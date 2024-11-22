@@ -1,10 +1,11 @@
 # main.py
 
-from core.Omega import Omega
+import asyncio
+from core.omega import Omega
 
-def main():
+# Run bot
+async def main():
     omega = Omega()
-    omega.run()
-    
-if __name__ == "__main__":
-    main()
+    await omega.run()
+
+asyncio.run(main())
