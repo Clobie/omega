@@ -2,20 +2,23 @@
 
 import discord
 from discord.ext import commands
-from utils.logger import logger
-from utils.config import config
+import utils.config
+import utils.cog
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Omega:
     def __init__(self):
-        self.bot = commands.Bot(command_prefix=config.COMMAND_PREFIX, intents=discord.Intents.all())
-    
+        self.cfg = utils.config.instantiate('./config/bot.conf')
+        self.cog = utils.cog.instantiate(self.cfg)
+        self.bot = commands.Bot(command_prefix=self.cfg.COMMAND_PREFIX, intents=discord.Intents.all())
+
     async def run(self):
         logger.info('Starting bot...')
-        self.bot.remove_command("help")
 
-        @self.bot.event
-        async def on_ready():
-            logger.info(f'Logged in as {self.bot.user}!')
+        self.bot.remove_command("help")
 
         @self.bot.event
         async def on_message(message):
@@ -24,4 +27,5 @@ class Omega:
             await self.bot.process_commands(message)
 
         async with self.bot:
-            await self.bot.start(config.DISCORD_BOT_TOKEN)
+            await self.cog.load_cogs(self.bot)
+            await self.bot.start(self.cfg.DISCORD_BOT_TOKEN)

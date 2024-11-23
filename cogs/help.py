@@ -2,6 +2,10 @@
 
 import discord
 from discord.ext import commands
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Help(commands.Cog):
     def __init__(self, bot):
@@ -29,8 +33,4 @@ class Help(commands.Cog):
         await context.send(embed=embed)
 
 async def setup(bot):
-    cog = Help
-    try:
-        await bot.add_cog(cog(bot))
-    except Exception as e:
-        pass
+    await bot.add_cog(Help(bot))
