@@ -9,13 +9,7 @@ logger = logging.getLogger(__name__)
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
-    @commands.command(name='ping')
-    async def ping(self, ctx):
-        latency = self.bot.latency
-        await ctx.send(f'Pong! Latency: {latency*1000:.2f} ms')
-        logger.info(f'Responded to ping command with latency {latency*1000:.2f} ms')
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info(f'Logged in as {self.bot.user}')

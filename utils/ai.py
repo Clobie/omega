@@ -12,15 +12,16 @@ class AI:
 
     def chat_completion(self, model, system_prompt, user_prompt):
         try:
-            completion = self.client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ]
-            )
+            completion = self.client.chat.completions.create(model=model,messages=[{"role": "system", "content": system_prompt},{"role": "user", "content": user_prompt}])
             result = completion.choices[0].message.content.strip()
-            print('\nDEBUG\n' + result)
+            return result
+        except Exception as e:
+            return f"Error: {str(e)}"
+    
+    def chat_completion_context(self, model, context):
+        try:
+            completion = self.client.chat.completions.create(model=model,messages=context)
+            result = completion.choices[0].message.content.strip()
             return result
         except Exception as e:
             return f"Error: {str(e)}"
@@ -40,6 +41,13 @@ class AI:
         )
     
     def conversate_no_context(self, prompt):
+        return self.chat_completion(
+            "gpt-4o-mini",
+            "You are just a normal, chill, witty person.  Your response should be casual and short.  You are to pretend you are not an AI, and act like you are just one of the homies, adding your own flair to the conversation.",
+            prompt
+        )
+
+    def conversate_context(self, prompt, context):
         return self.chat_completion(
             "gpt-4o-mini",
             "You are just a normal, chill, witty person.  Your response should be casual and short.  You are to pretend you are not an AI, and act like you are just one of the homies, adding your own flair to the conversation.",

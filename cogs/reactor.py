@@ -1,10 +1,9 @@
-import discord
+# cogs/reactor.py
+
 from discord.ext import commands
 import random
 import logging
 import requests
-import aiohttp
-import io
 import utils.config
 import utils.ai as ai
 
@@ -42,11 +41,6 @@ class Reactor(commands.Cog):
             react_gif_url = data['data'][0]['url']
             await message.channel.send(react_gif_url)
     
-    async def react_conversate(self, message):
-        prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-        result = self.ai.conversate_no_context(prompt)
-        await message.channel.send(result)
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -54,19 +48,10 @@ class Reactor(commands.Cog):
         ctx = await self.bot.get_context(message)
         if ctx.command:
             return
-        functions = [self.react_gif, self.react_conversate]
-        selected_function = random.choice(functions)
-        await selected_function(message)
-    
-    @commands.command(name='generate')
-    async def generate_image(self, ctx, *, prompt):
-        image_url = self.ai.generate_image(prompt)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(image_url) as resp:
-                if resp.status == 200:
-                    image_data = await resp.read()
-                    file = discord.File(io.BytesIO(image_data), filename="image.png")
-                    await ctx.send(file=file)
+        if random.random() < (10/100):
+            functions = [self.react_gif]
+            selected_function = random.choice(functions)
+            await selected_function(message)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Reactor(bot))
