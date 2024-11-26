@@ -16,6 +16,10 @@ class Reactor(commands.Cog):
         self.bot = bot
         self.ai = ai.instantiate()
         self.cfg = utils.config.instantiate('./config/bot.conf')
+        self.respond_chance = 10
+
+    def chance(self, percent):
+        return random.random() < (percent / 100)
     
     async def react_emoji(self, message):
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
@@ -48,7 +52,7 @@ class Reactor(commands.Cog):
         ctx = await self.bot.get_context(message)
         if ctx.command:
             return
-        if random.random() < (10/100):
+        if self.chance(self.respond_chance):
             functions = [self.react_gif]
             selected_function = random.choice(functions)
             await selected_function(message)

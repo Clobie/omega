@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 class Omega:
     def __init__(self):
         self.cfg = utils.config.instantiate('./config/bot.conf')
-        self.cog = utils.cog.instantiate(self.cfg)
         self.bot = commands.Bot(command_prefix=self.cfg.COMMAND_PREFIX, intents=discord.Intents.all())
+        self.cog = utils.cog.instantiate()
 
     async def run(self):
         logger.info('Starting bot...')

@@ -2,9 +2,7 @@
 
 import discord
 from discord.ext import commands
-import random
 import logging
-import requests
 import aiohttp
 import io
 import utils.config
@@ -19,10 +17,11 @@ class Dalle(commands.Cog):
         self.bot = bot
         self.ai = ai.instantiate()
         self.cfg = utils.config.instantiate('./config/bot.conf')
+        self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
 
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
-        reply_msg = await ctx.send("<a:ai_thinking:1309172561250353224>")
+        reply_msg = await ctx.send(self.thinking_emoji)
         image_url = self.ai.generate_image(prompt)
         async with aiohttp.ClientSession() as session:
             async with session.get(image_url) as resp:
