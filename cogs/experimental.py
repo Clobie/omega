@@ -25,5 +25,5 @@ class ExperimentalCog(commands.Cog):
         response = await Cog.test_cog_experimental(self.bot, cog_name, cog_data)
         await ctx.send(response)
 
-def setup(bot):
-    bot.add_cog(ExperimentalCog(bot))
+async def setup(bot):
+    await bot.add_cog(ExperimentalCog(bot))
