@@ -3,17 +3,15 @@
 import discord
 from discord.ext import commands
 import utils.config
-import utils.cog
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from utils.cog import cog
+from utils.common import common
+from utils.config import cfg
+from utils.log import logger
+from utils.status import status
 
 class Omega:
     def __init__(self):
-        self.cfg = utils.config.instantiate('./config/bot.conf')
-        self.bot = commands.Bot(command_prefix=self.cfg.COMMAND_PREFIX, intents=discord.Intents.all())
-        self.cog = utils.cog.instantiate()
+        self.bot = commands.Bot(command_prefix=cfg.COMMAND_PREFIX, intents=discord.Intents.all())
 
     async def run(self):
         logger.info('Starting bot...')
@@ -27,5 +25,5 @@ class Omega:
             await self.bot.process_commands(message)
 
         async with self.bot:
-            await self.cog.load_cogs(self.bot)
-            await self.bot.start(self.cfg.DISCORD_BOT_TOKEN)
+            await cog.load_cogs(self.bot)
+            await self.bot.start(cfg.DISCORD_BOT_TOKEN)
