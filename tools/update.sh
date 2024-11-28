@@ -40,8 +40,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Print the service status
-echo "Service status:"
-sudo systemctl status "$SERVICE_NAME"
-
-echo "Script completed successfully."
+# Tail the service logs
+echo "Tailing logs for $SERVICE_NAME service (Press Ctrl+C to exit)..."
+sudo journalctl -fu "$SERVICE_NAME"
