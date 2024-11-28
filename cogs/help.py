@@ -19,7 +19,7 @@ class Help(commands.Cog):
         prefix = context.prefix
         if not isinstance(prefix, str):
             prefix = prefix[0]
-        embed = discord.Embed(title="Help", description="List of available commands and functionality:")
+        embed = discord.Embed(title="Help", description="<:pepeleaving:1311565031711838298> List of available commands and functionality:")
         for cog_name, cog_obj in self.bot.cogs.items():
             cogname = cog_name.replace("cog", "")
             if cog_obj.__doc__:
