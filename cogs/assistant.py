@@ -104,7 +104,8 @@ class Assistant(commands.Cog):
         total_tokens = context_tokens + result_tokens
 
         # Append token estimate to the response
-        footer = f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, Total={total_tokens}*"
+        cost_estimate = str(2.5/1000000) * total_tokens
+        footer = f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, Total={total_tokens}* (est ${cost_estimate})"
 
         # Handle message response
         response_with_footer = result + footer
