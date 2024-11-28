@@ -11,7 +11,7 @@ class AI:
         self.client = OpenAI()
         # put these in the config eventually
         # also add system prompts to the config
-        self.image_generation_model = "dall-e-2"
+        self.image_generation_model = "dall-e-3"
         self.image_generation_size = "1024x1024"
         self.image_generation_quality = "standard"
         self.sentiment_model = "gpt-4o-mini"

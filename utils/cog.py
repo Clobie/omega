@@ -56,31 +56,5 @@ class Cog:
         await bot.reload_extension(cog_name)
         logger.info(f"Reloaded cog: {cog_name}")
 
-    async def test_cog_experimental(self, bot, cog_name, cog_data):
-        logger.debug(f"Testing experimental cog: {cog_name}")
-        cog_path = f"./cogs/experimental/{cog_name}.py"
-        cog_ext_name = f"cogs.experimental.{cog_name}"
-        if os.path.exists(cog_path):
-            if cog_ext_name in bot.extensions:
-                await bot.unload_extension(cog_ext_name)
-        try:
-            ast.parse(cog_data)
-        except SyntaxError as e:
-            logger.error(f"Syntax error in cog {cog_ext_name}: {e}")
-            return f"Syntax errors: {e}"
-
-        with open(cog_path, 'w') as f:
-            f.write(cog_data)
-        try:
-            await bot.load_extension(cog_ext_name)
-        except Exception as e:
-            with open(f'./cogs/experimental/failed/{cog_name}.py', 'w') as f:
-                f.write(cog_data)
-            logger.error(f"Failed loading experimental cog {cog_name}: {e}")
-            return f"Loading failed: {e}"
-        os.rename(cog_path, f'./cogs/experimental/success/{cog_name}.py')
-        logger.info(f"Successfully loaded experimental cog: {cog_name}")
-        return "Success"
-
 def instantiate():
     return Cog()

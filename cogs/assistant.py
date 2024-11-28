@@ -92,21 +92,20 @@ class Assistant(commands.Cog):
         reply_msg = await ctx.send(self.thinking_emoji)
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
         self.add_context('user', prompt)
-        async with ctx.typing():
-            result = self.ai.chat_completion_context(self.model, self.get_full_context())
-            self.add_context('assistant', result)
-            if len(result) > 4000:
-                with open('file.txt', 'w') as f:
-                    f.write(result)
-                file = discord.File('file.txt')
-                await reply_msg.edit(attachments=[file])
-                logging.debug("Response message exceeded 4000 characters, sent as a file.")
-            elif len(result) > 2000:
-                embed = discord.Embed(description=result)
-                await reply_msg.edit(embed=embed, attachments=[])
-                logging.debug("Response message exceeded 2000 characters, sent as an embed.")
-            else:
-                await reply_msg.edit(content=result, attachments=[])
+        result = self.ai.chat_completion_context(self.model, self.get_full_context())
+        self.add_context('assistant', result)
+        if len(result) > 4000:
+            with open('file.txt', 'w') as f:
+                f.write(result)
+            file = discord.File('file.txt')
+            await reply_msg.edit(attachments=[file])
+            logging.debug("Response message exceeded 4000 characters, sent as a file.")
+        elif len(result) > 2000:
+            embed = discord.Embed(description=result)
+            await reply_msg.edit(embed=embed, attachments=[])
+            logging.debug("Response message exceeded 2000 characters, sent as an embed.")
+        else:
+            await reply_msg.edit(content=result, attachments=[])
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
