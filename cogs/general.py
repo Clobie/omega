@@ -1,5 +1,5 @@
-import os
-import sys
+# cogs/general.py
+
 import logging
 from discord.ext import commands
 
