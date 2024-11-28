@@ -6,6 +6,7 @@ import re
 class ExperimentalCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.cog = Cog()
 
     @commands.command(name='test_cog')
     async def test_cog(self, ctx, cog_name: str, *, message: str):
@@ -22,7 +23,7 @@ class ExperimentalCog(commands.Cog):
 
         cog_data = code_matches[0].strip()  # The first code block is the cog data
         
-        response = await Cog.test_cog_experimental(self.bot, cog_name, cog_data)
+        response = await self.cog.test_cog_experimental(self.bot, cog_name, cog_data)
         await ctx.send(response)
 
 async def setup(bot):
