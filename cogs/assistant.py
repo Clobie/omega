@@ -153,7 +153,7 @@ class Assistant(commands.Cog):
             #    f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
             #    f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
             #)
-            text = self.to_superscript(f"tk{total_tokens},c${cost_estimate:.6f}")
+            text = self.to_superscript(f"{total_tokens},{cost_estimate:.6f}")
             footer = (
                 f"\n\n*{text}*"
             )
