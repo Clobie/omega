@@ -114,7 +114,7 @@ class Assistant(commands.Cog):
     async def reply_to_message(self, message, prompt):
         ctx = await self.bot.get_context(message)
         #reply_msg = await message.channel.send(self.thinking_emoji)
-        with ctx.typing():
+        async with ctx.typing():
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
 
