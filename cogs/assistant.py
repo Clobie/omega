@@ -26,12 +26,31 @@ class Assistant(commands.Cog):
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()  # Start the cleanup task
-        self.total_cost = 0.0
+        self.total_cost = self.load_cost_from_file()
+    
+    def load_cost_from_file(self):
+        """Load accumulated cost from a file."""
+        try:
+            with open("./config/cost_data.json", "r") as file:
+                cost_data = json.load(file)
+                return cost_data.get("total_cost", 0.0)
+        except FileNotFoundError:
+            logging.warning("cost_data.json not found. Starting with a cost of 0.")
+            return 0.0
 
     async def update_status(self):
-        """Update the bot's status to show the accumulated cost."""
+        """Update the bot's status to show the accumulated cost and save it to file."""
         cost_display = f"Accumulated Cost: ${self.total_cost:.6f}"
         await self.bot.change_presence(activity=discord.Game(name=cost_display))
+        self.save_cost_to_file()
+
+    def save_cost_to_file(self):
+        """Save the accumulated cost to a file."""
+        cost_data = {"total_cost": self.total_cost}
+        with open("./config/cost_data.json", "w") as file:
+            json.dump(cost_data, file, indent=4)
+        logging.debug("Saved accumulated cost to file.")
+
 
 
     def get_scope(self, message):
