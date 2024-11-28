@@ -1,11 +1,13 @@
 # cogs/assistant.py
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import logging
 import json
+import time
 import utils.config
 import utils.ai as ai
+import tiktoken  # Install with `pip install tiktoken`
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,22 +20,49 @@ class Assistant(commands.Cog):
         self.cfg = utils.config.instantiate('./config/bot.conf')
         self.model = 'gpt-4o-mini'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
-        self.context = []
-        self.system_prompt = "You are a helpful AI assistant named Omega.  Use short and concise responses."
+        self.contexts = {}  # Stores contexts by scope (user or channel)
+        self.context_timestamps = {}  # Tracks last activity for each scope
+        self.system_prompt = "You are a helpful AI assistant named Omega. Use short and concise responses."
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
+        self.clear_inactive_contexts.start()  # Start the cleanup task
 
-    def clear_context(self):
-        self.context = []
-    
-    def add_context(self, scope, content):
-        if scope == 'user':
-            self.context.append({"role": "user","content": content})
-        if scope == 'assistant':
-            self.context.append({"role": "assistant","content": content})
-    
-    def get_full_context(self):
-        return self.context_header + self.context
+    def get_scope(self, message):
+        """Determine the scope based on the message."""
+        if isinstance(message.channel, discord.DMChannel):
+            return f"user_{message.author.id}"
+        else:
+            return f"channel_{message.channel.id}"
+
+    def clear_context(self, scope):
+        """Clear context for a specific scope."""
+        if scope in self.contexts:
+            del self.contexts[scope]
+            del self.context_timestamps[scope]
+
+    def add_context(self, scope, role, content):
+        """Add context to the specific scope."""
+        if scope not in self.contexts:
+            self.contexts[scope] = []
+        self.contexts[scope].append({"role": role, "content": content})
+        self.context_timestamps[scope] = time.time()  # Update the last activity time
+
+    def get_full_context(self, scope):
+        """Get the full context for a specific scope."""
+        return self.context_header + self.contexts.get(scope, [])
+
+    @tasks.loop(seconds=60)
+    async def clear_inactive_contexts(self):
+        """Clear contexts that haven't been used in 5 minutes."""
+        current_time = time.time()
+        to_clear = [scope for scope, last_used in self.context_timestamps.items() if current_time - last_used > 300]
+        for scope in to_clear:
+            self.clear_context(scope)
+            logging.info(f"Cleared inactive context for {scope}")
+
+    @clear_inactive_contexts.before_loop
+    async def before_clear_inactive_contexts(self):
+        await self.bot.wait_until_ready()
 
     def save_autorespond_channels(self):
         """Save autorespond channels to file."""
@@ -50,49 +79,47 @@ class Assistant(commands.Cog):
         except FileNotFoundError:
             logging.warning("autorespond_channels.json not found. Returning empty list.")
             return []
-    
-    @commands.command(name="addchannel")
-    async def addchannel(self, context):
-        id = context.channel.id
-        if id in self.autorespond_channels:
-            await context.send("This channel is already added")
-            logging.info(f"Channel {id} is already in the autorespond list.")
-        else:
-            self.autorespond_channels.append(id)
-            self.save_autorespond_channels()
-            await context.send("Channel added")
-            logging.info(f"Added channel {id} to autorespond list.")
-    
-    @commands.command(name="removechannel")
-    async def removechannel(self, context):
-        id = context.channel.id
-        if id in self.autorespond_channels:
-            self.autorespond_channels.remove(id)
-            self.save_autorespond_channels()
-            await context.send("Channel removed")
-            logging.info(f"Removed channel {id} from autorespond list.")
-        else:
-            await context.send("Channel was not in the list")
-            logging.info(f"Channel {id} was not in the autorespond list.")
+
+    def estimate_tokens(self, text):
+        """Estimate the number of tokens used in a given text."""
+        encoding = tiktoken.encoding_for_model(self.model)
+        return len(encoding.encode(text))
 
     async def reply_to_message(self, message, prompt):
         reply_msg = await message.channel.send(self.thinking_emoji)
-        self.add_context('user', prompt)
-        result = self.ai.chat_completion_context(self.model, self.get_full_context())
-        self.add_context('assistant', result)
+        scope = self.get_scope(message)
+        self.add_context(scope, 'user', prompt)
 
-        if len(result) > 4000:
+        # Calculate token estimate for context
+        full_context = self.get_full_context(scope)
+        context_text = "\n".join([f"{entry['role']}: {entry['content']}" for entry in full_context])
+        context_tokens = self.estimate_tokens(context_text)
+
+        # Get AI response
+        result = self.ai.chat_completion_context(self.model, full_context)
+        self.add_context(scope, 'assistant', result)
+
+        # Calculate token estimate for the result
+        result_tokens = self.estimate_tokens(result)
+        total_tokens = context_tokens + result_tokens
+
+        # Append token estimate to the response
+        footer = f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, Total={total_tokens}*"
+
+        # Handle message response
+        response_with_footer = result + footer
+        if len(response_with_footer) > 4000:
             with open('file.txt', 'w') as f:
-                f.write(result)
+                f.write(response_with_footer)
             file = discord.File('file.txt')
             await reply_msg.edit(attachments=[file])
             logging.debug("Response message exceeded 4000 characters, sent as a file.")
-        elif len(result) > 2000:
-            embed = discord.Embed(description=result)
+        elif len(response_with_footer) > 2000:
+            embed = discord.Embed(description=response_with_footer)
             await reply_msg.edit(embed=embed, attachments=[])
             logging.debug("Response message exceeded 2000 characters, sent as an embed.")
         else:
-            await reply_msg.edit(content=result, attachments=[])
+            await reply_msg.edit(content=response_with_footer, attachments=[])
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -100,10 +127,11 @@ class Assistant(commands.Cog):
             return
 
         if message.content == "clear context":
-            self.clear_context()
+            scope = self.get_scope(message)
+            self.clear_context(scope)
             await message.add_reaction("✅")
             return
-        
+
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
 
         if isinstance(message.channel, discord.DMChannel):
