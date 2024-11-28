@@ -26,6 +26,13 @@ class Assistant(commands.Cog):
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()  # Start the cleanup task
+        self.total_cost = 0.0
+
+    async def update_status(self):
+        """Update the bot's status to show the accumulated cost."""
+        cost_display = f"Accumulated Cost: ${self.total_cost:.6f}"
+        await self.bot.change_presence(activity=discord.Game(name=cost_display))
+
 
     def get_scope(self, message):
         """Determine the scope based on the message."""
@@ -108,6 +115,9 @@ class Assistant(commands.Cog):
         cost_per_million_output = 0.60  # Cost in dollars per million output tokens
         cost_estimate = ((context_tokens / 1_000_000) * cost_per_million_input) + \
                         ((result_tokens / 1_000_000) * cost_per_million_output)
+        
+        self.total_cost += cost_estimate  # Accumulate cost
+        await self.update_status()
 
         # Append token estimate and cost to the response
         footer = (
