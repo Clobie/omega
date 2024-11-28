@@ -51,8 +51,6 @@ class Assistant(commands.Cog):
             json.dump(cost_data, file, indent=4)
         logging.debug("Saved accumulated cost to file.")
 
-
-
     def get_scope(self, message):
         """Determine the scope based on the message."""
         if isinstance(message.channel, discord.DMChannel):
