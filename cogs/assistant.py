@@ -112,52 +112,54 @@ class Assistant(commands.Cog):
         return len(encoding.encode(text))
 
     async def reply_to_message(self, message, prompt):
-        reply_msg = await message.channel.send(self.thinking_emoji)
-        scope = self.get_scope(message)
-        self.add_context(scope, 'user', prompt)
+        ctx = await self.bot.get_context(message)
+        #reply_msg = await message.channel.send(self.thinking_emoji)
+        with ctx.typing():
+            scope = self.get_scope(message)
+            self.add_context(scope, 'user', prompt)
 
-        # Calculate token estimate for context
-        full_context = self.get_full_context(scope)
-        context_text = "\n".join([f"{entry['role']}: {entry['content']}" for entry in full_context])
-        context_tokens = self.estimate_tokens(context_text)
+            # Calculate token estimate for context
+            full_context = self.get_full_context(scope)
+            context_text = "\n".join([f"{entry['role']}: {entry['content']}" for entry in full_context])
+            context_tokens = self.estimate_tokens(context_text)
 
-        # Get AI response
-        result = self.ai.chat_completion_context(self.model, full_context)
-        self.add_context(scope, 'assistant', result)
+            # Get AI response
+            result = self.ai.chat_completion_context(self.model, full_context)
+            self.add_context(scope, 'assistant', result)
 
-        # Calculate token estimate for the result
-        result_tokens = self.estimate_tokens(result)
-        total_tokens = context_tokens + result_tokens
+            # Calculate token estimate for the result
+            result_tokens = self.estimate_tokens(result)
+            total_tokens = context_tokens + result_tokens
 
-        # Calculate cost estimate
-        cost_per_million_input = 0.15  # Cost in dollars per million input tokens
-        cost_per_million_output = 0.60  # Cost in dollars per million output tokens
-        cost_estimate = ((context_tokens / 1_000_000) * cost_per_million_input) + \
-                        ((result_tokens / 1_000_000) * cost_per_million_output)
-        
-        self.total_cost += cost_estimate  # Accumulate cost
-        await self.update_status()
+            # Calculate cost estimate
+            cost_per_million_input = 0.15  # Cost in dollars per million input tokens
+            cost_per_million_output = 0.60  # Cost in dollars per million output tokens
+            cost_estimate = ((context_tokens / 1_000_000) * cost_per_million_input) + \
+                            ((result_tokens / 1_000_000) * cost_per_million_output)
+            
+            self.total_cost += cost_estimate  # Accumulate cost
+            await self.update_status()
 
-        # Append token estimate and cost to the response
-        footer = (
-            f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
-            f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
-        )
+            # Append token estimate and cost to the response
+            footer = (
+                f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
+                f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
+            )
 
-        # Handle message response
-        response_with_footer = result + footer
-        if len(response_with_footer) > 4000:
-            with open('file.txt', 'w') as f:
-                f.write(response_with_footer)
-            file = discord.File('file.txt')
-            await reply_msg.edit(attachments=[file])
-            logging.debug("Response message exceeded 4000 characters, sent as a file.")
-        elif len(response_with_footer) > 2000:
-            embed = discord.Embed(description=response_with_footer)
-            await reply_msg.edit(embed=embed, attachments=[])
-            logging.debug("Response message exceeded 2000 characters, sent as an embed.")
-        else:
-            await reply_msg.edit(content=response_with_footer, attachments=[])
+            # Handle message response
+            response_with_footer = result + footer
+            if len(response_with_footer) > 4000:
+                with open('file.txt', 'w') as f:
+                    f.write(response_with_footer)
+                file = discord.File('file.txt')
+                await ctx.send(attachments=[file])
+                logging.debug("Response message exceeded 4000 characters, sent as a file.")
+            elif len(response_with_footer) > 2000:
+                embed = discord.Embed(description=response_with_footer)
+                await ctx.send(embed=embed)
+                logging.debug("Response message exceeded 2000 characters, sent as an embed.")
+            else:
+                await ctx.send(content=response_with_footer)
 
 
     @commands.Cog.listener()
