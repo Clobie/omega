@@ -18,7 +18,7 @@ class Assistant(commands.Cog):
         self.bot = bot
         self.ai = ai.instantiate()
         self.cfg = utils.config.instantiate('./config/bot.conf')
-        self.model = 'gpt-4o'
+        self.model = 'gpt-4o-mini'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}  # Stores contexts by scope (user or channel)
         self.context_timestamps = {}  # Tracks last activity for each scope
@@ -104,8 +104,8 @@ class Assistant(commands.Cog):
         total_tokens = context_tokens + result_tokens
 
         # Calculate cost estimate
-        cost_per_million_input = 2.50  # Cost in dollars per million input tokens
-        cost_per_million_output = 10.00  # Cost in dollars per million output tokens
+        cost_per_million_input = 0.15  # Cost in dollars per million input tokens
+        cost_per_million_output = 0.60  # Cost in dollars per million output tokens
         cost_estimate = ((context_tokens / 1_000_000) * cost_per_million_input) + \
                         ((result_tokens / 1_000_000) * cost_per_million_output)
 
