@@ -19,7 +19,7 @@ class Assistant(commands.Cog):
         self.model = 'gpt-4o-mini'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.context = []
-        self.system_prompt = "You are a helpful AI assistant named Jenkins.  Use short and concise responses."
+        self.system_prompt = "You are a helpful AI assistant named Omega.  Use short and concise responses."
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
 

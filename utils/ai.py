@@ -52,7 +52,7 @@ class AI:
     def conversate_no_context(self, prompt):
         return self.chat_completion(
             self.conversate_model,
-            "You are an AI assistant named Jenkins.  Your response should be casual and short.",
+            "You are an AI assistant named Omega.  Your response should be casual and short.",
             prompt
         )
 
