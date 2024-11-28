@@ -111,6 +111,14 @@ class Assistant(commands.Cog):
         encoding = tiktoken.encoding_for_model(self.model)
         return len(encoding.encode(text))
 
+    def to_superscript(self, text):
+        # Mapping numbers and lowercase letters to superscript characters
+        superscript_mapping = str.maketrans(
+            "0123456789abcdefghijklmnopqrstuvwxyz",
+            "⁰¹²³⁴⁵⁶⁷⁸⁹ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻ"
+        )
+        return text.translate(superscript_mapping)
+
     async def reply_to_message(self, message, prompt):
         ctx = await self.bot.get_context(message)
         #reply_msg = await message.channel.send(self.thinking_emoji)
@@ -141,9 +149,13 @@ class Assistant(commands.Cog):
             await self.update_status()
 
             # Append token estimate and cost to the response
+            #footer = (
+            #    f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
+            #    f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
+            #)
+            text = self.to_superscript(f"tk{total_tokens},c${cost_estimate:.6f}")
             footer = (
-                f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
-                f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
+                f"\n\n*{text}*"
             )
 
             # Handle message response
