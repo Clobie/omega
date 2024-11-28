@@ -153,7 +153,7 @@ class Assistant(commands.Cog):
             #    f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
             #    f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
             #)
-            text = self.to_superscript(f"{total_tokens}tk - {cost_estimate:.6f}c")
+            text = self.to_superscript(f"{total_tokens}tk - cost{cost_estimate:.6f}")
             footer = (
                 f"\n\n*{text}*"
             )
@@ -178,7 +178,11 @@ class Assistant(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-
+        
+        ctx = await self.bot.get_context(message)
+        if ctx.command:
+            return
+        
         if message.content == "clear context":
             scope = self.get_scope(message)
             self.clear_context(scope)
@@ -189,10 +193,6 @@ class Assistant(commands.Cog):
 
         if isinstance(message.channel, discord.DMChannel):
             await self.reply_to_message(message, prompt)
-            return
-
-        ctx = await self.bot.get_context(message)
-        if ctx.command:
             return
 
         id = message.channel.id
