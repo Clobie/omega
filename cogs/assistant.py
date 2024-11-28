@@ -18,7 +18,7 @@ class Assistant(commands.Cog):
         self.bot = bot
         self.ai = ai.instantiate()
         self.cfg = utils.config.instantiate('./config/bot.conf')
-        self.model = 'gpt-4o-mini'
+        self.model = 'gpt-4o'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}  # Stores contexts by scope (user or channel)
         self.context_timestamps = {}  # Tracks last activity for each scope
