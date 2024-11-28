@@ -104,8 +104,10 @@ class Assistant(commands.Cog):
         total_tokens = context_tokens + result_tokens
 
         # Calculate cost estimate
-        cost_per_million = 2.50  # Cost in dollars
-        cost_estimate = (total_tokens / 1_000_000) * cost_per_million
+        cost_per_million_input = 2.50  # Cost in dollars per million input tokens
+        cost_per_million_output = 10.00  # Cost in dollars per million output tokens
+        cost_estimate = ((context_tokens / 1_000_000) * cost_per_million_input) + \
+                        ((result_tokens / 1_000_000) * cost_per_million_output)
 
         # Append token estimate and cost to the response
         footer = (
