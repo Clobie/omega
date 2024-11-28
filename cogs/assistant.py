@@ -103,9 +103,15 @@ class Assistant(commands.Cog):
         result_tokens = self.estimate_tokens(result)
         total_tokens = context_tokens + result_tokens
 
-        # Append token estimate to the response
-        cost_estimate = str(2.5/1000000) * total_tokens
-        footer = f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, Total={total_tokens}* (est ${cost_estimate})"
+        # Calculate cost estimate
+        cost_per_million = 2.50  # Cost in dollars
+        cost_estimate = (total_tokens / 1_000_000) * cost_per_million
+
+        # Append token estimate and cost to the response
+        footer = (
+            f"\n\n*Token estimate: Context={context_tokens}, Response={result_tokens}, "
+            f"Total={total_tokens}, Cost=${cost_estimate:.6f}*"
+        )
 
         # Handle message response
         response_with_footer = result + footer
@@ -121,6 +127,7 @@ class Assistant(commands.Cog):
             logging.debug("Response message exceeded 2000 characters, sent as an embed.")
         else:
             await reply_msg.edit(content=response_with_footer, attachments=[])
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
