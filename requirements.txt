@@ -1,0 +1,8 @@
+OpenAI
+aiohttp
+asyncio
+configparser
+discord
+pyqrcode
+requests
+tiktoken
