@@ -2,11 +2,7 @@
 
 import configparser
 import os
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+from utils.log import logger
 
 class Config:
     def __init__(self, config_path):
@@ -81,5 +77,4 @@ class Config:
         for key, value in attrs.items():
             print(f"{key} = {value}")
 
-def instantiate(config_path):
-    return Config(config_path)
+cfg = Config('./config/bot.conf')

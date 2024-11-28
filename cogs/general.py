@@ -1,10 +1,9 @@
 # cogs/general.py
 
-import logging
 from discord.ext import commands
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from utils.common import common
+from utils.config import cfg
+from utils.log import logger
 
 class General(commands.Cog):
     def __init__(self, bot):
@@ -32,7 +31,6 @@ class General(commands.Cog):
         channel_name = getattr(ctx.channel, 'name', 'Direct Message')
         command_content = ctx.message.content.encode('unicode_escape').decode('utf-8')
         channel_id = ctx.channel.id
-        
         user_info = f"{ctx.author.name} (ID: {ctx.author.id})" if ctx.guild else f"{ctx.author.name} (ID: {ctx.author.id})"
         logger.info(f"Command '{command_content}' entered by {user_info} in {server_name} ({channel_name}) [channel id: {channel_id}]")
 
@@ -42,7 +40,6 @@ class General(commands.Cog):
         channel_name = getattr(ctx.channel, 'name', 'Direct Message')
         command_content = ctx.message.content.encode('unicode_escape').decode('utf-8')
         channel_id = ctx.channel.id
-
         user_info = f"{ctx.author.name} (ID: {ctx.author.id})"
         logger.info(f"Command '{command_content}' completed by {user_info} in {server_name} ({channel_name}) [channel id: {channel_id}]")
 
@@ -52,7 +49,6 @@ class General(commands.Cog):
         channel_name = getattr(message.channel, 'name', 'Direct Message')
         command_content = message.content.encode('unicode_escape').decode('utf-8')
         channel_id = message.channel.id
-
         user_info = f"{message.author.name} (ID: {message.author.id})"
         logger.info(f"Message from {user_info} in {server_name} ({channel_name}) [channel id: {channel_id}]: {command_content}")
 
@@ -63,7 +59,6 @@ class General(commands.Cog):
         before_content = before.content.encode('unicode_escape').decode('utf-8')
         after_content = after.content.encode('unicode_escape').decode('utf-8')
         channel_id = before.channel.id
-
         user_info = f"{before.author.name} (ID: {before.author.id})"
         logger.info(f"Message edited by {user_info} in {server_name} ({channel_name}) [channel id: {channel_id}]:"
             f"\nBefore: {before_content}"

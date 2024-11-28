@@ -1,10 +1,10 @@
 # cogs/template.py
 
 from discord.ext import commands
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from utils.config import cfg
+from utils.log import logger
+from utils.status import status
+from utils.common import common
 
 class TemplateCog(commands.Cog):
     def __init__(self, bot: commands.Bot):

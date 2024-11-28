@@ -2,36 +2,28 @@
 
 from discord.ext import commands
 import random
-import logging
 import requests
-import utils.config
-import utils.ai as ai
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from utils.ai import ai
+from utils.common import common
+from utils.config import cfg
+from utils.log import logger
 
 class Reactor(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.ai = ai.instantiate()
-        self.cfg = utils.config.instantiate('./config/bot.conf')
         self.respond_chance = 10
-
-    def chance(self, percent):
-        return random.random() < (percent / 100)
-    
-    async def react_emoji(self, message):
-        prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-        sentiment_emoji = self.ai.get_emoji_sentiment(prompt)
-        await message.add_reaction(sentiment_emoji)
 
     async def react_gif(self, message):
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-        search_string = self.ai.generate_gif_search_string(prompt)
+        search_string = ai.chat_completion(
+            'gpt-4o-mini', 
+            'Analyze the text and suggest a concise search string for finding a relevant GIF. Your search string should be short and relevant.',
+            prompt
+        )
         url = "https://api.giphy.com/v1/gifs/search"
         params = {
-            "api_key": self.cfg.GIPHY_API_KEY,
+            "api_key": cfg.GIPHY_API_KEY,
             "q": search_string,
             "limit": 25,
             "offset": random.randint(0, 24),
@@ -52,7 +44,7 @@ class Reactor(commands.Cog):
         ctx = await self.bot.get_context(message)
         if ctx.command:
             return
-        if self.chance(self.respond_chance):
+        if common.chance(self.respond_chance):
             functions = [self.react_gif]
             selected_function = random.choice(functions)
             await selected_function(message)
