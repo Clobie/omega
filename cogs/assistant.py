@@ -75,25 +75,12 @@ class Assistant(commands.Cog):
             await context.send("Channel was not in the list")
             logging.info(f"Channel {id} was not in the autorespond list.")
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.content == "clear context":
-            self.clear_context()
-            await message.add_reaction("✅")
-            return
-        if message.author.bot:
-            return
-        ctx = await self.bot.get_context(message)
-        if ctx.command:
-            return
-        id = message.channel.id
-        if (not self.bot.user.mentioned_in(message) and id not in self.autorespond_channels):
-            return
-        reply_msg = await ctx.send(self.thinking_emoji)
-        prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
+    async def reply_to_message(self, message, prompt):
+        reply_msg = await message.channel.send(self.thinking_emoji)
         self.add_context('user', prompt)
         result = self.ai.chat_completion_context(self.model, self.get_full_context())
         self.add_context('assistant', result)
+
         if len(result) > 4000:
             with open('file.txt', 'w') as f:
                 f.write(result)
@@ -106,6 +93,32 @@ class Assistant(commands.Cog):
             logging.debug("Response message exceeded 2000 characters, sent as an embed.")
         else:
             await reply_msg.edit(content=result, attachments=[])
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        if message.content == "clear context":
+            self.clear_context()
+            await message.add_reaction("✅")
+            return
+        
+        prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
+
+        if isinstance(message.channel, discord.DMChannel):
+            await self.reply_to_message(message, prompt)
+            return
+
+        ctx = await self.bot.get_context(message)
+        if ctx.command:
+            return
+
+        id = message.channel.id
+        if not self.bot.user.mentioned_in(message) and id not in self.autorespond_channels:
+            return
+
+        await self.reply_to_message(message, prompt)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
