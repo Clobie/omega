@@ -3,6 +3,7 @@ aiohttp
 asyncio
 configparser
 discord
-pyqrcode
+qrcode
+pillow
 requests
 tiktoken
