@@ -3,8 +3,11 @@ Omega is a powerful Python Discord bot designed to enhance your server with AI-d
 
 # Features
 AI Integration: Engage with AI models for various tasks and queries.
+
 Tooling: Access useful tools for productivity and fun.
+
 Automation: Automate repetitive tasks.
+
 Crypto: TBA
 
 # License
