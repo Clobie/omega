@@ -147,5 +147,29 @@ class Assistant(commands.Cog):
         # Reply
         await self.reply_to_message(message, prompt)
 
+    @commands.command(name="addchannel")
+    async def addchannel(self, context):
+        id = context.channel.id
+        if id in self.autorespond_channels:
+            await context.send("This channel is already added")
+            logger.info(f"Channel {id} is already in the autorespond list.")
+        else:
+            self.autorespond_channels.append(id)
+            self.save_autorespond_channels()
+            await context.send("Channel added")
+            logger.info(f"Added channel {id} to autorespond list.")
+    
+    @commands.command(name="removechannel")
+    async def removechannel(self, context):
+        id = context.channel.id
+        if id in self.autorespond_channels:
+            self.autorespond_channels.remove(id)
+            self.save_autorespond_channels()
+            await context.send("Channel removed")
+            logger.info(f"Removed channel {id} from autorespond list.")
+        else:
+            await context.send("Channel was not in the list")
+            logger.info(f"Channel {id} was not in the autorespond list.")
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
