@@ -17,6 +17,9 @@ class QR(commands.Cog, name="qr"):
     
     @commands.command(name="qr")
     async def create_stylized_qr(self, context, *msg):
+        """
+        Generates a stylized QR code
+        """
         qr = qrcode.QRCode(
             version=3,
             error_correction=qrcode.constants.ERROR_CORRECT_H,
