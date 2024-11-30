@@ -1,13 +1,11 @@
 # utils/openai.py
 
 from openai import OpenAI
-import discord
 import tiktoken
 import json
 from utils.common import common
 from utils.config import cfg
 from utils.log import logger
-from utils.status import status
 
 class AI:
     def __init__(self):

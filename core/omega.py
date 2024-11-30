@@ -2,12 +2,9 @@
 
 import discord
 from discord.ext import commands
-import utils.config
 from utils.cog import cog
-from utils.common import common
 from utils.config import cfg
 from utils.log import logger
-from utils.status import status
 
 class Omega:
     def __init__(self):

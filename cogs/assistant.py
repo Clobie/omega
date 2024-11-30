@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands, tasks
 import json
 import time
-import utils.config
 from utils.ai import ai
 from utils.config import cfg
 from utils.log import logger

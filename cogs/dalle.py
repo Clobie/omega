@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands
 import aiohttp
 import io
-import utils.config
 from utils.ai import ai
 from utils.common import common
 from utils.config import cfg
