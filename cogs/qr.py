@@ -6,9 +6,7 @@ import discord
 from discord.ext import commands
 import qrcode
 from qrcode.image.styledpil import StyledPilImage
-from qrcode.image.styles.moduledrawers.pil import CircleModuleDrawer
 from qrcode.image.styles.moduledrawers.pil import GappedSquareModuleDrawer
-from qrcode.image.styles.colormasks import RadialGradiantColorMask
 from PIL import Image
 
 class QR(commands.Cog, name="qr"):
@@ -50,6 +48,5 @@ class QR(commands.Cog, name="qr"):
         await context.send(file=discord.File(unique_filename))
         os.remove(unique_filename)
 
-# Cog setup function
 async def setup(bot: commands.Bot):
     await bot.add_cog(QR(bot))
