@@ -89,10 +89,6 @@ class Assistant(commands.Cog):
             # Get footer
             footer = ai.get_footer(tokens, cost)
 
-            # Update bot status
-            total_cost = ai.get_total_cost()
-            await status.update(self.bot, f"Cost: ${total_cost}")
-
             # Build full message
             response_with_footer = result + footer
 
