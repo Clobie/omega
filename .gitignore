@@ -163,3 +163,4 @@ cython_debug/
 config/cogs.json
 tools/test*
 cogs/test*
+test*
