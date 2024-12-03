@@ -28,7 +28,7 @@ class Dalle(commands.Cog):
                     file = discord.File(io.BytesIO(image_data), filename="image.png")
                     footer = ai.get_footer('null', 0.04)
                     ai.update_cost_static(0.04)
-                    await status.update(self.bot, f"Cost: ${ai.get_total_cost()}")
+                    await status.update(self.bot, 'watching', f"Cost: ${ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
 
 async def setup(bot: commands.Bot):

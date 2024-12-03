@@ -79,7 +79,7 @@ class Assistant(commands.Cog):
 
             # Get AI response
             result = ai.chat_completion_context(self.model, full_context)
-
+            
             # Add response to context
             self.add_context(scope, 'assistant', result)
 
@@ -91,6 +91,8 @@ class Assistant(commands.Cog):
 
             # Build full message
             response_with_footer = result + footer
+
+            await status.update(self.bot, 'watching', f"Cost: ${ai.get_total_cost()}")
 
             # Reply with file/embed/text based on response length (because of discord limits)
             if len(response_with_footer) > 4000:
