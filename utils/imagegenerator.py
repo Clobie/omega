@@ -87,7 +87,7 @@ class ImageGenerator():
             random_color_pair[1], 
             text, 
             "black", 
-            "Roboto-Black.ttf"
+            "./fonts/Roboto/Roboto-Black.ttf"
         )
         return file
 
