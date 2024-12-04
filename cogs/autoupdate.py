@@ -52,19 +52,12 @@ class UpdateCheckerCog(commands.Cog):
             await channel.send(f"Starting update to: {self.last_commit_message}")
             logger.info(f"Starting update to: {self.last_commit_message}")
             
-            result = subprocess.run(['./tools/update.sh'], capture_output=True, text=True)
-            if result.returncode != 0:
-                logger.error(f"Error running update script: {result.stderr.strip()}")
-                await channel.send("Update failed.")
-                return
+            # Run update script in the background
+            subprocess.Popen(['./tools/update.sh'])
             
-            await channel.send("Update completed successfully.")
-            logger.info("Update completed successfully.")
+            await channel.send("Update initiated. The process will run in the background.")
+            logger.info("Update initiated. The process will run in the background.")
             
-            # Notify after restart
-            await channel.send(f"Bot restarted after updating to: {self.last_commit_message}")
-            logger.info(f"Bot restarted after updating to: {self.last_commit_message}")
-
         except Exception as e:
             logger.error(f"An error occurred: {str(e)}")
             await channel.send("An error occurred during the update check.")
