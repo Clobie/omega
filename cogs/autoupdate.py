@@ -49,7 +49,7 @@ class UpdateCheckerCog(commands.Cog):
             await channel.send("Starting update...")
             logger.info("Starting update...")
             
-            result = subprocess.run(['/tools/update.sh'], capture_output=True, text=True)
+            result = subprocess.run(['./tools/update.sh'], capture_output=True, text=True)
             if result.returncode != 0:
                 logger.error(f"Error running update script: {result.stderr.strip()}")
                 await channel.send("Update failed.")
