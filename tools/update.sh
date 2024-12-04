@@ -43,3 +43,4 @@ fi
 # Tail the service logs
 #echo "Tailing logs for $SERVICE_NAME service (Press Ctrl+C to exit)..."
 #sudo journalctl -fu "$SERVICE_NAME"
+
