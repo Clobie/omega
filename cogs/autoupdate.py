@@ -1,4 +1,3 @@
-
 # cogs/autoupdate.py
 
 import os
@@ -15,6 +14,7 @@ class UpdateCheckerCog(commands.Cog):
         self.bot = bot
         self.channel_id = 1256848459558817812  # Channel to post updates
         self.update_check.start()  # Start the task when the cog is loaded
+        self.last_commit_message = None  # To store the last commit message
 
     @tasks.loop(seconds=15)  # Task runs every 15 seconds
     async def update_check(self):
@@ -43,11 +43,14 @@ class UpdateCheckerCog(commands.Cog):
             result = subprocess.run(['git', 'status', '-uno'], capture_output=True, text=True)
             if "up to date" in result.stdout:
                 logger.info("No updates available.")
-                #await channel.send("No updates available.")
                 return
 
-            await channel.send("Starting update...")
-            logger.info("Starting update...")
+            # Get the latest commit message
+            commit_info = subprocess.run(['git', 'log', '-1', '--pretty=%B'], capture_output=True, text=True)
+            self.last_commit_message = commit_info.stdout.strip()
+
+            await channel.send(f"Starting update to: {self.last_commit_message}")
+            logger.info(f"Starting update to: {self.last_commit_message}")
             
             result = subprocess.run(['./tools/update.sh'], capture_output=True, text=True)
             if result.returncode != 0:
@@ -57,6 +60,10 @@ class UpdateCheckerCog(commands.Cog):
             
             await channel.send("Update completed successfully.")
             logger.info("Update completed successfully.")
+            
+            # Notify after restart
+            await channel.send(f"Bot restarted after updating to: {self.last_commit_message}")
+            logger.info(f"Bot restarted after updating to: {self.last_commit_message}")
 
         except Exception as e:
             logger.error(f"An error occurred: {str(e)}")
