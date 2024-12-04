@@ -17,8 +17,8 @@ class ImageGenerator(commands.Cog):
         Generates one of those fancy 'text over gradient' images for social media posts.
         """
         logger.info(f"User {context.author} requested image generation.")
+        img = imgen.generate_facebook_text_post(msg)
         try:
-            img = imgen.generate_facebook_text_post(msg)
             await context.send(file=discord.File(img, filename="post_image.png"))
             logger.info(f"Image sent to {context.author}.")
         except Exception as e:
