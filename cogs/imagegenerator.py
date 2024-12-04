@@ -11,7 +11,7 @@ class ImageGenerator(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="postgenerator")
+    @commands.command(name="postgenerator", aliases=["pg", "postgen"])
     async def postgenerator(self, context, *, msg):
         """
         Generates one of those fancy 'text over gradient' images for social media posts.
