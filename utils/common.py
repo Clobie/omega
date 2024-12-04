@@ -2,6 +2,7 @@
 
 import random
 import re
+import string
 from utils.log import logger
 
 class Common:
@@ -20,5 +21,8 @@ class Common:
     def remove_superscript(self, text):
         superscript_pattern = r'[\u00B2\u00B3\u00B9\u1D2C0-\u1D2DF]'
         return re.sub(superscript_pattern, '', text)
+    
+    def generate_random_string(self, length=10):
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 common = Common()

@@ -3,13 +3,11 @@ import math
 import string
 import random
 import os 
+from utils.common import common
 
 class ImageGenerator():
     def __init__(self):
         pass
-
-    def generate_random_string(self, length=10):
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
     def get_random_color_pair(self):
         color_pairs = [
@@ -76,7 +74,7 @@ class ImageGenerator():
             draw.text((position_x, position_y), line, fill=text_color, font=font)
             position_y += text_bbox[3] - text_bbox[1]
 
-        random_filename = self.generate_random_string() + "_text_image.png"
+        random_filename = common.generate_random_string() + "_text_image.png"
         img.save(random_filename)
         return random_filename
 
