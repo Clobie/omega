@@ -87,7 +87,7 @@ class ImageGenerator():
             random_color_pair[1], 
             text, 
             "black", 
-            "arial.ttf"
+            "Roboto.ttf"
         )
         return file
 
