@@ -43,7 +43,7 @@ class UpdateCheckerCog(commands.Cog):
             result = subprocess.run(['git', 'status', '-uno'], capture_output=True, text=True)
             if "up to date" in result.stdout:
                 logger.info("No updates available.")
-                await channel.send("No updates available.")
+                #await channel.send("No updates available.")
                 return
 
             await channel.send("Starting update...")
