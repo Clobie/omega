@@ -85,6 +85,7 @@ class Assistant(commands.Cog):
             if result.startswith("GIF:"):
                 usedagif = True
                 result = await gfy.get_react_gif_url(result.replace("GIF:", ""))
+                logger.info("Circumvented annoying AI response by using a GIF.  Search:  " + result)
 
             # Add response to context
             self.add_context(scope, 'assistant', result)
