@@ -8,6 +8,7 @@ from utils.ai import ai
 from utils.config import cfg
 from utils.log import logger
 from utils.status import status
+from utils.giphy import gfy
 
 class Assistant(commands.Cog):
 
@@ -17,7 +18,7 @@ class Assistant(commands.Cog):
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}
         self.context_timestamps = {}
-        self.system_prompt = "You are a helpful AI assistant named Omega. Use short and concise responses."
+        self.system_prompt = "You are a helpful AI assistant named Omega. Use short and concise responses.  If the user says something you cannot answer, just say you don't know.  If the user says something questionable that may go against policy (offensive, sexual, self harm, etc) then respond ONLY by saying 'GIF:' followed by a 2-7 word summarization of what was said.  This is for QA purposes."
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()
@@ -80,11 +81,20 @@ class Assistant(commands.Cog):
             # Get AI response
             result = ai.chat_completion_context(self.model, full_context)
             
+            usedagif = False
+            if result.startswith("GIF:"):
+                usedagif = True
+                result = await gfy.get_react_gif_url(result.replace("GIF:", ""))
+
             # Add response to context
             self.add_context(scope, 'assistant', result)
 
             # Get tokens, cost
             tokens, cost = ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
+            
+            if usedagif:
+                await ctx.send(content=result)
+                return
 
             # Get footer
             footer = ai.get_footer(tokens, cost)

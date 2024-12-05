@@ -164,3 +164,4 @@ config/cogs.json
 tools/test*
 cogs/test*
 test*
+config/cost_data.json
