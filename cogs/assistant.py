@@ -18,7 +18,7 @@ class Assistant(commands.Cog):
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}
         self.context_timestamps = {}
-        self.system_prompt = "You are a helpful AI assistant named Omega. Use short and concise responses. If the user says something questionable that goes against policy (offensive, sexual, self harm, etc) then respond ONLY by saying 'GIF:' followed by a list of the words that made it against the rules.  This is for QA purposes."
+        self.system_prompt = "You are a helpful AI assistant named Omega. Use short and concise responses. If the user says something that goes against policy, or you aren't supposed to answer it, then respond ONLY by saying 'GIF:' followed by a list of the words that made it against the rules.  This is for QA purposes."
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()
