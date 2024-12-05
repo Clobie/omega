@@ -18,8 +18,9 @@ class ImageGenerator(commands.Cog):
         """
         logger.info(f"User {context.author} requested image generation.")
         img = imgen.generate_facebook_text_post(msg)
+        random_string = common.generate_random_string()
         try:
-            await context.send(file=discord.File(img, filename="post_image.png"))
+            await context.send(file=discord.File(img, filename=random_string + "_omega_generated_image.png"))
             logger.info(f"Image sent to {context.author}.")
         except Exception as e:
             logger.error(f"Error generating image: {e}")
