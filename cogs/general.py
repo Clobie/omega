@@ -1,5 +1,6 @@
 # cogs/general.py
 
+import os
 from discord.ext import commands
 from utils.common import common
 from utils.config import cfg
@@ -12,6 +13,26 @@ class General(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info(f'Logged in as {self.bot.user}')
+
+        # Put this somewhere else eventually
+        last_commit_file = './.last_commit'
+        if os.path.exists(last_commit_file):
+            try:
+                with open(last_commit_file, 'r') as file:
+                    last_commit_id = file.read().strip()
+                logger.info(f'Last commit ID: {last_commit_id}')
+                # Magic number bad
+                channel_id = 1256848459558817812
+                channel = self.bot.get_channel(channel_id)
+                if channel:
+                    await channel.send(f"The bot has been updated to commit `{last_commit_id}`.")
+                else:
+                    logger.warning(f"Channel with ID {channel_id} not found.")
+                os.remove(last_commit_file)
+                logger.info(f"Deleted file {last_commit_file}")
+            except Exception as e:
+                logger.error(f"Failed to process {last_commit_file}: {e}")
+
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
