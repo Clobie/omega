@@ -8,8 +8,6 @@ from utils.log import logger
 
 class Database:
     def __init__(self):
-        self.client = MongoClient(cfg.DATABASE_USER, cfg.DATABASE_PASS)
-        self.db = self.client[cfg.DATABASE_NAME]
-        self.collection = self.db[cfg.DATABASE_COLLECTION_NAME]
+        pass
 
 db = Database()
