@@ -85,6 +85,8 @@ After=network.target
 [Service]
 ExecStart=/bin/bash $GIT_REPO_DIR/tools/updater.sh
 Restart=always
+User=root
+WorkingDirectory=$GIT_REPO_DIR/tools
 
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_UPDATER > /dev/null
