@@ -1,6 +1,7 @@
 # cogs/general.py
 
 import os
+import discord
 from discord.ext import commands
 from utils.common import common
 from utils.config import cfg
@@ -21,13 +22,19 @@ class General(commands.Cog):
                 with open(last_commit_file, 'r') as file:
                     last_commit_id = file.read().strip()
                 logger.info(f'Last commit ID: {last_commit_id}')
-                # Magic number bad
+                
+                # Channel ID for notifications
                 channel_id = 1256848459558817812
                 channel = self.bot.get_channel(channel_id)
+                
                 if channel:
-                    await channel.send(f"Updated complete.\nSee changes here:\n\n[{last_commit_id}](https://github.com/Clobie/omega/commit/{last_commit_id})")
+                    embed = discord.Embed(title="Update Notification", description="The update is complete!", color=0x00ff00)
+                    embed.add_field(name="Last Commit ID", value=last_commit_id, inline=False)
+                    embed.add_field(name="Changes", value=f"[View changes here](https://github.com/Clobie/omega/commit/{last_commit_id})", inline=False)
+                    await channel.send(embed=embed)
                 else:
                     logger.warning(f"Channel with ID {channel_id} not found.")
+                
                 os.remove(last_commit_file)
                 logger.info(f"Deleted file {last_commit_file}")
             except Exception as e:
