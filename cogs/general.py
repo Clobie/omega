@@ -25,7 +25,7 @@ class General(commands.Cog):
                 channel_id = 1256848459558817812
                 channel = self.bot.get_channel(channel_id)
                 if channel:
-                    await channel.send(f"The bot has been updated to commit `{last_commit_id}`.")
+                    await channel.send(f"Updated to commit [{last_commit_id}](https://github.com/Clobie/omega/commit/{last_commit_id}). ")
                 else:
                     logger.warning(f"Channel with ID {channel_id} not found.")
                 os.remove(last_commit_file)
