@@ -31,6 +31,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+pip install -r $REPO_DIR/requirements.txt
+
 # Restart the service
 echo "Starting $SERVICE_NAME service..."
 sudo systemctl start "$SERVICE_NAME"
