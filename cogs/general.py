@@ -23,7 +23,6 @@ class General(commands.Cog):
                     last_commit_id = file.read().strip()
                 logger.info(f'Last commit ID: {last_commit_id}')
                 
-                # Channel ID for notifications
                 channel_id = 1256848459558817812
                 channel = self.bot.get_channel(channel_id)
                 
