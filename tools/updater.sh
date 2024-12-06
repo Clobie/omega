@@ -1,27 +1,25 @@
 #!/bin/bash
 
-# Use the full path to the repository directory
+LOG_FILE="/var/log/omegaupdater.log"
+echo "Starting updater at $(date)" >> $LOG_FILE
+
 GIT_REPO_DIR="$HOME/omega"
 
+if [ ! -d "$GIT_REPO_DIR" ]; then
+    echo "Directory $GIT_REPO_DIR not found at $(date)" >> $LOG_FILE
+    exit 1
+fi
+
 while true; do
-    # Navigate to the Git repository directory
-    cd "$GIT_REPO_DIR" || { echo "Directory $GIT_REPO_DIR not found"; exit 1; }
-    
-    # Fetch updates from the remote repository
-    git fetch origin
-    
-    # Check if the local HEAD is different from the remote HEAD
+    echo "Checking repository updates at $(date)" >> $LOG_FILE
+    cd "$GIT_REPO_DIR" || { echo "Failed to cd to $GIT_REPO_DIR at $(date)" >> $LOG_FILE; exit 1; }
+
+    git fetch origin >> $LOG_FILE 2>&1
     if [ "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" != "$(git -C "$GIT_REPO_DIR" rev-parse origin/main)" ]; then
-        # Save the current HEAD commit hash to a file
+        echo "Updates detected. Applying updates at $(date)" >> $LOG_FILE
         echo "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" > "$GIT_REPO_DIR/.last_commit"
-        
-        # Execute the update script
-        "$GIT_REPO_DIR/tools/update.sh"
-        
-        # Wait for 30 seconds before continuing
+        "$GIT_REPO_DIR/tools/update.sh" >> $LOG_FILE 2>&1
         sleep 30
     fi
-    
-    # Wait for 15 seconds before the next iteration
     sleep 15
 done
