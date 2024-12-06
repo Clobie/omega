@@ -1,30 +1,27 @@
 # Omega
 Omega is a powerful Python Discord bot designed to enhance your server with AI-driven features, tooling, and automation. 
 
-# Features
-AI Integration:
+# Installation
 
-    Tag the bot and ask a question
+Git checkout - Currently, this only works in a home directory such as ~/user - change TBA
 
-    '!addchannel' and '!removechannel' in the desired channel to have the bot automatically respond without a tag
+    git clone https://github.com/yourusername/omega.git
 
-    '!generate description' to generate an image with dall-e-3
+Go into the project directory
 
-    Bot will occasionally read chat to randomly post a relevant gif and engage in the coversation
+    cd omega
 
-Tooling:
+Run the installer - this installs the services, including the autoupdater
 
-    Stylized QR codes with '!qr msg'
+    bash install.sh
+   
+It will ask for api keys during install, or you can manually add them to your environment afterwards:
 
-    More TBA
+    DISCORD_BOT_TOKEN=
+    OPENAI_API_KEY=
+    GIPHY_API_KEY=
 
-Automation:
 
-    TBA
-
-Crypto:
-
-    TBA
 
 # License
 This project is licensed under the MIT License.
