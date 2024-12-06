@@ -24,7 +24,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Pull latest changes (optional, if you want the latest updates)
+# Pull latest changes
 echo "Pulling latest changes from $BRANCH branch..."
 git pull origin "$BRANCH"
 if [ $? -ne 0 ]; then
