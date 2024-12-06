@@ -28,8 +28,8 @@ class General(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
                 
                 if channel:
-                    embed = discord.Embed(title="Update Notification", description="The update is complete!", color=0x00ff00)
-                    embed.add_field(name="Last Commit ID", value=last_commit_id, inline=False)
+                    embed = discord.Embed(title="Update Notification", description="", color=discord.Color(int(cfg.PRIMARYCOLOR, 16)))
+                    embed.add_field(name="Commit ID", value=last_commit_id, inline=False)
                     embed.add_field(name="Changes", value=f"[View changes here](https://github.com/Clobie/omega/commit/{last_commit_id})", inline=False)
                     await channel.send(embed=embed)
                 else:
