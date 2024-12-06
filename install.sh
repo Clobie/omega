@@ -44,10 +44,11 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /root/omega/main.py
+EnvironmentFile=~/omega/.env
+ExecStart=/usr/bin/python3 ~/omega/main.py
 Restart=on-failure
 User=root
-WorkingDirectory=/root/omega
+WorkingDirectory=~/omega
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_OMEGA > /dev/null
 
@@ -67,7 +68,7 @@ Description=Omega Git Update Service
 After=network.target
 
 [Service]
-ExecStart=/bin/bash /root/omega/tools/updater.sh
+ExecStart=/bin/bash ~/omega/tools/updater.sh
 Restart=always
 
 [Install]
