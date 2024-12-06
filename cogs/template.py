@@ -8,7 +8,7 @@ from utils.log import logger
 from utils.status import status
 from utils.common import common
 from utils.database import db
-#from utils.credit import credit
+from utils.credit import credit
 from utils.role import role
 
 class TemplateCog(commands.Cog):
