@@ -1,13 +1,15 @@
 #!/bin/bash
 
-GIT_REPO_DIR="~/omega"
+# Get the user's home directory
+USER_HOME="$HOME"
+GIT_REPO_DIR="$USER_HOME/omega"
 SERVICE_NAME_UPDATER="omegaupdater"
 SERVICE_FILE_UPDATER="/etc/systemd/system/$SERVICE_NAME_UPDATER.service"
 SERVICE_NAME_OMEGA="omega"
 SERVICE_FILE_OMEGA="/etc/systemd/system/$SERVICE_NAME_OMEGA.service"
-ENV_FILE=~/omega/.env
+ENV_FILE="$GIT_REPO_DIR/.env"
 
-# Delete a service if it exists
+# Function to delete a service if it exists
 delete_service() {
     local service_name=$1
     local service_file=$2
@@ -27,8 +29,8 @@ delete_service "$SERVICE_NAME_UPDATER" "$SERVICE_FILE_UPDATER"
 delete_service "$SERVICE_NAME_OMEGA" "$SERVICE_FILE_OMEGA"
 
 # Create .env file if it doesn't exist
-mkdir -p ~/omega
-touch $ENV_FILE
+mkdir -p "$GIT_REPO_DIR"
+touch "$ENV_FILE"
 
 # Function to check key existence
 check_key() {
@@ -38,17 +40,17 @@ check_key() {
 # Ask for API keys if they don't exist
 if ! check_key "OPENAI_API_KEY"; then
     read -p "Enter OpenAI API Key: " openai_key
-    echo "OPENAI_API_KEY=$openai_key" >> $ENV_FILE
+    echo "OPENAI_API_KEY=$openai_key" >> "$ENV_FILE"
 fi
 
 if ! check_key "GIPHY_API_KEY"; then
     read -p "Enter Giphy API Key: " giphy_key
-    echo "GIPHY_API_KEY=$giphy_key" >> $ENV_FILE
+    echo "GIPHY_API_KEY=$giphy_key" >> "$ENV_FILE"
 fi
 
 if ! check_key "DISCORD_BOT_TOKEN"; then
     read -p "Enter Discord API Key: " discord_key
-    echo "DISCORD_BOT_TOKEN=$discord_key" >> $ENV_FILE
+    echo "DISCORD_BOT_TOKEN=$discord_key" >> "$ENV_FILE"
 fi
 
 echo "API keys checked/added in $ENV_FILE"
@@ -61,15 +63,15 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=$ENV_FILE
-ExecStart=/usr/bin/python3 ~/omega/main.py
+ExecStart=/usr/bin/python3 $GIT_REPO_DIR/main.py
 Restart=on-failure
 User=root
-WorkingDirectory=~/omega
+WorkingDirectory=$GIT_REPO_DIR
 
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_OMEGA > /dev/null
 
-chmod +x ~/omega/main.py
+chmod +x "$GIT_REPO_DIR/main.py"
 sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME_OMEGA
 sudo systemctl start $SERVICE_NAME_OMEGA
@@ -81,14 +83,14 @@ Description=Omega Git Update Service
 After=network.target
 
 [Service]
-ExecStart=/bin/bash ~/omega/tools/updater.sh
+ExecStart=/bin/bash $GIT_REPO_DIR/tools/updater.sh
 Restart=always
 
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_UPDATER > /dev/null
 
-chmod +x ~/omega/tools/updater.sh
-chmod +x ~/omega/tools/update.sh
+chmod +x "$GIT_REPO_DIR/tools/updater.sh"
+chmod +x "$GIT_REPO_DIR/tools/update.sh"
 sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME_UPDATER
 sudo systemctl start $SERVICE_NAME_UPDATER
