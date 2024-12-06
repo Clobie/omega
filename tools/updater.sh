@@ -1,9 +1,9 @@
 #!/bin/bash
 
 LOG_FILE="/var/log/omegaupdater.log"
-echo "Starting updater at $(date)" >> $LOG_FILE
+GIT_REPO_DIR="/root/omega"
 
-GIT_REPO_DIR="$HOME/omega"
+echo "Starting updater at $(date)" >> $LOG_FILE
 
 if [ ! -d "$GIT_REPO_DIR" ]; then
     echo "Directory $GIT_REPO_DIR not found at $(date)" >> $LOG_FILE
@@ -15,11 +15,21 @@ while true; do
     cd "$GIT_REPO_DIR" || { echo "Failed to cd to $GIT_REPO_DIR at $(date)" >> $LOG_FILE; exit 1; }
 
     git fetch origin >> $LOG_FILE 2>&1
-    if [ "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" != "$(git -C "$GIT_REPO_DIR" rev-parse origin/main)" ]; then
-        echo "Updates detected. Applying updates at $(date)" >> $LOG_FILE
+    LOCAL_HEAD=$(git rev-parse HEAD)
+    REMOTE_HEAD=$(git rev-parse origin/main)
+
+    if [ "$LOCAL_HEAD" != "$REMOTE_HEAD" ]; then
+        echo "Updates detected. Resetting and pulling latest changes at $(date)" >> $LOG_FILE
+
+        # Force reset and pull
+        git reset --hard origin/main >> $LOG_FILE 2>&1
+        git pull origin main >> $LOG_FILE 2>&1
+
+        # Run the update script
         "$GIT_REPO_DIR/tools/update.sh" >> $LOG_FILE 2>&1
-        echo "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" > "$GIT_REPO_DIR/.last_commit"
+        echo "Updates applied successfully at $(date)" >> $LOG_FILE
         sleep 30
     fi
+
     sleep 15
 done
