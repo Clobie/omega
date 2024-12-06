@@ -32,6 +32,7 @@ if [ $? -ne 0 ]; then
 fi
 
 pip install -r $REPO_DIR/requirements.txt
+sleep 2
 
 # Restart the service
 echo "Starting $SERVICE_NAME service..."
