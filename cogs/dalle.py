@@ -25,7 +25,8 @@ class Dalle(commands.Cog):
             async with session.get(image_url) as resp:
                 if resp.status == 200:
                     image_data = await resp.read()
-                    file = discord.File(io.BytesIO(image_data), filename="image.png")
+                    filename = common.generate_random_string() + "_image.png"
+                    file = discord.File(io.BytesIO(image_data), filename=filename)
                     footer = ai.get_footer('null', 0.04)
                     ai.update_cost_static(0.04)
                     await status.update(self.bot, 'watching', f"Cost: ${ai.get_total_cost()}")
