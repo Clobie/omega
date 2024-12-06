@@ -17,8 +17,8 @@ while true; do
     git fetch origin >> $LOG_FILE 2>&1
     if [ "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" != "$(git -C "$GIT_REPO_DIR" rev-parse origin/main)" ]; then
         echo "Updates detected. Applying updates at $(date)" >> $LOG_FILE
-        echo "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" > "$GIT_REPO_DIR/.last_commit"
         "$GIT_REPO_DIR/tools/update.sh" >> $LOG_FILE 2>&1
+        echo "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" > "$GIT_REPO_DIR/.last_commit"
         sleep 30
     fi
     sleep 15
