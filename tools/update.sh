@@ -9,7 +9,6 @@ echo "Stopping $SERVICE_NAME service..."
 sudo systemctl stop "$SERVICE_NAME"
 if [ $? -ne 0 ]; then
     echo "Failed to stop $SERVICE_NAME service. Exiting."
-    exit 1
 fi
 
 # Navigate to the repository directory
