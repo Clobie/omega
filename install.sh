@@ -7,6 +7,25 @@ SERVICE_NAME_OMEGA="omega"
 SERVICE_FILE_OMEGA="/etc/systemd/system/$SERVICE_NAME_OMEGA.service"
 ENV_FILE=~/omega/.env
 
+# Delete a service if it exists
+delete_service() {
+    local service_name=$1
+    local service_file=$2
+    if systemctl list-units --full --all | grep -Fq "$service_name.service"; then
+        echo "Stopping and disabling service $service_name..."
+        sudo systemctl stop $service_name
+        sudo systemctl disable $service_name
+        sudo rm -f $service_file
+        echo "Service $service_name removed."
+    else
+        echo "Service $service_name does not exist."
+    fi
+}
+
+# Remove existing services
+delete_service "$SERVICE_NAME_UPDATER" "$SERVICE_FILE_UPDATER"
+delete_service "$SERVICE_NAME_OMEGA" "$SERVICE_FILE_OMEGA"
+
 # Create .env file if it doesn't exist
 mkdir -p ~/omega
 touch $ENV_FILE
@@ -35,35 +54,29 @@ fi
 echo "API keys checked/added in $ENV_FILE"
 
 # Install omega service
-if systemctl list-units --full --all | grep -Fq "$SERVICE_NAME_UPDATER.service"; then
-    echo "Service $SERVICE_NAME_UPDATER is already installed."
-else
-    echo "[Unit]
+echo "[Unit]
 Description=Omega Discord Bot
 After=network.target
 
 [Service]
 Type=simple
-EnvironmentFile=~/omega/.env
+EnvironmentFile=$ENV_FILE
 ExecStart=/usr/bin/python3 ~/omega/main.py
 Restart=on-failure
 User=root
 WorkingDirectory=~/omega
+
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_OMEGA > /dev/null
 
-    chmod +x ~/omega/main.py
-    sudo systemctl daemon-reload
-    sudo systemctl enable $SERVICE_NAME_OMEGA
-    sudo systemctl start $SERVICE_NAME_OMEGA
-    echo "Service $SERVICE_NAME_OMEGA installed and started."
-fi
+chmod +x ~/omega/main.py
+sudo systemctl daemon-reload
+sudo systemctl enable $SERVICE_NAME_OMEGA
+sudo systemctl start $SERVICE_NAME_OMEGA
+echo "Service $SERVICE_NAME_OMEGA installed and started."
 
 # Install updater service
-if systemctl list-units --full --all | grep -Fq "$SERVICE_NAME_UPDATER.service"; then
-    echo "Service $SERVICE_NAME_UPDATER is already installed."
-else
-    echo "[Unit]
+echo "[Unit]
 Description=Omega Git Update Service
 After=network.target
 
@@ -74,12 +87,11 @@ Restart=always
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_UPDATER > /dev/null
 
-    chmod +x ~/omega/tools/updater.sh
-    chmod +x ~/omega/tools/update.sh
-    sudo systemctl daemon-reload
-    sudo systemctl enable $SERVICE_NAME_UPDATER
-    sudo systemctl start $SERVICE_NAME_UPDATER
-    echo "Service $SERVICE_NAME_UPDATER installed and started."
-fi
+chmod +x ~/omega/tools/updater.sh
+chmod +x ~/omega/tools/update.sh
+sudo systemctl daemon-reload
+sudo systemctl enable $SERVICE_NAME_UPDATER
+sudo systemctl start $SERVICE_NAME_UPDATER
+echo "Service $SERVICE_NAME_UPDATER installed and started."
 
 echo "Installation complete"
