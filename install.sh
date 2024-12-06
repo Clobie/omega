@@ -38,7 +38,8 @@ echo "API keys checked/added in $ENV_FILE"
 if systemctl list-units --full --all | grep -Fq "$SERVICE_NAME_UPDATER.service"; then
     echo "Service $SERVICE_NAME_UPDATER is already installed."
 else
-    echo "Description=Omega Discord Bot
+    echo "[Unit]
+Description=Omega Discord Bot
 After=network.target
 
 [Service]
@@ -63,9 +64,10 @@ if systemctl list-units --full --all | grep -Fq "$SERVICE_NAME_UPDATER.service";
 else
     echo "[Unit]
 Description=Omega Git Update Service
+After=network.target
 
 [Service]
-ExecStart=/root/omega/tools/updater.sh
+ExecStart=/bin/bash /root/omega/tools/updater.sh
 Restart=always
 
 [Install]
