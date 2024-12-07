@@ -11,33 +11,27 @@ class Credits(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        for guild in self.bot.guilds:
-            query_server = (
-                "INSERT INTO discord_servers (server_id, credits) "
-                "VALUES (%s, 0) "
-                "ON CONFLICT (server_id) DO NOTHING"
-            )
-            formatted_server_query = query_server % guild.id
-            omega.logger.info(formatted_server_query)
-            omega.db.run_script(formatted_server_query)
-            
-            for member in guild.members:
-                query_user = (
-                    "INSERT INTO discord_users (user_id, credits) "
-                    "VALUES (%s, 0) "
-                    "ON CONFLICT (user_id) DO NOTHING"
-                )
-                formatted_user_query = query_user % member.id
-                omega.logger.info(formatted_user_query)
-                omega.db.run_script(formatted_user_query)
+        pass
     
+    def init_user(self, user_id):
+        query_user = (
+            "INSERT INTO discord_users (user_id, credits) "
+            "VALUES (%s, 0) "
+            "ON CONFLICT (user_id) DO NOTHING"
+        )
+        formatted_user_query = query_user % user_id
+        omega.logger.info(formatted_user_query)
+        omega.db.run_script(formatted_user_query)
+
     def get_credits(self, user_id):
         query = (
             "SELECT credits FROM discord_users WHERE user_id = %s;"
         )
         formatted_query = query % (user_id)
         result = omega.db.run_script(formatted_query)
-        return result[0][0] if result else None
+        if not result:
+            self.init_user(user_id)
+        return result[0][0] if result else 0
     
     def give_credits(self, user_from, user_to, amount):
         if amount <= 0:
