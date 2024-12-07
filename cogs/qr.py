@@ -41,7 +41,7 @@ class QR(commands.Cog, name="qr"):
         
         qr_width, qr_height = qr_img.size
         logo_position = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
-        qr_img.paste(logo, logo_position, logo)
+        #qr_img.paste(logo, logo_position, logo)
         
         unique_filename = f'qr_{int(time.time())}.png'
         qr_img.save(unique_filename)
