@@ -37,7 +37,7 @@ class Credits(commands.Cog):
         )
         formatted_query = query % (user_id)
         result = omega.db.run_script(formatted_query)
-        return result
+        return result[0][0] if result else None
     
     def give_credits(self, user_from, user_to, amount):
         if amount <= 0:
