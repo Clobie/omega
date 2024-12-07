@@ -17,8 +17,9 @@ class Credits(commands.Cog):
                 "VALUES (%s, 0) "
                 "ON CONFLICT (server_id) DO NOTHING"
             )
-            omega.logger.info(query_server % guild.id)
-            omega.db.run_script(query_server, (guild.id,))
+            formatted_server_query = query_server % guild.id
+            omega.logger.info(formatted_server_query)
+            omega.db.run_script(formatted_server_query)
             
             for member in guild.members:
                 query_user = (
@@ -26,8 +27,9 @@ class Credits(commands.Cog):
                     "VALUES (%s, 0) "
                     "ON CONFLICT (user_id) DO NOTHING"
                 )
-                omega.logger.info(query_user % member.id)
-                omega.db.run_script(query_user, (member.id,))
+                formatted_user_query = query_user % member.id
+                omega.logger.info(formatted_user_query)
+                omega.db.run_script(formatted_user_query)
     
     def get_credits(self, user_id):
         query = (
@@ -38,7 +40,8 @@ class Credits(commands.Cog):
             ") "
             "SELECT credits FROM discord_users WHERE user_id = %s;"
         )
-        result = omega.db.run_script(query, (user_id, user_id))
+        formatted_query = query % (user_id, user_id)
+        result = omega.db.run_script(formatted_query)
         return result
     
     def give_credits(self, user_from, user_to, amount):
@@ -48,13 +51,11 @@ class Credits(commands.Cog):
         to_credits = self.get_credits(user_to)
 
         if from_credits is None or to_credits is None:
-            return False  # At least one user doesn't exist
+            return False
         
-        # Check if user_from has enough credits
         if from_credits < amount:
             return False
 
-        # Execute the credit transfer
         query = (
             "WITH deducted AS ("
             "    UPDATE discord_users "
@@ -71,9 +72,41 @@ class Credits(commands.Cog):
             "SELECT (SELECT credits FROM deducted) AS from_credits, "
             "       (SELECT credits FROM added) AS to_credits;"
         )
-        
-        omega.db.run_script(query, (amount, user_from, amount, user_to))
+        formatted_query = query % ((amount, user_from, amount, user_to))
+        omega.db.run_script(formatted_query)
         return True
+    
+    def gift_credits(self, user_to, amount):
+        if amount <= 0:
+            return False
+        to_credits = self.get_credits(user_to)
+        if to_credits is None:
+            return False
+        query = (
+            "UPDATE discord_users "
+            "SET credits = credits + %s "
+            "WHERE user_id = %s "
+            "RETURNING credits;"
+        )
+        formatted_query = query % (amount, user_to)
+        new_credits = omega.db.run_script(formatted_query)
+        return new_credits is not None
+    
+    def take_credits(self, user_from, amount):
+        if amount <= 0:
+            return False
+        from_credits = self.get_credits(user_from)
+        if from_credits is None or from_credits < amount:
+            return False
+        query = (
+            "UPDATE discord_users "
+            "SET credits = credits - %s "
+            "WHERE user_id = %s "
+            "RETURNING credits;"
+        )
+        formatted_query = query % (amount, user_from)
+        new_credits = omega.db.run_script(formatted_query)
+        return new_credits is not None
 
     @commands.command(name='credits')
     async def credits(self, ctx):
@@ -91,6 +124,8 @@ class Credits(commands.Cog):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
         else:
             await ctx.send("You don't have enough credits.")
+    
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Credits(bot))
