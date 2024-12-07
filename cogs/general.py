@@ -23,8 +23,7 @@ class General(commands.Cog):
                     last_commit_id = file.read().strip()
                 logger.info(f'Last commit ID: {last_commit_id}')
                 
-                channel_id = 1256848459558817812
-                channel = self.bot.get_channel(channel_id)
+                channel = self.bot.get_channel(cfg.UPDATE_CHANNEL)
                 
                 if channel:
                     embed = discord.Embed(title="Update Notification", description="", color=discord.Color(int(cfg.PRIMARYCOLOR, 16)))
@@ -32,7 +31,7 @@ class General(commands.Cog):
                     embed.add_field(name="Changes", value=f"[View changes here](https://github.com/Clobie/omega/commit/{last_commit_id})", inline=False)
                     await channel.send(embed=embed)
                 else:
-                    logger.warning(f"Channel with ID {channel_id} not found.")
+                    logger.warning(f"Channel with ID {cfg.UPDATE_CHANNEL} not found.")
                 
                 os.remove(last_commit_file)
                 logger.info(f"Deleted file {last_commit_file}")
