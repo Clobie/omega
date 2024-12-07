@@ -13,7 +13,7 @@ class Asdf(commands.Cog):
     async def on_ready(self):
         for guild in self.bot.guilds:
             for member in guild.members:
-                query = f'INSERT INTO discord_users (id, name, credits, message_count) VALUES ({member.id}, {member.name}, 0, 0);'
+                query = f"INSERT INTO discord_users (username, user_id, credits) VALUES ('{member.name}', {member.id}, 0)"
                 omega.logger.info(query)
                 omega.db.run_script(query)
 

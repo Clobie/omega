@@ -27,19 +27,7 @@ class Database:
         except Exception as e:
             logger.error(f"Database connection error: {e}")
             raise
-
-    def run_script_from_file(self, filepath):
-        logger.info(f"Running SQL script from file: {filepath}")
-        with open(filepath, 'r') as file:
-            script = file.read()
-            self.cursor.execute(script)
-            if script.strip().lower().startswith("select"):
-                result = self.cursor.fetchall()
-                logger.info("Select query executed successfully")
-                return result
-            self.connection.commit()
-            logger.info("Script executed successfully")
-            return None
+        return None
     
     def run_script(self, script):
         logger.info("Running script directly1")
