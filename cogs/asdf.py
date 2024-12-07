@@ -12,6 +12,7 @@ class Asdf(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
+            query = f"INSERT INTO discord_servers (servername, server_id, credits) VALUES ('{guild.name}', {guild.id}, 0)"
             for member in guild.members:
                 query = f"INSERT INTO discord_users (username, user_id, credits) VALUES ('{member.name}', {member.id}, 0)"
                 omega.logger.info(query)

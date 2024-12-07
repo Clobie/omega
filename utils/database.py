@@ -30,9 +30,7 @@ class Database:
         return None
     
     def run_script(self, script):
-        logger.info("Running script directly1")
         self.cursor.execute(script)
-        logger.info("Running script directly2")
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
             logger.info("Select query executed successfully")
