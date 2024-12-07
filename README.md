@@ -13,7 +13,8 @@ Go into the project directory
 
 Run the installer - this installs the services, including the autoupdater
 
-    bash install.sh
+    chmod +x omega/install.sh
+    ./omega/install.sh
    
 It will ask for api keys during install, or you can manually add them to your environment afterwards:
 
