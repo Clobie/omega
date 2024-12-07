@@ -41,10 +41,8 @@ class Credit:
             f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT {total};"
         )
         result = db.run_script(query)
-        return result
-        if result:
-            return '\n'.join(f"<@{row['user_id']}>: {row['credits']}" for row in result)
-        return None
+        leaderboard_str = ", ".join([f"<@{user_id}>: {credits}" for user_id, credits in result])
+        return leaderboard_str
     
     def give_credits(self, user_from, user_to, amount):
         if amount <= 0:
