@@ -122,6 +122,9 @@ class Credits(commands.Cog):
     
     @commands.command(name='gift')
     async def gift(self, ctx, amount: int, member: discord.Member):
+        if ctx.author.id is not int(omega.cfg.BOT_OWNER):
+            await ctx.send("You do not have the required permissions for that command.")
+            return
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to give.")
             return
@@ -130,6 +133,9 @@ class Credits(commands.Cog):
     
     @commands.command(name='take')
     async def take(self, ctx, amount: int, member: discord.Member):
+        if ctx.author.id is not int(omega.cfg.BOT_OWNER):
+            await ctx.send("You do not have the required permissions for that command.")
+            return
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to take.")
             return
