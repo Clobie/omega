@@ -5,7 +5,7 @@ Omega is a powerful Python Discord bot designed to enhance your server with AI-d
 
 Git checkout - Currently, this only works in a home directory such as ~/user - change TBA
 
-    git clone https://github.com/yourusername/omega.git
+    git clone https://github.com/Clobie/omega.git
 
 Go into the project directory
 
