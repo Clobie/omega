@@ -13,12 +13,13 @@ class Credit:
         pass
 
     def init_user(self, user_id):
+        init_credits = cfg.NEW_USER_CREDITS
         query_user = (
             "INSERT INTO discord_users (user_id, credits) "
-            "VALUES (%s, 0) "
+            "VALUES (%s, %s) "
             "ON CONFLICT (user_id) DO NOTHING"
         )
-        formatted_user_query = query_user % user_id
+        formatted_user_query = query_user % (user_id, init_credits)
         logger.info(formatted_user_query)
         db.run_script(formatted_user_query)
 
