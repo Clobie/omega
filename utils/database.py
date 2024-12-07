@@ -35,9 +35,11 @@ class Database:
             result = self.cursor.fetchall()
             logger.info("Select query executed successfully")
             return result
-        self.connection.commit()
-        logger.info("Script executed successfully")
-        return None
+        else:
+            affected_rows = self.cursor.rowcount
+            self.connection.commit()
+            logger.info(f"Script executed successfully, {affected_rows} rows affected")
+            return affected_rows
 
     def close(self):
         self.cursor.close()
