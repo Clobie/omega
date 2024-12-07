@@ -33,14 +33,9 @@ class Credits(commands.Cog):
     
     def get_credits(self, user_id):
         query = (
-            "WITH upsert AS ("
-            "    INSERT INTO discord_users (user_id, credits) "
-            "    VALUES (%s, 0) "
-            "    ON CONFLICT (user_id) DO NOTHING "
-            ") "
             "SELECT credits FROM discord_users WHERE user_id = %s;"
         )
-        formatted_query = query % (user_id, user_id)
+        formatted_query = query % (user_id)
         result = omega.db.run_script(formatted_query)
         return result
     
@@ -125,7 +120,23 @@ class Credits(commands.Cog):
         else:
             await ctx.send("You don't have enough credits.")
     
-
+    @commands.command(name='gift')
+    async def gift(self, ctx, member: discord.Member, amount: int):
+        if amount <= 0:
+            await ctx.send("Specify a valid amount of credits to give.")
+            return
+        if self.gift_credits(member.id, amount):
+            await ctx.send(f"You've given {amount} credits to {member.mention}.")
+    
+    @commands.command(name='take')
+    async def take(self, ctx, member: discord.Member, amount: int):
+        if amount <= 0:
+            await ctx.send("Specify a valid amount of credits to take.")
+            return
+        if self.take_credits(member.id, amount):
+            await ctx.send(f"You've taken {amount} credits from {member.mention}.")
+        else:
+            await ctx.send(f"Failed to take credits from {member.mention}. They may not have enough credits.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Credits(bot))
