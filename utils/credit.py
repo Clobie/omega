@@ -32,7 +32,7 @@ class Credit:
             self.init_user(user_id)
         return result[0][0] if result else 0
     
-    def get_top_credits(self, total=None):
+    def get_leaderboard(self, total=None):
         if total is None:
             total = 10
         else:
@@ -41,6 +41,7 @@ class Credit:
             f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT {total};"
         )
         result = db.run_script(query)
+        return result
         if result:
             return '\n'.join(f"<@{row['user_id']}>: {row['credits']}" for row in result)
         return None
