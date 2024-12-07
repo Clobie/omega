@@ -24,25 +24,20 @@ class QR(commands.Cog, name="qr"):
             box_size=10,
             border=1
         )
-        
         qr.add_data(' '.join(msg))
         qr.make(fit=True)
-        
         qr_img = qr.make_image(
             image_factory=StyledPilImage,
             ill_color="black", 
             back_color="white",
             module_drawer=GappedSquareModuleDrawer()
         ).convert('RGB')
-
         logo = Image.open('./assets/omega.png').convert("RGBA")
         logo_size = 50
         logo = logo.resize((logo_size, logo_size))
-        
         qr_width, qr_height = qr_img.size
         logo_position = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
         #qr_img.paste(logo, logo_position, logo)
-        
         unique_filename = f'qr_{int(time.time())}.png'
         qr_img.save(unique_filename)
         await context.send(file=discord.File(unique_filename))

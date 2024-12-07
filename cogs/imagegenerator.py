@@ -27,7 +27,7 @@ class ImageGenerator(commands.Cog):
             await context.send("Sorry, there was an error generating the image.")
         finally:
             if os.path.exists(img):
-                os.remove(img)  # remove image from file system
+                os.remove(img)
                 logger.info(f"Removed temporary image file: {img}")
 
 async def setup(bot: commands.Bot):
