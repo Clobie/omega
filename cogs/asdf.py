@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from core.omega import omega
 
-class TemplateCog(commands.Cog):
+class Asdf(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
     
@@ -17,4 +17,4 @@ class TemplateCog(commands.Cog):
                 omega.logger.info(f'Inserted user into discord_users table - Name: {member.name}, ID: {member.id}')
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(TemplateCog(bot))
+    await bot.add_cog(Asdf(bot))
