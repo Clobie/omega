@@ -25,6 +25,10 @@ class General(commands.Cog):
                 logger.info(f'Last commit ID: {last_commit_id}')
                 
                 channel = self.bot.get_channel(cfg.UPDATE_CHANNEL)
+                print('\n')
+                print(channel)
+                print(cfg.UPDATE_CHANNEL)
+                print('\n')
                 
                 if channel:
                     embed = discord.Embed(title="Update Notification", description="", color=discord.Color(int(cfg.PRIMARYCOLOR, 16)))
