@@ -27,6 +27,7 @@ while true; do
 
         # Run the update script
         "$GIT_REPO_DIR/tools/update.sh" >> $LOG_FILE 2>&1
+        echo "$(git -C "$GIT_REPO_DIR" rev-parse HEAD)" > "$HOME/omega/.last_commit"
         echo "Updates applied successfully at $(date)" >> $LOG_FILE
         sleep 30
     fi
