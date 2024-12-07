@@ -2,6 +2,7 @@
 
 import discord
 from discord.ext import commands, tasks
+from discord.ext.commands import Context
 import json
 import time
 from utils.ai import ai
@@ -155,6 +156,7 @@ class Assistant(commands.Cog):
         # Reply
         await self.reply_to_message(message, prompt)
 
+    @commands.has_permissions(manage_guild=True)
     @commands.command(name="addchannel")
     async def addchannel(self, context):
         id = context.channel.id
@@ -167,6 +169,7 @@ class Assistant(commands.Cog):
             await context.send("Channel added")
             logger.info(f"Added channel {id} to autorespond list.")
     
+    @commands.has_permissions(manage_guild=True)
     @commands.command(name="removechannel")
     async def removechannel(self, context):
         id = context.channel.id
