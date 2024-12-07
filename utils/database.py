@@ -55,6 +55,6 @@ class Database:
     def close(self):
         self.cursor.close()
         self.connection.close()
-        omega.logger.info("Database connection closed")
+        logger.info("Database connection closed")
 
 db = Database()
