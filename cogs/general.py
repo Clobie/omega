@@ -3,6 +3,7 @@
 import os
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
 from utils.common import common
 from utils.config import cfg
 from utils.log import logger
