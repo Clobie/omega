@@ -12,11 +12,14 @@ class Asdf(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
-            query = f"INSERT INTO discord_servers (servername, server_id, credits) VALUES ('{guild.name}', {guild.id}, 0)"
+            query = f"INSERT IGNORE INTO discord_servers (servername, server_id, credits) VALUES ('{guild.name}', {guild.id}, 0)"
+            result = omega.db.run_script(query)
+            print(result)
             for member in guild.members:
-                query = f"INSERT INTO discord_users (username, user_id, credits) VALUES ('{member.name}', {member.id}, 0)"
+                query = f"INSERT IGNORE INTO discord_users (username, user_id, credits) VALUES ('{member.name}', {member.id}, 0)"
                 omega.logger.info(query)
-                omega.db.run_script(query)
+                result = omega.db.run_script(query)
+                print(result)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Asdf(bot))
