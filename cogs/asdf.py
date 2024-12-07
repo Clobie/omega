@@ -14,8 +14,8 @@ class Asdf(commands.Cog):
         for guild in self.bot.guilds:
             for member in guild.members:
                 query = f'INSERT INTO discord_users (id, name, credits, message_count) VALUES ({member.id}, {member.name}, 0, 0)'
-                omega.db.run_script(query)
                 omega.logger.info(query)
+                omega.db.run_script(query)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Asdf(bot))
