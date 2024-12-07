@@ -105,11 +105,17 @@ class Credits(commands.Cog):
 
     @commands.command(name='credits')
     async def credits(self, ctx):
+        """
+        See how many credits you have
+        """
         credits = self.get_credits(ctx.author.id)
         await ctx.send(f"You have {credits} credits.")
 
     @commands.command(name='give')
-    async def give(self, ctx, member: discord.Member, amount: int):
+    async def give(self, ctx, amount: int, member: discord.Member):
+        """
+        Give credits to another user
+        """
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to give.")
             return
@@ -121,7 +127,7 @@ class Credits(commands.Cog):
             await ctx.send("You don't have enough credits.")
     
     @commands.command(name='gift')
-    async def gift(self, ctx, member: discord.Member, amount: int):
+    async def gift(self, ctx, amount: int, member: discord.Member):
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to give.")
             return
@@ -129,7 +135,7 @@ class Credits(commands.Cog):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
     
     @commands.command(name='take')
-    async def take(self, ctx, member: discord.Member, amount: int):
+    async def take(self, ctx, amount: int, member: discord.Member):
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to take.")
             return
