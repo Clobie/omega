@@ -7,4 +7,4 @@ qrcode
 pillow
 requests
 tiktoken
-pymongo
+psycopg2
