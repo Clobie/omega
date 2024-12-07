@@ -14,7 +14,10 @@ class Credits(commands.Cog):
         pass
     
     @commands.command(name='leaderboard')
-    async def leaderboard(self, ctx, total):
+    async def leaderboard(self, ctx, total = 10):
+        """
+        See the top list for credits
+        """
         toplist = omega.credit.get_top_credits(total)
         await ctx.send(toplist)
 
@@ -45,6 +48,10 @@ class Credits(commands.Cog):
     
     @commands.command(name='gift')
     async def gift(self, ctx, amount: int, member: discord.Member):
+
+        omega.logger.error(f"{ctx.author.id}")
+        omega.logger.error(f"{omega.cfg.BOT_OWNER}")
+
         if ctx.author.id is not int(omega.cfg.BOT_OWNER):
             await ctx.send("You do not have the required permissions for that command.")
             return
