@@ -48,7 +48,7 @@ class General(commands.Cog):
             await ctx.send('Missing required argument.')
             logger.info(f'Missing required argument in command: {ctx.message.content}')
         else:
-            await ctx.send(f'An error occurred: {str(error)}')
+            await ctx.send(f'{str(error)}')
             logger.error(f'An error occurred: {str(error)}')
             raise error
 
