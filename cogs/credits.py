@@ -18,7 +18,7 @@ class Credits(commands.Cog):
         """
         See the top list for credits
         """
-        toplist = omega.credit.get_top_credits(total)
+        toplist = omega.credit.get_leaderboard(total)
         await ctx.send(toplist)
 
     @commands.command(name='credits')
