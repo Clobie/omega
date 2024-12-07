@@ -12,6 +12,11 @@ class Credits(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         pass
+    
+    @commands.command(name='leaderboard')
+    async def leaderboard(self, ctx, total):
+        toplist = omega.credit.get_top_credits(total)
+        await ctx.send(toplist)
 
     @commands.command(name='credits')
     async def credits(self, ctx, user: discord.User = None):

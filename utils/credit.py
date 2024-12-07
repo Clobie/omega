@@ -32,6 +32,19 @@ class Credit:
             self.init_user(user_id)
         return result[0][0] if result else 0
     
+    def get_top_credits(self, total=None):
+        if total is None:
+            total = 10
+        else:
+            total = total if total <= 25 else 10
+        query = (
+            f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT {total};"
+        )
+        result = db.run_script(query)
+        if result:
+            return '\n'.join(f"<@{row['user_id']}>: {row['credits']}" for row in result)
+        return None
+    
     def give_credits(self, user_from, user_to, amount):
         if amount <= 0:
             return False
