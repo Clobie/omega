@@ -27,7 +27,6 @@ class Database:
         except Exception as e:
             logger.error(f"Database connection error: {e}")
             raise
-        return None
     
     def run_script(self, script):
         self.cursor.execute(script)
