@@ -169,6 +169,11 @@ class Assistant(commands.Cog):
             await context.send("Channel added")
             logger.info(f"Added channel {id} to autorespond list.")
     
+    @addchannel.error
+    async def addchannel_error(self, ctx: Context, error: commands.CommandError):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send("You don't have the necessary permissions to use this command.")
+    
     @commands.has_permissions(manage_guild=True)
     @commands.command(name="removechannel")
     async def removechannel(self, context):
@@ -181,6 +186,11 @@ class Assistant(commands.Cog):
         else:
             await context.send("Channel was not in the list")
             logger.info(f"Channel {id} was not in the autorespond list.")
+    
+    @removechannel.error
+    async def removechannel_error(self, ctx: Context, error: commands.CommandError):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send("You don't have the necessary permissions to use this command.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
