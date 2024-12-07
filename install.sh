@@ -98,4 +98,44 @@ sudo systemctl enable $SERVICE_NAME_UPDATER
 sudo systemctl start $SERVICE_NAME_UPDATER
 echo "Service $SERVICE_NAME_UPDATER installed and started."
 
+# Install and configure postgresql
+sudo yum install -y postgresql-server postgresql-contrib
+sudo postgresql-setup --initdb
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+
+# Request user input
+read -p "Enter database name: " DB_NAME
+read -p "Enter username: " DB_USER
+read -sp "Enter password: " DB_PASS
+echo
+
+# Create database and user
+sudo -u postgres psql <<EOF
+CREATE DATABASE $DB_NAME;
+CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASS';
+GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
+EOF
+
+echo "Database $DB_NAME created and user $DB_USER granted privileges."
+
+# Update or add to .env file
+declare -A env_vars=( ["DB_NAME"]="$DB_NAME" ["DB_USER"]="$DB_USER" ["DB_PASS"]="$DB_PASS" )
+
+for key in "${!env_vars[@]}"; do
+  if grep -q "^$key=" "$ENV_FILE"; then
+    sed -i "s/^$key=.*/$key=${env_vars[$key]}/" "$ENV_FILE"
+  else
+    echo "$key=${env_vars[$key]}" >> "$ENV_FILE"
+  fi
+done
+echo ".env file updated with the latest database credentials."
+
+# Edit pgsql config to accept md5 auth
+sudo sed -i 's/^\(local\s\+all\s\+all\s\+\)ident/\1md5/' /var/lib/pgsql/data/pg_hba.conf
+sudo sed -i 's/^\(host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+\)ident/\1md5/' /var/lib/pgsql/data/pg_hba.conf
+sudo sed -i 's/^\(host\s\+all\s\+all\s\+::1\/128\s\+\)ident/\1md5/' /var/lib/pgsql/data/pg_hba.conf
+sudo systemctl restart postgresql
+
 echo "Installation complete"
