@@ -30,7 +30,7 @@ class CivitAI(commands.Cog):
         response = civitai.image.create(input_data)
         token = response['token']
         for attempt in range(10):
-            job_response = civitai.jobs.get(token=token)
+            job_response = await civitai.jobs.get(token=token)
             if job_response['jobs'][0]['result']['available']:
                 blob_url = job_response['jobs'][0]['result']['blobUrl']
                 await reply_msg.edit(content=f'{blob_url}', attachments=[])
