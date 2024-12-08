@@ -90,6 +90,10 @@ class General(commands.Cog):
         logger.info(f"Message edited by {user_info} in {server_name} ({channel_name}) [channel id: {channel_id}]:"
             f"\nBefore: {before_content}"
             f"\nAfter: {after_content}")
+    
+    @commands.Command(name="invitelink")
+    async def invitelink(self, ctx):
+        await ctx.send("https://discord.com/oauth2/authorize?client_id=782629498678935562")
 
 async def setup(bot):
     await bot.add_cog(General(bot))
