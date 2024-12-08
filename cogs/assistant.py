@@ -139,7 +139,7 @@ class Assistant(commands.Cog):
             self.clear_context(scope)
             await message.add_reaction("✅")
             return
-
+        
         # Strip bot tag
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
 
