@@ -5,15 +5,17 @@ import civitai
 import asyncio
 from core.omega import omega
 
-class ImageGenerator(commands.Cog):
+class CivitAI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.model = "urn:air:flux1:checkpoint:civitai:618692@691639"
+        self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
 
     @commands.command(name='civit')
     async def generate_image(self, ctx, *, prompt: str):
         reply_msg = await ctx.send(self.thinking_emoji)
         input_data = {
-            "model": "urn:air:flux1:checkpoint:civitai:618692@691639",
+            "model": self.model,
             "params": {
                 "prompt": prompt,
                 "negativePrompt": "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime, mutated hands and fingers:1.4), (deformed, distorted, disfigured:1.3)",
@@ -38,4 +40,4 @@ class ImageGenerator(commands.Cog):
         await reply_msg.edit(content='Image generation timed out after 10 attempts.', attachments=[])
 
 async def setup(bot):
-    await bot.add_cog(ImageGenerator(bot))
+    await bot.add_cog(CivitAI(bot))
