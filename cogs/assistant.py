@@ -74,6 +74,11 @@ class Assistant(commands.Cog):
     async def reply_to_message(self, message, prompt):
         ctx = await self.bot.get_context(message)
         async with ctx.typing():
+
+            if credit.get_user_credits(message.author.id) == 0:
+                await ctx.send(f"You don't have enough credits for that :(")
+                return
+
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
 

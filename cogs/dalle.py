@@ -20,6 +20,9 @@ class Dalle(commands.Cog):
 
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
+        if credit.get_user_credits(ctx.author.id) < 4:
+            await ctx.send(f"You don't have enough credits for that :(")
+            return
         reply_msg = await ctx.send(self.thinking_emoji)
         image_url = ai.generate_image(self.model, prompt)
         async with aiohttp.ClientSession() as session:
