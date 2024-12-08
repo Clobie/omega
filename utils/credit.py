@@ -23,6 +23,11 @@ class Credit:
         logger.info(formatted_user_query)
         db.run_script(formatted_user_query)
 
+    def convert_cost_to_credits(self, cost):
+        credits_per_cent = 1000
+        credits = cost * credits_per_cent
+        return max(1, credits)
+
     def get_user_credits(self, user_id):
         query = (
             "SELECT credits FROM discord_users WHERE user_id = %s;"
@@ -83,7 +88,7 @@ class Credit:
         leaderboard_str = "\n".join([f"<@{user_id}>: {credits} credits" for user_id, credits in result])
         return leaderboard_str
     
-    def give_credits(self, user_from, user_to, amount):
+    def give_user_credits(self, user_from, user_to, amount):
         if amount <= 0:
             return False
         from_credits = self.get_user_credits(user_from)
@@ -115,7 +120,7 @@ class Credit:
         db.run_script(formatted_query)
         return True
     
-    def gift_credits(self, user_to, amount):
+    def gift_user_credits(self, user_to, amount):
         if amount <= 0:
             return False
         to_credits = self.get_user_credits(user_to)
@@ -131,7 +136,7 @@ class Credit:
         new_credits = db.run_script(formatted_query)
         return new_credits is not None
     
-    def take_credits(self, user_from, amount):
+    def take_user_credits(self, user_from, amount):
         if amount <= 0:
             return False
         from_credits = self.get_user_credits(user_from)

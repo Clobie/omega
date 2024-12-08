@@ -9,6 +9,7 @@ from utils.common import common
 from utils.config import cfg
 from utils.log import logger
 from utils.status import status
+from utils.credit import credit
 
 class Dalle(commands.Cog):
 
@@ -29,6 +30,8 @@ class Dalle(commands.Cog):
                     file = discord.File(io.BytesIO(image_data), filename=filename)
                     footer = ai.get_footer('null', 0.04)
                     ai.update_cost_static(0.04)
+                    credits = credit.convert_cost_to_credits(0.04)
+                    credit.user_spend(ctx.author.id, credits)
                     await status.update(self.bot, 'watching', f"Cost: ${ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
 

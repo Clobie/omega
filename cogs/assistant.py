@@ -10,6 +10,7 @@ from utils.config import cfg
 from utils.log import logger
 from utils.status import status
 from utils.giphy import gfy
+from utils.credit import credit
 
 class Assistant(commands.Cog):
 
@@ -92,8 +93,10 @@ class Assistant(commands.Cog):
             self.add_context(scope, 'assistant', result)
 
             # Get tokens, cost
-            tokens, cost = ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
+            tokens, cost, credits = ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
             
+            credit.user_spend(message.author.id, credits)
+
             if usedagif:
                 await ctx.send(content=result)
                 return
@@ -139,7 +142,7 @@ class Assistant(commands.Cog):
             self.clear_context(scope)
             await message.add_reaction("✅")
             return
-        
+
         # Strip bot tag
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
 

@@ -6,6 +6,7 @@ import json
 from utils.common import common
 from utils.config import cfg
 from utils.log import logger
+from utils.credit import credit
 
 class AI:
     def __init__(self):
@@ -72,7 +73,7 @@ class AI:
         cost_estimate = round(cost_estimate, 6)
         self.total_cost += cost_estimate
         self.save_cost_to_file()
-        return total_tokens, cost_estimate
+        return total_tokens, cost_estimate, credit.convert_cost_to_credits(cost_estimate)
     
     def update_cost_static(self, cost):
         self.total_cost += round(cost, 6)
