@@ -10,6 +10,7 @@ from utils.common import common
 from utils.credit import credit
 from utils.role import role
 from utils.database import db
+from utils.ai import ai
 
 class Omega:
     def __init__(self):
@@ -22,6 +23,7 @@ class Omega:
         self.credit = credit
         self.role = role
         self.db = db
+        self.ai = ai
 
     async def run(self):
         logger.info('Starting bot...')
