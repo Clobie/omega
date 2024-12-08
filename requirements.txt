@@ -8,3 +8,4 @@ pillow
 requests
 tiktoken
 psycopg2
+civitai-py
