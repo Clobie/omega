@@ -32,7 +32,6 @@ class Database:
         self.cursor.execute(script)
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
-            logger.debug(f"\nDEBUG: QUERY RESULT: {result}\n")
             logger.info("Select query executed successfully")
             return result
         else:
