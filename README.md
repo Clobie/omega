@@ -68,11 +68,15 @@ Fill out these environment variables inside the .env file
     DISCORD_BOT_TOKEN=
     OPENAI_API_KEY=
     GIPHY_API_KEY=
-    DB_NAME = 
-    DB_USER = 
-    DB_PASS = 
-    DB_HOST = 
-    DB_PORT = 
+    DB_NAME= 
+    DB_USER= 
+    DB_PASS= 
+    DB_HOST= 
+    DB_PORT= 
+    BOT_OWNER=
+    UPDATE_CHANNEL=
+    INVITE_ID=
+
 
 If you don't have API keys for the above services, you can get them here:
 

@@ -2,12 +2,7 @@
 
 from discord.ext import commands
 import random
-import requests
-from utils.ai import ai
-from utils.common import common
-from utils.config import cfg
-from utils.log import logger
-from utils.giphy import gfy
+from core.omega import omega
 
 class Reactor(commands.Cog):
 
@@ -17,7 +12,7 @@ class Reactor(commands.Cog):
 
     async def react_gif(self, message):
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-        react_gif_url = await gfy.get_react_gif_url(prompt)
+        react_gif_url = await omega.gfy.get_react_gif_url(prompt)
         await message.channel.send(react_gif_url)
     
     @commands.Cog.listener()
@@ -27,7 +22,7 @@ class Reactor(commands.Cog):
         ctx = await self.bot.get_context(message)
         if ctx.command:
             return
-        if common.chance(self.respond_chance):
+        if omega.common.chance(self.respond_chance):
             functions = [self.react_gif]
             selected_function = random.choice(functions)
             await selected_function(message)

@@ -2,9 +2,9 @@
 
 import os
 import time
+import qrcode
 import discord
 from discord.ext import commands
-import qrcode
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers.pil import GappedSquareModuleDrawer
 from PIL import Image
@@ -32,12 +32,6 @@ class QR(commands.Cog, name="qr"):
             back_color="white",
             module_drawer=GappedSquareModuleDrawer()
         ).convert('RGB')
-        logo = Image.open('./assets/omega.png').convert("RGBA")
-        logo_size = 50
-        logo = logo.resize((logo_size, logo_size))
-        qr_width, qr_height = qr_img.size
-        logo_position = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
-        #qr_img.paste(logo, logo_position, logo)
         unique_filename = f'qr_{int(time.time())}.png'
         qr_img.save(unique_filename)
         await context.send(file=discord.File(unique_filename))
