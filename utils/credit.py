@@ -24,9 +24,11 @@ class Credit:
         db.run_script(formatted_user_query)
 
     def convert_cost_to_credits(self, cost):
-        credits_per_cent = 1000
-        credits = cost * credits_per_cent
-        return max(1, credits)
+        if cost < 0:
+            return 1
+        credits_per_cent = 10
+        credits = cost * 100 * credits_per_cent
+        return max(1, round(credits))
 
     def get_user_credits(self, user_id):
         query = (
