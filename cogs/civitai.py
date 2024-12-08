@@ -1,13 +1,14 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 import civitai
-import asyncio
-from core.omega import omega
+import time
 
 class CivitAI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.model = "urn:air:flux1:checkpoint:civitai:618692@691639"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
+        self.active_jobs = {}  # Dictionary to track jobs
+        self.poll_jobs.start()  # Start the background task
 
     @commands.command(name='civit')
     async def generate_image(self, ctx, *, prompt: str):
@@ -25,28 +26,46 @@ class CivitAI(commands.Cog):
                 "clipSkip": 2
             }
         }
+
+        # Start the image generation and track the job
         response = civitai.image.create(input_data)
         token = response['token']
+        self.active_jobs[reply_msg.id] = {
+            "ctx": ctx,
+            "token": token,
+            "start_time": time.time(),
+            "message": reply_msg
+        }
 
-        for attempt in range(10):
-            # Call the blocking function and debug its return
+    @tasks.loop(seconds=5)
+    async def poll_jobs(self):
+        completed_jobs = []
+
+        for message_id, job in self.active_jobs.items():
             try:
-                job_response = civitai.jobs.get(token=token)
-                print(f"Debug: job_response type: {type(job_response)}, content: {job_response}")
-
-                # Access the data correctly (modify this as needed based on debug output)
+                job_response = civitai.jobs.get(token=job["token"])
                 jobs = job_response.get('jobs', [])
                 if jobs and jobs[0]['result']['available']:
                     blob_url = jobs[0]['result']['blobUrl']
-                    await reply_msg.edit(content=f'{blob_url}', attachments=[])
-                    return
+                    await job["message"].edit(content=f'{blob_url}', attachments=[])
+                    completed_jobs.append(message_id)
+                elif time.time() - job["start_time"] > 60:  # Timeout after 60 seconds
+                    await job["ctx"].send("Image generation timed out.")
+                    await job["message"].edit(content="Image generation timed out.", attachments=[])
+                    completed_jobs.append(message_id)
             except Exception as e:
-                print(f"Error fetching job response: {e}")
-            
-            await asyncio.sleep(6)
+                print(f"Error polling job: {e}")
 
-        await ctx.send('Image generation timed out after 10 attempts.')
-        await reply_msg.edit(content='Image generation timed out after 10 attempts.', attachments=[])
+        # Remove completed jobs
+        for message_id in completed_jobs:
+            del self.active_jobs[message_id]
+
+    @poll_jobs.before_loop
+    async def before_poll_jobs(self):
+        await self.bot.wait_until_ready()
+
+    def cog_unload(self):
+        self.poll_jobs.cancel()
 
 async def setup(bot):
     await bot.add_cog(CivitAI(bot))
