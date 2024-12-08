@@ -29,12 +29,20 @@ class CivitAI(commands.Cog):
         token = response['token']
 
         for attempt in range(10):
-            job_response = await asyncio.to_thread(civitai.jobs.get, token=token)
+            # Call the blocking function and debug its return
+            try:
+                job_response = civitai.jobs.get(token=token)
+                print(f"Debug: job_response type: {type(job_response)}, content: {job_response}")
 
-            if job_response['jobs'][0]['result']['available']:
-                blob_url = job_response['jobs'][0]['result']['blobUrl']
-                await reply_msg.edit(content=f'{blob_url}', attachments=[])
-                return
+                # Access the data correctly (modify this as needed based on debug output)
+                jobs = job_response.get('jobs', [])
+                if jobs and jobs[0]['result']['available']:
+                    blob_url = jobs[0]['result']['blobUrl']
+                    await reply_msg.edit(content=f'{blob_url}', attachments=[])
+                    return
+            except Exception as e:
+                print(f"Error fetching job response: {e}")
+            
             await asyncio.sleep(6)
 
         await ctx.send('Image generation timed out after 10 attempts.')
