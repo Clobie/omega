@@ -1,6 +1,9 @@
 # Omega
 Omega is a powerful Python Discord bot designed to enhance your server with AI-driven features, tooling, and automation.
 
+In development - see issues here https://github.com/Clobie/omega/issues
+If you would like to contribute, please open a PR
+
 # Installation
 
 ## Postgres install
