@@ -1,5 +1,3 @@
-# cogs/civitai.py
-
 from discord.ext import commands
 import civitai
 import asyncio
@@ -29,13 +27,16 @@ class CivitAI(commands.Cog):
         }
         response = civitai.image.create(input_data)
         token = response['token']
+
         for attempt in range(10):
-            job_response = await civitai.jobs.get(token=token)
+            job_response = await asyncio.to_thread(civitai.jobs.get, token=token)
+
             if job_response['jobs'][0]['result']['available']:
                 blob_url = job_response['jobs'][0]['result']['blobUrl']
                 await reply_msg.edit(content=f'{blob_url}', attachments=[])
                 return
             await asyncio.sleep(6)
+
         await ctx.send('Image generation timed out after 10 attempts.')
         await reply_msg.edit(content='Image generation timed out after 10 attempts.', attachments=[])
 
