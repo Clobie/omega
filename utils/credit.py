@@ -23,7 +23,7 @@ class Credit:
         logger.info(formatted_user_query)
         db.run_script(formatted_user_query)
 
-    def get_credits(self, user_id):
+    def get_user_credits(self, user_id):
         query = (
             "SELECT credits FROM discord_users WHERE user_id = %s;"
         )
@@ -32,6 +32,44 @@ class Credit:
         if not result:
             self.init_user(user_id)
         return result[0][0] if result else 0
+    
+    def get_server_credits(self, user_id):
+        query = (
+            "SELECT credits FROM discord_servers WHERE server_id = %s;"
+        )
+        formatted_query = query % (user_id)
+        result = db.run_script(formatted_query)
+        if not result:
+            self.init_user(user_id)
+        return result[0][0] if result else 0
+
+    def user_spend(self, user_id, amount):
+        from_credits = self.get_user_credits(user_id)
+        if from_credits is None or from_credits < amount:
+            return False
+        query = (
+            "UPDATE discord_users "
+            "SET credits = credits - %s "
+            "WHERE user_id = %s "
+            "RETURNING credits;"
+        )
+        formatted_query = query % (amount, user_id)
+        new_credits = db.run_script(formatted_query)
+        return new_credits is not None
+    
+    def server_spend(self, server_id, amount):
+        from_credits = self.get_server_credits(server_id)
+        if from_credits is None or from_credits < amount:
+            return False
+        query = (
+            "UPDATE discord_servers "
+            "SET credits = credits - %s "
+            "WHERE server_id = %s "
+            "RETURNING credits;"
+        )
+        formatted_query = query % (amount, server_id)
+        new_credits = db.run_script(formatted_query)
+        return new_credits is not None
     
     def get_leaderboard(self, total=None):
         if total is None:
@@ -48,8 +86,8 @@ class Credit:
     def give_credits(self, user_from, user_to, amount):
         if amount <= 0:
             return False
-        from_credits = self.get_credits(user_from)
-        to_credits = self.get_credits(user_to)
+        from_credits = self.get_user_credits(user_from)
+        to_credits = self.get_user_credits(user_to)
 
         if from_credits is None or to_credits is None:
             return False
@@ -80,7 +118,7 @@ class Credit:
     def gift_credits(self, user_to, amount):
         if amount <= 0:
             return False
-        to_credits = self.get_credits(user_to)
+        to_credits = self.get_user_credits(user_to)
         if to_credits is None:
             return False
         query = (
@@ -96,7 +134,7 @@ class Credit:
     def take_credits(self, user_from, amount):
         if amount <= 0:
             return False
-        from_credits = self.get_credits(user_from)
+        from_credits = self.get_user_credits(user_from)
         if from_credits is None or from_credits < amount:
             return False
         query = (
