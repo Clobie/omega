@@ -27,7 +27,7 @@ class Credits(commands.Cog):
         See how many credits you have or another user has
         """
         user_id = user.id if user else ctx.author.id
-        credits = omega.credit.get_credits(user_id)
+        credits = omega.credit.get_user_credits(user_id)
         user_name = user.name if user else ctx.author.name
         await ctx.send(f"{user_name} has {credits} credits.")
 
@@ -41,7 +41,7 @@ class Credits(commands.Cog):
             return
         user_from_id = ctx.author.id
         user_to_id = member.id
-        if omega.credit.give_credits(user_from_id, user_to_id, amount):
+        if omega.credit.give_user_credits(user_from_id, user_to_id, amount):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
         else:
             await ctx.send("You don't have enough credits.")
@@ -54,7 +54,7 @@ class Credits(commands.Cog):
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to give.")
             return
-        if omega.credit.gift_credits(member.id, amount):
+        if omega.credit.gift_user_credits(member.id, amount):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
     
     @commands.command(name='take')
@@ -65,7 +65,7 @@ class Credits(commands.Cog):
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to take.")
             return
-        if omega.credit.take_credits(member.id, amount):
+        if omega.credit.take_user_credits(member.id, amount):
             await ctx.send(f"You've taken {amount} credits from {member.mention}.")
         else:
             await ctx.send(f"Failed to take credits from {member.mention}. They may not have enough credits.")
