@@ -95,7 +95,9 @@ class AI:
         VALUES (%s, %s, %s, %s)
         """
         formatted_query = script % (user_id, tokens, cost, usage_type)
+        logger.info("asdf1")
         db.run_script(formatted_query)
+        logger.info("asdf2")
 
 
 ai = AI()
