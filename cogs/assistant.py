@@ -199,12 +199,12 @@ class Assistant(commands.Cog):
     
     @commands.command(name="usage")
     async def usage(self, context, user: discord.User = None):
-        user_id = user.id if user else context.author.id
+        userid = user.id if user else context.author.id
         user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(user_id)
 
         total_cost = completion_cost + dalle3_cost  # Calculate total cost
 
-        if user_id == user.id:
+        if userid == user_id:
             message = (
                 f"🔍 **Usage Information** for <@{user_id}>:\n"
                 f"📊 **Total Tokens Used:** {tokens}\n"
