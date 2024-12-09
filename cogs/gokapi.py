@@ -11,7 +11,7 @@ class Gokapi(commands.Cog):
 
     @commands.command(name='files')
     async def list_files(self, ctx):
-        api_url = "http://files.clobie.net/api/files/list"
+        api_url = "https://files.clobie.net/api/files/list"
         headers = {
             "accept": "application/json",
             "apikey": f"{omega.cfg.GOKAPI_API_KEY}"
