@@ -39,17 +39,23 @@ class Credit:
         result = db.run_script(formatted_query)
         if not result:
             return self.init_user(user_id)
-        return round(result[0][0], 1) if result else 0.0
+        
+        credit_value = round(result[0][0], 2)
+        if credit_value.is_integer():
+            return int(credit_value)
+        return credit_value
     
-    def get_server_credits(self, user_id):
+    def get_server_credits(self, server_id):
         query = (
             "SELECT credits FROM discord_servers WHERE server_id = %s;"
         )
-        formatted_query = query % (user_id)
+        formatted_query = query % (server_id)
         result = db.run_script(formatted_query)
         if not result:
-            self.init_user(user_id)
-        return result[0][0] if result else 0
+            self.init_user(server_id)
+            return 0
+        credit_value = result[0][0]
+        return int(round(credit_value, 2)) if round(credit_value, 2) == round(credit_value) else round(credit_value, 2)
 
     def user_spend(self, user_id, amount):
         from_credits = self.get_user_credits(user_id)
@@ -88,7 +94,10 @@ class Credit:
             f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT {total};"
         )
         result = db.run_script(query)
-        leaderboard_str = "\n".join([f"<@{user_id}>: {credits} credits" for user_id, credits in result])
+        leaderboard_str = "\n".join([
+            f"<@{user_id}>: {int(round(credits, 2)) if round(credits, 2) == round(credits) else round(credits, 2)} credits" 
+            for user_id, credits in result
+        ])
         return leaderboard_str
     
     def give_user_credits(self, user_from, user_to, amount):
