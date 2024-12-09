@@ -31,8 +31,12 @@ class Gokapi(commands.Cog):
                 )
 
             await ctx.send(embed=embed)
+        elif response.status_code == 400:
+            await ctx.send("Invalid input.")
+        elif response.status_code == 401:
+            await ctx.send("Invalid API key provided or not logged in as admin.")
         else:
-            await ctx.send("Failed to retrieve the file list.")
+            await ctx.send(f"Failed to retrieve the file list. {response.status_code}")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Gokapi(bot))
