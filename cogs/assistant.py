@@ -211,7 +211,7 @@ class Assistant(commands.Cog):
             )
             await context.send(message)
         else:
-            await context.send("👥 No usage data found for you.")
+            await context.send("👥 No usage data found for <@{user_id}>.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
