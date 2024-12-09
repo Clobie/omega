@@ -12,12 +12,6 @@ class Credits(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         pass
-    
-    @commands.Cog.listener()
-    async def on_message(self, ctx):
-        credits = omega.credit.gift_user_credits(ctx.author.id, 0.1)
-        if credits % 100 == 0:
-            await ctx.send(f"{ctx.author.mention}, you now have {credits} credits!")
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
