@@ -7,6 +7,7 @@ from utils.common import common
 from utils.config import cfg
 from utils.log import logger
 from utils.credit import credit
+from utils.database import db
 
 class AI:
     def __init__(self):
@@ -94,7 +95,7 @@ class AI:
         VALUES (%s, %s, %s, %s)
         """
         formatted_query = script % (user_id, tokens, cost, usage_type)
-        self.db.run_script(formatted_query)
+        db.run_script(formatted_query)
 
 
 ai = AI()
