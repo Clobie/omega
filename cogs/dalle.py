@@ -30,6 +30,7 @@ class Dalle(commands.Cog):
                     omega.ai.update_cost_static(0.04)
                     credits = omega.credit.convert_cost_to_credits(0.04)
                     omega.credit.user_spend(ctx.author.id, credits)
+                    omega.ai.log_usage(ctx.author.id, 0, 0.04, 'dalle3')
                     await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
 

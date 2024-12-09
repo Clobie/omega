@@ -97,6 +97,8 @@ class Assistant(commands.Cog):
             
             omega.credit.user_spend(message.author.id, credits)
 
+            omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
+
             if usedagif:
                 await ctx.send(content=result)
                 return

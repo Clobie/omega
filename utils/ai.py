@@ -73,6 +73,7 @@ class AI:
         cost_estimate = round(cost_estimate, 6)
         self.total_cost += cost_estimate
         self.save_cost_to_file()
+
         return total_tokens, cost_estimate, credit.convert_cost_to_credits(cost_estimate)
     
     def update_cost_static(self, cost):
@@ -86,5 +87,12 @@ class AI:
     
     def get_total_cost(self):
         return round(self.total_cost, 6)
+
+    def log_usage(self, user_id, tokens, cost, usage_type):
+        script = f"""
+        INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type)
+        VALUES ({user_id}, {tokens}, '{cost}', {usage_type})
+        """
+        self.db.run_script(script)
 
 ai = AI()
