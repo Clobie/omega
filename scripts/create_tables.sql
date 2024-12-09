@@ -21,14 +21,6 @@ CREATE TABLE user_server_activity (
 
 CREATE TABLE openapi_usage (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES discord_users(user_id),
-    tokens INT,
-    cost_value MONEY,
-    activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE openapi_usage (
-    id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     tokens INT NOT NULL,
     cost_value NUMERIC(18, 8) NOT NULL,
