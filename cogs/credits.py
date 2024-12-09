@@ -15,16 +15,13 @@ class Credits(commands.Cog):
     
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
-        """
-        See the top list for credits
-        """
         toplist = omega.credit.get_leaderboard(total)
         await ctx.send(toplist)
 
     @commands.command(name='credits')
     async def credits(self, ctx, user: discord.User = None):
         """
-        See how many credits you have or another user has
+        See how many credits you or another user has
         """
         user_id = user.id if user else ctx.author.id
         credits = omega.credit.get_user_credits(user_id)
@@ -58,17 +55,17 @@ class Credits(commands.Cog):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
     
     @commands.command(name='take')
-    async def take(self, ctx, amount: int, member: discord.Member):
+    async def take(self, ctx, amount: int, user: discord.Member):
         if not ctx.author.id == int(omega.cfg.BOT_OWNER):
             await ctx.send("You do not have the required permissions for that command.")
             return
         if amount <= 0:
             await ctx.send("Specify a valid amount of credits to take.")
             return
-        if omega.credit.take_user_credits(member.id, amount):
-            await ctx.send(f"You've taken {amount} credits from {member.mention}.")
+        if omega.credit.take_user_credits(user.id, amount):
+            await ctx.send(f"You've taken {amount} credits from {user.mention}.")
         else:
-            await ctx.send(f"Failed to take credits from {member.mention}. They may not have enough credits.")
+            await ctx.send(f"Failed to take credits from {user.mention}. They may not have enough credits.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Credits(bot))

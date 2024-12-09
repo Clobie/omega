@@ -22,6 +22,7 @@ class Credit:
         formatted_user_query = query_user % (user_id, init_credits)
         logger.info(formatted_user_query)
         db.run_script(formatted_user_query)
+        return init_credits
 
     def convert_cost_to_credits(self, cost):
         if cost < 0:
@@ -37,7 +38,7 @@ class Credit:
         formatted_query = query % (user_id)
         result = db.run_script(formatted_query)
         if not result:
-            self.init_user(user_id)
+            return self.init_user(user_id)
         return result[0][0] if result else 0
     
     def get_server_credits(self, user_id):
