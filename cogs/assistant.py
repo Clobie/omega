@@ -200,7 +200,7 @@ class Assistant(commands.Cog):
     @commands.command(name="usage")
     async def usage(self, context, user: discord.User = None):
         userid = user.id if user else context.author.id
-        user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(user_id)
+        user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(userid)
 
         total_cost = completion_cost + dalle3_cost  # Calculate total cost
 
