@@ -87,12 +87,14 @@ class AI:
     
     def get_total_cost(self):
         return round(self.total_cost, 6)
-
+    
     def log_usage(self, user_id, tokens, cost, usage_type):
-        script = f"""
+        script = """
         INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type)
-        VALUES ({user_id}, {tokens}, '{cost}', {usage_type})
+        VALUES (%s, %s, %s, %s)
         """
-        self.db.run_script(script)
+        formatted_query = script % (user_id, tokens, cost, usage_type)
+        self.db.run_script(formatted_query)
+
 
 ai = AI()
