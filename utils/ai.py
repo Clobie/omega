@@ -98,7 +98,7 @@ class AI:
         db.run_script(formatted_query)
     
     def get_usage(self, user_id):
-        script = (
+        script1 = (
             "SELECT user_id, "
             "SUM(cost_value) AS total_cost, "
             "SUM(tokens) AS total_tokens "
@@ -107,10 +107,29 @@ class AI:
             "AND user_id = '%s' "
             "GROUP BY user_id; "
         )
-        formatted_query = script % (user_id)
-        result = db.run_script(formatted_query)
-        if result:
-            return result[0][0], result[0][1], result[0][2]
-        return None, None, None
+        script2 = (
+            "SELECT user_id, "
+            "SUM(cost_value) AS total_cost, "
+            "SUM(tokens) AS total_tokens "
+            "FROM openapi_usage "
+            "WHERE usage_type = 'dalle3' "
+            "AND user_id = '%s' "
+            "GROUP BY user_id; "
+        )
+        formatted_query1 = script1 % (user_id)
+        formatted_query2 = script2 % (user_id)  # Corrected this line
+        try:
+            result1 = db.run_script(formatted_query1)
+            result2 = db.run_script(formatted_query2)
+            if result1:
+                completion_user_id = result1[0][0] or None
+                completion_cost = result1[0][1] or 0
+                completion_tokens = result1[0][2] or 0
+            else:
+                completion_user_id, completion_cost, completion_tokens = user_id, 0, 0
+            dalle3_cost = result2[0][1] if result2 else 0
+            return completion_user_id, completion_tokens, completion_cost, dalle3_cost
+        except Exception as e:
+            return user_id, 0, 0, 0
 
 ai = AI()
