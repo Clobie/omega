@@ -198,10 +198,11 @@ class Assistant(commands.Cog):
             await ctx.send("You don't have the necessary permissions to use this command.")
     
     @commands.command(name="usage")
-    async def usage(self, context):
-        user_id, cost, tokens = omega.ai.get_usage(context.author.id)
+    async def usage(self, context, user: discord.User = None):
+        user = user.id if user else context.author.id
+        user_id, cost, tokens = omega.ai.get_usage(user)
         
-        if user_id:
+        if user_id == user:
             message = (
                 f"🔍 **Usage Information** for <@{user_id}>:\n"
                 f"📊 **Total Tokens Used:** {tokens}\n"
