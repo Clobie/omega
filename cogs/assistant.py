@@ -199,19 +199,23 @@ class Assistant(commands.Cog):
     
     @commands.command(name="usage")
     async def usage(self, context, user: discord.User = None):
-        user = user.id if user else context.author.id
-        user_id, cost, tokens = omega.ai.get_usage(user)
-        
-        if user_id == user:
+        user_id = user.id if user else context.author.id
+        user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(user_id)
+
+        total_cost = completion_cost + dalle3_cost  # Calculate total cost
+
+        if user_id == user.id:
             message = (
                 f"🔍 **Usage Information** for <@{user_id}>:\n"
                 f"📊 **Total Tokens Used:** {tokens}\n"
-                f"💰 **Total Cost:** ${cost:.5f}\n"
+                f"💰 **Completion Cost:** ${completion_cost:.5f}\n"
+                f"📷 **DALL·E 3 Cost:** ${dalle3_cost:.5f}\n"
+                f"💸 **Total Cost:** ${total_cost:.5f}\n"  # Display total cost
                 f"Thank you for using our service! If you have more questions, feel free to ask."
             )
             await context.send(message)
         else:
-            await context.send("👥 No usage data found for <@{user_id}>.")
+            await context.send(f"👥 No usage data found for <@{user_id}>.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
