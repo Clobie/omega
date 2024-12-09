@@ -39,7 +39,7 @@ class Credit:
         result = db.run_script(formatted_query)
         if not result:
             return self.init_user(user_id)
-        return result[0][0] if result else 0
+        return round(result[0][0], 1) if result else 0.0
     
     def get_server_credits(self, user_id):
         query = (
