@@ -206,7 +206,7 @@ class Assistant(commands.Cog):
             message = (
                 f"🔍 **Usage Information** for <@{user_id}>:\n"
                 f"📊 **Total Tokens Used:** {tokens}\n"
-                f"💰 **Total Cost:** ${cost:.2f}\n"
+                f"💰 **Total Cost:** ${cost:.5f}\n"
                 f"Thank you for using our service! If you have more questions, feel free to ask."
             )
             await context.send(message)
