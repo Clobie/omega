@@ -152,8 +152,10 @@ class Credit:
         if amount <= 0:
             return False
         from_credits = self.get_user_credits(user_from)
-        if from_credits is None or from_credits < amount:
+        if from_credits is None:
             return False
+        if from_credits < amount:
+            amount = from_credits
         query = (
             "UPDATE discord_users "
             "SET credits = credits - %s "
