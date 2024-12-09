@@ -27,8 +27,8 @@ class Gokapi(commands.Cog):
             for file in files:
                 file_link = f"[{file['Name']}]({file['UrlDownload']})"
                 embed.add_field(
-                    name=file_link,
-                    value="Click the link above to download.",
+                    name="",
+                    value=file_link,
                     inline=False
                 )
             await ctx.send(embed=embed)
