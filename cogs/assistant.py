@@ -196,6 +196,21 @@ class Assistant(commands.Cog):
     async def removechannel_error(self, ctx: Context, error: commands.CommandError):
         if isinstance(error, commands.CheckFailure):
             await ctx.send("You don't have the necessary permissions to use this command.")
+    
+    @commands.command(name="usage")
+    async def usage(self, context):
+        user_id, cost, tokens = omega.ai.get_usage(context.author.id)
+        
+        if user_id:
+            message = (
+                f"🔍 **Usage Information** for <@{user_id}>:\n"
+                f"📊 **Total Tokens Used:** {tokens}\n"
+                f"💰 **Total Cost:** ${cost:.2f}\n"
+                f"Thank you for using our service! If you have more questions, feel free to ask."
+            )
+            await context.send(message)
+        else:
+            await context.send("👥 No usage data found for you.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
