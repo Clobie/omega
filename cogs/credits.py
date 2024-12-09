@@ -15,9 +15,9 @@ class Credits(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        credits = omega.credit.gift_user_credits(ctx.author.id, 1)
+        credits = omega.credit.gift_user_credits(ctx.author.id, 0.1)
         if credits % 100 == 0:
-            await ctx.send(ctx.author.mention + " You now have {credits} credits!" )
+            await ctx.send(f"{ctx.author.mention}, you now have {credits} credits!")
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
@@ -35,7 +35,7 @@ class Credits(commands.Cog):
         await ctx.send(f"{user_name} has {credits} credits.")
 
     @commands.command(name='give')
-    async def give(self, ctx, amount: int, member: discord.Member):
+    async def give(self, ctx, amount: float, member: discord.Member):
         """
         Give credits to another user
         """
@@ -50,7 +50,7 @@ class Credits(commands.Cog):
             await ctx.send("You don't have enough credits.")
     
     @commands.command(name='gift')
-    async def gift(self, ctx, amount: int, member: discord.Member):
+    async def gift(self, ctx, amount: float, member: discord.Member):
         if not ctx.author.id == int(omega.cfg.BOT_OWNER):
             await ctx.send("You do not have the required permissions for that command.")
             return
@@ -61,7 +61,7 @@ class Credits(commands.Cog):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
     
     @commands.command(name='take')
-    async def take(self, ctx, amount: int, user: discord.Member):
+    async def take(self, ctx, amount: float, user: discord.Member):
         if not ctx.author.id == int(omega.cfg.BOT_OWNER):
             await ctx.send("You do not have the required permissions for that command.")
             return
