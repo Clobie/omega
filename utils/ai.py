@@ -100,8 +100,8 @@ class AI:
     def get_usage(self, user_id):
         script = (
             "SELECT user_id, "
-            "    SUM(cost_value) AS total_cost, "
-            "    SUM(tokens) AS total_tokens "
+            "SUM(cost_value) AS total_cost, "
+            "SUM(tokens) AS total_tokens "
             "FROM openapi_usage "
             "WHERE usage_type = 'completion' "
             "AND user_id = '%s' "
