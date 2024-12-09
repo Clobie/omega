@@ -95,9 +95,22 @@ class AI:
             "VALUES (%s, %s, %s, %s)"
         )
         formatted_query = script % (user_id, tokens, cost, f"'{usage_type}'")
-        logger.info("asdf1")
         db.run_script(formatted_query)
-        logger.info("asdf2")
-
+    
+    def get_usage(self, user_id):
+        script = (
+            "SELECT user_id,"
+            "    SUM(cost_value) AS total_cost,"
+            "    SUM(tokens) AS total_tokens"
+            "FROM openapi_usage"
+            "WHERE usage_type = 'completion'"
+            "AND user_id = '%s'"
+            "GROUP BY user_id;"
+        )
+        formatted_query = script % (user_id)
+        result = db.run_script(formatted_query)
+        if result:
+            return result[0][0], result[0][1], result[0][2]
+        return None, None, None
 
 ai = AI()
