@@ -14,7 +14,7 @@ class Gokapi(commands.Cog):
         api_url = "http://files.clobie.net/api/files/list"
         headers = {
             "accept": "application/json",
-            "apikey": omega.cfg.GOKAPI_API_KEY
+            "apikey": f"{omega.cfg.GOKAPI_API_KEY}"
         }
 
         response = requests.get(api_url, headers=headers)
