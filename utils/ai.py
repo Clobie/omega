@@ -94,7 +94,7 @@ class AI:
             "INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type)"
             "VALUES (%s, %s, %s, %s)"
         )
-        formatted_query = script % (user_id, tokens, cost, usage_type)
+        formatted_query = script % (user_id, tokens, cost, f"{usage_type}")
         logger.info("asdf1")
         db.run_script(formatted_query)
         logger.info("asdf2")
