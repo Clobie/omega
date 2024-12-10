@@ -84,7 +84,7 @@ class Gokapi(commands.Cog):
 
             # Make the POST request
             gokapi_response = requests.post(
-                f"{self.gokapi_url}/api/files/add", 
+                self.file_save_api_url, 
                 headers=headers, 
                 files=files, 
                 data=data
