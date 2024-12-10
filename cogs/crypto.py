@@ -13,6 +13,9 @@ class CryptoPriceCog(commands.Cog):
 
     @commands.command(name='quote')
     async def get_crypto_quote(self, ctx, ticker: str):
+        """
+        Get the price of crypto
+        """
         ticker = ticker.upper()
         ticker_key = f"{ticker}/USD"
         url = f"{self.base_url_quotes}?symbols={ticker_key}"
