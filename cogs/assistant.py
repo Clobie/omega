@@ -208,9 +208,9 @@ class Assistant(commands.Cog):
             message = (
                 f"🔍 **Usage Information** for <@{user_id}>:\n"
                 f"📊 **Total Tokens Used:** {tokens}\n"
-                f"💰 **Completion Cost:** ${completion_cost:.5f}\n"
-                f"📷 **DALL·E 3 Cost:** ${dalle3_cost:.5f}\n"
-                f"💸 **Total Cost:** ${total_cost:.5f}\n"  # Display total cost
+                f"💰 **Completion Cost:** ${completion_cost:.5f}".rstrip('0') + "\n"
+                f"📷 **DALL·E 3 Cost:** ${dalle3_cost:.5f}".rstrip('0') + "\n"
+                f"💸 **Total Cost:** ${total_cost:.5f}".rstrip('0') + "\n"
                 f"Thank you for using our service! If you have more questions, feel free to ask."
             )
             await context.send(message)
