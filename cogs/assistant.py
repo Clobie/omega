@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Context
 import json
 import time
+import datetime
 from core.omega import omega
 
 class Assistant(commands.Cog):
@@ -203,15 +204,27 @@ class Assistant(commands.Cog):
         user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(userid)
         total_cost = completion_cost + dalle3_cost
         if userid == user_id:
-            embed = discord.Embed(title="🔍 Usage Information", color=0x00FF00)
-            embed.set_author(name=f"<@{user_id}>")
-            embed.add_field(name="📊 Total Tokens Used", value=tokens, inline=False)
-            embed.add_field(name="💰 Completion Cost", value=f"${completion_cost:.5f}".rstrip('0'), inline=False)
-            embed.add_field(name="📷 DALL·E 3 Cost", value=f"${dalle3_cost:.5f}".rstrip('0'), inline=False)
-            embed.add_field(name="💸 Total Cost", value=f"${total_cost:.5f}".rstrip('0'), inline=False)
+            desc=(
+                "> 🪙 Tokens: %s\n"
+                "> 📰 Completions: %s\n"
+                "> 📷 Dalle-3: %s\n"
+                "> 💰 Total Cost:%s",
+            )
+            desc_formatted = desc % (tokens, f"${completion_cost:.5f}".rstrip('0'), f"${dalle3_cost:.5f}".rstrip('0'), f"${total_cost:.5f}".rstrip('0'))
+            embed = discord.Embed(
+                title="Usage Information",
+                description=desc_formatted
+                colour=0x00b0f4,
+                timestamp=datetime.now()
+            )
+            embed.set_author(name="Info",url="https://github.com/Clobie/omega",icon_url="https://github.com/Clobie/omega/blob/main/assets/omega.png?raw=true")
+            embed.set_thumbnail(url="https://github.com/Clobie/omega/blob/main/assets/omega.png?raw=true")
+            embed.set_footer(text="Omega",icon_url="https://github.com/Clobie/omega/blob/main/assets/omega.png?raw=true")
             await context.send(embed=embed)
         else:
             await context.send(f"👥 No usage data found for <@{user_id}>.")
+
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
