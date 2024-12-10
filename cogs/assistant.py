@@ -110,7 +110,7 @@ class Assistant(commands.Cog):
             # Build full message
             response_with_footer = result + footer
 
-            await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
+            #await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
 
             # Reply with file/embed/text based on response length (because of discord limits)
             if len(response_with_footer) > 4000:
@@ -200,6 +200,9 @@ class Assistant(commands.Cog):
     
     @commands.command(name="usage")
     async def usage(self, context, user: discord.User = None):
+        """
+        Display usage and costs
+        """
         userid = user.id if user else context.author.id
         user_id, tokens, completion_cost, dalle3_cost = omega.ai.get_usage(userid)
         total_cost = completion_cost + dalle3_cost
