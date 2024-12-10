@@ -3,6 +3,7 @@
 import discord
 from discord.ext import commands
 import requests
+import mimetypes
 from core.omega import omega
 
 class Gokapi(commands.Cog):
@@ -68,7 +69,12 @@ class Gokapi(commands.Cog):
                 "expiryDays": expiry_days,
                 "password": password
             }
-            response = requests.post(self.file_save_api_url, headers=headers, data=file_content, params=data)
+            file_type, _ = mimetypes.guess_type(file_attachment.filename)
+            files = {
+                "file": (file_attachment.filename, file_content, file_type or "application/octet-stream")
+            }
+
+            response = requests.post(self.file_save_api_url, headers=headers, files=files, data=data)
             if response.status_code == 201:
                 data = response.json()
                 if data["Result"] == "OK":
