@@ -73,8 +73,8 @@ class Gokapi(commands.Cog):
                 "file": (file_name, response, "application/octet-stream"),
             }
             data = {
-                "allowedDownloads": 1,
-                "expiryDays": 1,
+                "allowedDownloads": 0,
+                "expiryDays": 0,
                 "password": "",  # Set a password here if needed
             }
             headers = {
