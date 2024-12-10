@@ -93,7 +93,7 @@ class Gokapi(commands.Cog):
             if gokapi_response.status_code == 200:
                 result = gokapi_response.json()
                 download_url = result["FileInfo"]["UrlDownload"]
-                await ctx.send(f"File saved successfully! Download it here: {download_url}")
+                await ctx.send(f"{download_url}")
             else:
                 await ctx.send(f"Failed to upload the file. Error: {gokapi_response.text}")
         except Exception as e:
