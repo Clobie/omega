@@ -77,7 +77,7 @@ class Gokapi(commands.Cog):
                 else:
                     await ctx.send("Failed to retrieve download URL.")
             else:
-                await ctx.send("Failed to upload file")
+                await ctx.send(f"Failed to upload file [{response.status_code}]")
             
 async def setup(bot: commands.Bot):
     await bot.add_cog(Gokapi(bot))
