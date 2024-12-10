@@ -73,6 +73,7 @@ class Gokapi(commands.Cog):
             files = {
                 "file": (file_attachment.filename, file_content, file_type or "application/octet-stream")
             }
+            omega.logger.info(files)
 
             response = requests.post(self.file_save_api_url, headers=headers, files=files, data=data)
             if response.status_code == 201:
