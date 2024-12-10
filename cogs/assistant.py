@@ -208,7 +208,7 @@ class Assistant(commands.Cog):
                 "> 🪙 Tokens: %s\n"
                 "> 📰 Completions: %s\n"
                 "> 📷 Dalle-3: %s\n"
-                "> 💰 Total Cost:%s",
+                "> 💰 Total Cost: %s\n\n"
             )
             desc_formatted = desc % (tokens, f"${completion_cost:.5f}".rstrip('0'), f"${dalle3_cost:.5f}".rstrip('0'), f"${total_cost:.5f}".rstrip('0'))
             embed = discord.Embed(
