@@ -11,6 +11,7 @@ from utils.credit import credit
 from utils.role import role
 from utils.database import db
 from utils.ai import ai
+from utils.embed import embed
 
 class Omega:
     def __init__(self):
@@ -24,6 +25,7 @@ class Omega:
         self.role = role
         self.db = db
         self.ai = ai
+        self.embed = embed
 
     async def run(self):
         logger.info('Starting bot...')
