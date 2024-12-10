@@ -16,7 +16,7 @@ class Help(commands.Cog):
         prefix = context.prefix
         if not isinstance(prefix, str):
             prefix = prefix[0]
-        embed = discord.Embed(title="Help", description="List of available commands and functionality:\n\n", color=discord.Color(int(omega.cfg.PRIMARYCOLOR, 16)))
+        embed = discord.Embed(title="Help", description="List of available commands and functionality:\n\n", color=omega.cfg.PRIMARYCOLOR)
         help_text_lines = []
         for cog_name, cog_obj in self.bot.cogs.items():
             cogname = cog_name.replace("cog", "")

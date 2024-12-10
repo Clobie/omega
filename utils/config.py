@@ -2,6 +2,7 @@
 
 import configparser
 import os
+import discord
 from utils.log import logger
 
 class Config:
@@ -24,6 +25,8 @@ class Config:
                             logger.info(f"Environment variable {key.upper()} found.")
                             setattr(self, key.upper(), env_value)
                     else:
+                        if value.startswith('0x') and len(value) == 8:
+                            value = discord.Color(int(value, 16))
                         setattr(self, key.upper(), value)
                 except Exception as e:
                     logger.error(f"Error setting attribute {key.upper()}: {e}")

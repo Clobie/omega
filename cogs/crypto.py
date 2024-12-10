@@ -3,6 +3,7 @@
 import discord
 from discord.ext import commands
 import requests
+from core.omega import omega
 
 class CryptoPriceCog(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +23,7 @@ class CryptoPriceCog(commands.Cog):
             trade_info = data.get('quotes', {}).get(ticker_key, None)
             if trade_info:
                 spread = trade_info['ap'] - trade_info['bp']
-                embed = discord.Embed(title=f"{ticker} Latest Information", color=0x00ff00)
+                embed = discord.Embed(title=f"{ticker} Latest Information", color=omega.cfg.PRIMARYCOLOR)
                 embed.add_field(name="Bid Price", value=f"${trade_info['bp']}", inline=True)
                 #embed.add_field(name="Bid Size", value=f"{trade_info['bs']}", inline=False)
                 embed.add_field(name="Ask Price", value=f"${trade_info['ap']}", inline=True)

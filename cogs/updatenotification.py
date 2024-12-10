@@ -20,7 +20,7 @@ class UpdateNotification(commands.Cog):
                 omega.logger.info(f'Last commit ID: {last_commit_id}')
                 channel = self.bot.get_channel(int(omega.cfg.UPDATE_CHANNEL))
                 if channel:
-                    embed = discord.Embed(title="Update Notification", description="", color=discord.Color(int(omega.cfg.PRIMARYCOLOR, 16)))
+                    embed = discord.Embed(title="Update Notification", description="", color=omega.cfg.PRIMARYCOLOR)
                     embed.add_field(name="Commit ID", value=last_commit_id, inline=False)
                     embed.add_field(name="Changes", value=f"[View changes here](https://github.com/Clobie/omega/commit/{last_commit_id})", inline=False)
                     await channel.send(embed=embed)

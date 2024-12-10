@@ -22,12 +22,12 @@ class Embed:
         return embed
 
     def create_embed_error(self, title, description):
-        return self.create_embed_generic(f"Error: {title}", description, discord.Color(int(cfg.ERRORCOLOR, 16)))
+        return self.create_embed_generic(f"Error: {title}", description, cfg.ERRORCOLOR)
     
     def create_embed_info(self, title, description):
-        return self.create_embed_generic(f"Info: {title}", description, discord.Color(int(cfg.INFOCOLOR, 16)))
+        return self.create_embed_generic(f"Info: {title}", description, cfg.INFOCOLOR)
 
     def create_embed(self, title, description):
-        return self.create_embed_generic(title, description, discord.Color(int(cfg.PRIMARYCOLOR, 16)))
+        return self.create_embed_generic(title, description, cfg.PRIMARYCOLOR)
     
 embed = Embed()

@@ -214,7 +214,7 @@ class Assistant(commands.Cog):
             embed = discord.Embed(
                 title="Usage Information",
                 description=desc_formatted,
-                colour=0x00b0f4,
+                colour=omega.cfg.PRIMARYCOLOR,
                 timestamp=datetime.now()
             )
             embed.set_author(name="Info",url="https://github.com/Clobie/omega",icon_url="https://github.com/Clobie/omega/blob/main/assets/omega.png?raw=true")

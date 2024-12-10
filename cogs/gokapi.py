@@ -23,7 +23,7 @@ class Gokapi(commands.Cog):
             embed = discord.Embed(
                 title="📂 File List",
                 description="Here are the available files:",
-                color=discord.Color(int(omega.cfg.PRIMARYCOLOR, 16))
+                color=omega.cfg.PRIMARYCOLOR
             )
             for file in files:
                 file_link = f"[{file['Name']}]({file['UrlDownload']})"
