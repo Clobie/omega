@@ -71,7 +71,7 @@ class Assistant(commands.Cog):
         ctx = await self.bot.get_context(message)
         async with ctx.typing():
 
-            if omega.credit.get_user_credits(message.author.id) == 0:
+            if int(omega.credit.get_user_credits(message.author.id)) == 0:
                 await ctx.send(f"You don't have enough credits for that :(")
                 return
 
