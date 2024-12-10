@@ -19,7 +19,7 @@ CREATE TABLE user_server_activity (
     activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE openapi_usage (
+CREATE TABLE openai_usage (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     tokens INT NOT NULL,
