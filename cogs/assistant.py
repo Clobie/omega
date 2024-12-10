@@ -5,7 +5,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Context
 import json
 import time
-import datetime
+from datetime import datetime
 from core.omega import omega
 
 class Assistant(commands.Cog):
