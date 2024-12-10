@@ -15,7 +15,7 @@ class Dalle(commands.Cog):
 
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
-        if omega.credit.get_user_credits(ctx.author.id) < 4:
+        if int(omega.credit.get_user_credits(ctx.author.id)) < 4:
             await ctx.send(f"You don't have enough credits for that :(")
             return
         reply_msg = await ctx.send(self.thinking_emoji)
