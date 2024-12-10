@@ -204,10 +204,10 @@ class Assistant(commands.Cog):
         total_cost = completion_cost + dalle3_cost
         if userid == user_id:
             embed = discord.Embed(title="🔍 Usage Information", color=0x00FF00)
-            embed.set_author(name=str(user_id))
+            embed.set_author(name=f"<@{user_id}>")
             embed.add_field(name="📊 Total Tokens Used", value=tokens, inline=False)
-            embed.add_field(name="💰 Completion Cost", value=f"${completion_cost:.5f}".rstrip('0'), inline=True)
-            embed.add_field(name="📷 DALL·E 3 Cost", value=f"${dalle3_cost:.5f}".rstrip('0'), inline=True)
+            embed.add_field(name="💰 Completion Cost", value=f"${completion_cost:.5f}".rstrip('0'), inline=False)
+            embed.add_field(name="📷 DALL·E 3 Cost", value=f"${dalle3_cost:.5f}".rstrip('0'), inline=False)
             embed.add_field(name="💸 Total Cost", value=f"${total_cost:.5f}".rstrip('0'), inline=False)
             await context.send(embed=embed)
         else:
