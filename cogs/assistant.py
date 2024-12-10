@@ -119,13 +119,12 @@ class Assistant(commands.Cog):
                 file = discord.File('file.txt')
                 await ctx.send(attachments=[file])
                 omega.logger.debug("Response message exceeded 4000 characters, sent as a file.")
-            #elif len(response_with_footer) > 2000:
-            else:
+            elif len(response_with_footer) > 2000:
                 embed = omega.embed.create_embed("", response_with_footer)
                 await ctx.send(embed=embed)
                 omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
-            #else:
-            #    await ctx.send(content=response_with_footer)
+            else:
+                await ctx.send(content=response_with_footer)
 
 
     @commands.Cog.listener()
