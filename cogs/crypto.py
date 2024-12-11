@@ -83,6 +83,7 @@ class CryptoPriceCog(commands.Cog):
         Add a crypto api id to tracker
         """
         exists = omega.cg.api_id_exists(api_id)
+        omega.logger.debug(f"Exists: {exists}")
         if exists:
             if omega.cg.set_coin_tracking(api_id, 'true'):
                 embed = omega.embed.create_embed(f"Added {api_id} to tracker", "")
@@ -95,6 +96,7 @@ class CryptoPriceCog(commands.Cog):
         Remove a crypto api id from the tracker
         """
         exists = omega.cg.api_id_exists(api_id)
+        omega.logger.debug(f"Exists: {exists}")
         if exists:
             if omega.cg.set_coin_tracking(api_id, 'false'):
                 embed = omega.embed.create_embed(f"Removed {api_id} from tracker", "")
