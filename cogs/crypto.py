@@ -14,31 +14,16 @@ class CryptoPriceCog(commands.Cog):
         self.headers = {"accept": "application/json"}
         self.update_recent_data.start()
 
-    @tasks.loop(seconds=3600)
+    @tasks.loop(seconds=300)
     async def update_recent_data(self):
         coin_api_ids = omega.cg.get_tracked_coin_api_ids()
-        omega.logger.debug(f"")
-        omega.logger.debug(f"1h upd ids {coin_api_ids}")
-        omega.logger.debug(f"")
-
         api_ids = [item[0] for item in coin_api_ids]
-        omega.logger.debug(f"1h upd ids2 {api_ids}")
-        omega.logger.debug(f"")
-
         current_time = int(time.time())
-        lookback_time = current_time - 3600
-        omega.logger.debug(f"t2t {current_time} {lookback_time}")
-        omega.logger.debug(f"")
-
+        lookback_time = current_time - 300
         for item in api_ids:
-            omega.logger.debug(f"")
             rows_affected = omega.cg.query_and_insert_historical_data(item, lookback_time, current_time)
-            omega.logger.debug(f"ra {item} {lookback_time} {current_time}")
-            omega.logger.debug(f"")
             channel = self.bot.get_channel(1256848459558817812)
-            await channel.send(f"debug: {rows_affected} rows affected")
-
-
+            await channel.send(f"Pulled {rows_affected} entries for {item}")
 
     @update_recent_data.before_loop
     async def before_update_date(self):
