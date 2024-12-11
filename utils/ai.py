@@ -91,7 +91,7 @@ class AI:
     
     def log_usage(self, user_id, tokens, cost, usage_type):
         query = (
-            "INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type) VALUES (%s, %s, %s, \"%s\")"
+            "INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type) VALUES (%s, %s, %s, %s)"
         )
         db.run_script(query, (user_id, tokens, cost, usage_type,))
     
