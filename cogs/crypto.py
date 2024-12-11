@@ -73,23 +73,12 @@ class CryptoPriceCog(commands.Cog):
         """
         results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
-        omega.logger.debug("1")
-        omega.logger.debug(results)
-        omega.logger.debug(results[0])
         quotes = ",".join(item[0] for item in results)
-        omega.logger.debug("2")
-        omega.logger.debug(results[0])
-        omega.logger.debug(results)
+        omega.logger.debug(f"Quotes: {quotes}")
         price_results = omega.cg.get_price(quotes)
-        omega.logger.debug("3")
-        omega.logger.debug(price_results)
         price_json = price_results.json()
-        omega.logger.debug("4")
-        omega.logger.debug(price_json)
-
+        omega.logger.debug(f"JSON: {price_json}")
         for item in price_json:
-            omega.logger.debug(f"loopy {item}")
-            omega.logger.debug(f"loopy {item[0]}")
             price = price_json[item]['usd']
             if price >= 1:
                 price = "${:,.2f}".format(price)
@@ -99,7 +88,7 @@ class CryptoPriceCog(commands.Cog):
             change_24h = "{:+.2f}%".format(change_24h_value)
             embed.add_field(
                 name="", 
-                value=f"> **{item}**\n> Price: **{price}**\n```diff\n{change_24h}```\n\n",
+                value=f"> **{item}**\n> Price: **{price}**\n24h Change:```diff\n{change_24h}```\n\n",
                 inline=False
             )
         await ctx.send(embed=embed)
