@@ -40,16 +40,20 @@ class CryptoPriceCog(commands.Cog):
     
     @commands.command(name="search")
     async def search_crypto_id(self, ctx, symbol: str):
-        results = omega.cg.get_table_from_name(symbol)
+        results = omega.cg.get_table_from_api_id(symbol)
         if not results:
             results = omega.cg.get_table_from_symbol(symbol)
+        if not results:
+            results = omega.cg.get_table_from_name(symbol)
         if not results:
             await ctx.send("No results")
             return
         embed = omega.embed.create_embed("Search results", f"Search: {symbol}\n\n")
+        desc = ""
         for item in results:
             api_id, sym, name = item
-            embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Symbol: {sym}\n> Name: {name}\n\n", inline=False)
+            desc += f"> API ID: **{api_id}**\n> Symbol: {sym}\n> Name: {name}\n\n"
+        embed.add_field(name="", value=desc, inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="tracked")
