@@ -29,5 +29,16 @@ class Common:
     def get_unix_timestamp(date_str, date_format="%Y-%m-%d %H:%M:%S"):
         dt = datetime.strptime(date_str, date_format)
         return int(dt.timestamp())
+
+    def get_unix_interval(timestamps):
+        differences = [timestamps[i] - timestamps[i - 1] for i in range(1, len(timestamps))]
+        min_diff = min(differences)
+        min_diff_sec = min_diff / 1000
+        if min_diff_sec <= 300:
+            return '5m'
+        elif min_diff_sec <= 3600:
+            return 'hourly'
+        else:
+            return 'daily'
     
 common = Common()

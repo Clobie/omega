@@ -35,3 +35,14 @@ CREATE TABLE coingecko_list (
     coin_name TEXT UNIQUE,
     coin_tracked BOOLEAN
 );
+
+CREATE TABLE coingecko_historical_data (
+    pkid SERIAL PRIMARY KEY,
+    api_id TEXT,
+    timestamp BIGINT,
+    price MONEY,
+    market_cap MONEY,
+    total_volume MONEY,
+    interval TEXT,
+    UNIQUE(api_id, timestamp)
+);

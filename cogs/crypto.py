@@ -1,9 +1,10 @@
 # cogs/crypto.py
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import requests
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from core.omega import omega
 
 class CryptoPriceCog(commands.Cog):
@@ -11,6 +12,25 @@ class CryptoPriceCog(commands.Cog):
         self.bot = bot
         self.base_url_quotes = "https://data.alpaca.markets/v1beta3/crypto/us/latest/quotes"
         self.headers = {"accept": "application/json"}
+
+    @tasks.loop(seconds=3600)
+    async def update_recent_data(self):
+        coin_api_ids = omega.cg.get_tracked_coin_api_ids()
+        api_ids = [item[0] for item in coin_api_ids]
+
+        current_time = int(time.time())
+        back_10m = current_time - 600
+
+        for item in api_ids:
+            rows_affected = omega.cg.query_and_insert_historical_data(item, back_10m, current_time)
+            channel = self.bot.get_channel(1256848459558817812)
+            await channel.send(f"debug: {rows_affected} rows affected")
+
+
+
+    @update_recent_data.before_loop
+    async def before_update_date(self):
+        await self.bot.wait_until_ready()
 
     @commands.command(name='quote')
     async def get_crypto_quote(self, ctx, api_id: str):
