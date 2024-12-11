@@ -40,7 +40,7 @@ class CryptoPriceCog(commands.Cog):
         change_24h_value = results_json[api_id]['usd_24h_change']
         change_24h = "{:+.2f}%".format(change_24h_value)
         embed = omega.embed.create_embed(f"Price quote for {api_id}", "")
-        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: **{price}**\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: **{change_24h}**", inline=False)
+        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: **{price}**\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n```diff\n{change_24h}```", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
