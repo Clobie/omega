@@ -78,7 +78,7 @@ class CryptoPriceCog(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="track")
-    async def tracked_coins(self, ctx, api_id):
+    async def track_coin(self, ctx, api_id):
         """
         Add a crypto api id to tracker
         """
@@ -90,7 +90,7 @@ class CryptoPriceCog(commands.Cog):
                 return
     
     @commands.command(name="untrack")
-    async def tracked_coins(self, ctx, api_id):
+    async def untrack_coin(self, ctx, api_id):
         """
         Remove a crypto api id from the tracker
         """
