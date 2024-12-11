@@ -35,7 +35,7 @@ class CryptoPriceCog(commands.Cog):
         if price >= 1:
             price = "${:,.2f}".format(price)
         else:
-            price = "${}".format(price)
+            price = "${:,.10f}".format(price)
         market_cap = "${:,.2f}".format(results_json[app_id]['usd_market_cap'])
         vol_24h = "${:,.2f}".format(results_json[app_id]['usd_24h_vol'])
         change_24h_value = results_json[app_id]['usd_24h_change']
