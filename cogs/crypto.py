@@ -14,6 +14,7 @@ class CryptoPriceCog(commands.Cog):
         self.base_url_quotes = "https://data.alpaca.markets/v1beta3/crypto/us/latest/quotes"
         self.headers = {"accept": "application/json"}
         self.update_recent_data.start()
+        self.generate_alerts.start()
 
     @tasks.loop(seconds=900)
     async def update_recent_data(self):
@@ -28,6 +29,16 @@ class CryptoPriceCog(commands.Cog):
 
     @update_recent_data.before_loop
     async def before_update_date(self):
+        await self.bot.wait_until_ready()
+    
+    @tasks.loop(seconds=60)
+    async def generate_alerts(self):
+        #channel = self.bot.get_channel(1256848459558817812)
+        data = omega.db.run_script('price_interval_changes.sql')
+        omega.logger.debug(data)
+    
+    @generate_alerts.before_loop
+    async def before_generate_alerts(self):
         await self.bot.wait_until_ready()
 
     @commands.command(name='quote')
@@ -151,8 +162,9 @@ class CryptoPriceCog(commands.Cog):
                 rows_affected = omega.cg.query_and_insert_historical_data(api_id, lookback_hour, current_time)
                 rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_day, lookback_hour)
                 rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_month, lookback_day)
-                embed.add_field(name="Entries", value=f"{rows_affected}")
+                embed.add_field(name=f"Entries added:", value=f"```diff\n+{rows_affected}")
                 await ctx.send(embed=embed)
+                return
         await ctx.send(f"No results for {api_id}")
 
 async def setup(bot):
