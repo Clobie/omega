@@ -34,8 +34,11 @@ class CryptoPriceCog(commands.Cog):
     @tasks.loop(seconds=60)
     async def generate_alerts(self):
         #channel = self.bot.get_channel(1256848459558817812)
+        omega.logger.debug("ASDF0")
         data = omega.db.run_script('price_interval_changes.sql')
+        omega.logger.debug("ASDF1")
         omega.logger.debug(data)
+        omega.logger.debug("ASDF2")
     
     @generate_alerts.before_loop
     async def before_generate_alerts(self):

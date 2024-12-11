@@ -43,7 +43,7 @@ class Database:
 
         self.cursor.execute(script, params)
 
-        if script.strip().lower().startswith("select"):
+        if script.strip().lower().startswith("select") or script.strip().lower().startswith("with"):
             result = self.cursor.fetchall()
             return result
         else:
