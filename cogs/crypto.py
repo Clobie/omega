@@ -14,7 +14,7 @@ class CryptoPriceCog(commands.Cog):
         self.headers = {"accept": "application/json"}
         self.update_recent_data.start()
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(seconds=3600)
     async def update_recent_data(self):
         coin_api_ids = omega.cg.get_tracked_coin_api_ids()
         omega.logger.debug(f"")
