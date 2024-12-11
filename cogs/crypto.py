@@ -99,7 +99,7 @@ class CryptoPriceCog(commands.Cog):
             change_24h = "{:+.2f}%".format(change_24h_value)
             embed.add_field(
                 name="", 
-                value=f"> **{item}**\n> Price: **{price}**\n24h Price Change\n```diff\n{change_24h}```",
+                value=f"> **{item}**\n> Price: **{price}**\n```diff\n{change_24h}```\n\n",
                 inline=False
             )
         await ctx.send(embed=embed)
