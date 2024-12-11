@@ -26,11 +26,12 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug(f"")
 
         current_time = int(time.time())
-        lookback_time = current_time - 30
+        lookback_time = current_time - 3600
         omega.logger.debug(f"t2t {current_time} {lookback_time}")
         omega.logger.debug(f"")
 
         for item in api_ids:
+            omega.logger.debug(f"")
             rows_affected = omega.cg.query_and_insert_historical_data(item, lookback_time, current_time)
             omega.logger.debug(f"ra {item} {lookback_time} {current_time}")
             omega.logger.debug(f"")
