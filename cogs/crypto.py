@@ -20,15 +20,10 @@ class CryptoPriceCog(commands.Cog):
         results = omega.cg.get_table_from_api_id(api_id)
         if not results:
             results
-
         results = omega.cg.get_price(api_id)
         results_json = results.json()
 
-        omega.logger.debug("\n\n")
-        omega.logger.debug(results)
-        omega.logger.debug("\n\n")
         omega.logger.debug(results_json)
-        omega.logger.debug("\n\n")
 
         price = results_json[api_id]['usd']
         if price >= 1:
@@ -40,7 +35,7 @@ class CryptoPriceCog(commands.Cog):
         change_24h_value = results_json[api_id]['usd_24h_change']
         change_24h = "{:+.2f}%".format(change_24h_value)
         embed = omega.embed.create_embed(f"Price quote for {api_id}", "")
-        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: **{price}**\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n\n24h Price change\n```diff\n{change_24h}```", inline=False)
+        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: **{price}**\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n\n24h Price Change\n```diff\n{change_24h}```", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
@@ -78,8 +73,26 @@ class CryptoPriceCog(commands.Cog):
         """
         results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
-        for item in results:
-            embed.add_field(name="", value=f"> **{item[0]}**\n", inline=False)
+
+        quotes = ",".join(item for item in results)
+        price_results = omega.cg.get_price(quotes)
+        price_json = price_results.json()
+
+        for item in price_json:
+            price = price_json[item]['usd']
+            if price >= 1:
+                price = "${:,.2f}".format(price)
+            else:
+                price = "${:,.10f}".format(price)
+            market_cap = "${:,.2f}".format(price_json[item]['usd_market_cap'])
+            vol_24h = "${:,.2f}".format(price_json[item]['usd_24h_vol'])
+            change_24h_value = price_json[item]['usd_24h_change']
+            change_24h = "{:+.2f}%".format(change_24h_value)
+            embed.add_field(
+                name="", 
+                value=f"> **{item}**\n> Price: **{price}**\n24h Price Change\n```diff\n{change_24h}```",
+                inline=False
+            )
         await ctx.send(embed=embed)
     
     @commands.command(name="track")
