@@ -33,17 +33,17 @@ class CoinGecko:
         return requests.get(url, self.headers)
 
     def get_table_from_name(self, name):
-        query = f"SELECT * FROM coingecko_list WHERE coin_name = %s;"
+        query = f"SELECT coin_api_id, coin_symbol, coin_name FROM coingecko_list WHERE coin_name = %s;"
         results = db.run_script(query, (name,))
         return results
 
     def get_table_from_symbol(self, name):
-        query = f"SELECT * FROM coingecko_list WHERE coin_symbol = %s;"
+        query = f"SELECT coin_api_id, coin_symbol, coin_name FROM coingecko_list WHERE coin_symbol = %s;"
         results = db.run_script(query, (name,))
         return results
     
     def get_table_from_api_id(self, name):
-        query = f"SELECT * FROM coingecko_list WHERE coin_api_id = %s;"
+        query = f"SELECT coin_api_id, coin_symbol, coin_name FROM coingecko_list WHERE coin_api_id = %s;"
         results = db.run_script(query, (name,))
         return results
 
