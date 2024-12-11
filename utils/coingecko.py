@@ -88,11 +88,20 @@ class CoinGecko:
             return 0
 
         timestamps = [item[0] for item in data['prices']]
+        logger.debug(f"timestamps data: {timestamps}")
+
         prices = [item[1] for item in data['prices']]
+        logger.debug(f"prices data: {prices}")
+
         market_caps = [item[1] for item in data['market_caps']]
+        logger.debug(f"market_caps data: {market_caps}")
+
         total_volumes = [item[1] for item in data['total_volumes']]
+        logger.debug(f"total_volumes data: {total_volumes}")
 
         interval = common.get_unix_interval(timestamps)
+        logger.debug(f"interval data: {interval}")
+
         total_rows_affected = 0
 
         for i in range(len(timestamps)):
@@ -100,6 +109,8 @@ class CoinGecko:
                 "INSERT INTO coingecko_historical_data (api_id, timestamp, price, market_cap, total_volume, interval) "
                 "VALUES (%s, %s, %s, %s, %s, %s)"
             )
+
+
             rows_affected = db.run_script(
                 script,
                 (api_id, timestamps[i], prices[i], market_caps[i], total_volumes[i], interval),
