@@ -33,12 +33,12 @@ class CoinGecko:
         return requests.get(url, self.headers)
 
     def get_ids_from_name(self, name):
-        query = f"SELECT coin_api_id FROM coingecko_lookup WHERE coin_name = %s;"
+        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_name = %s;"
         results = db.run_script(query, (name,))
         return results
 
     def get_ids_from_symbol(self, name):
-        query = f"SELECT coin_symbol FROM coingecko_lookup WHERE coin_name = %s;"
+        query = f"SELECT coin_symbol FROM coingecko_list WHERE coin_name = %s;"
         results = db.run_script(query, (name,))
         return results
 
