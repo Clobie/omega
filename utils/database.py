@@ -29,6 +29,7 @@ class Database:
             raise
     
     def run_script(self, script, params = None):
+        logger.debug(script)
         self.cursor.execute(script, params)
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
