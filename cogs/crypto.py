@@ -40,17 +40,17 @@ class CryptoPriceCog(commands.Cog):
     
     @commands.command(name="search")
     async def search_crypto_id(self, ctx, symbol: str):
-        results = omega.cg.get_ids_from_name(symbol)
-        if results:
-            list = '\n'.join(item[0] for item in results)
-            await ctx.send(f"Here are the api id's for {symbol}\n{list}")
+        results = omega.cg.get_table_from_name(symbol)
+        if not results:
+            results = omega.cg.get_table_from_symbol(symbol)
+        if not results:
+            await ctx.send("No results")
             return
-        results = omega.cg.get_ids_from_symbol(symbol)
-        if results:
-            list = '\n'.join(item[0] for item in results)
-            await ctx.send(f"Here are the api id's for {symbol}\n{list}")
-            return
-        await ctx.send("No results")
+        embed = omega.embed.create_embed("Search results", f"API IDs for {symbol}")
+        for item in results:
+            api_id, sym, name = item
+            embed.add_field(name=name, value=f"API ID: {api_id}\nSymbol: {sym}", inline=False)
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(CryptoPriceCog(bot))
