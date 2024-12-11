@@ -74,12 +74,18 @@ class CryptoPriceCog(commands.Cog):
         results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
         omega.logger.debug("1")
+        omega.logger.debug(results)
+        omega.logger.debug(results[0])
         quotes = ",".join(item for item in results[0])
         omega.logger.debug("2")
+        omega.logger.debug(results[0])
+        omega.logger.debug(results)
         price_results = omega.cg.get_price(quotes)
         omega.logger.debug("3")
+        omega.logger.debug(price_results)
         price_json = price_results.json()
         omega.logger.debug("4")
+        omega.logger.debug(price_json)
 
         for item in price_json:
             omega.logger.debug(f"loopy {item}")
