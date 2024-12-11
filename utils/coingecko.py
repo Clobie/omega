@@ -68,11 +68,12 @@ class CoinGecko:
         return False
 
     def query_and_insert_historical_data(self, api_id, time_from, time_to):
+        logger.debug(f"results {api_id}")
         url = f"{self.base_api_url}/coins/{api_id}/market_chart/range?vs_currency=usd&from={time_from}&to={time_to}&precision=10"
         results = requests.get(url, self.headers)
-        logger.debug(f"{results}")
+        logger.debug(f"results {results}")
         data = results[0].json()
-        logger.debug(f"{data}")
+        logger.debug(f"data {data}")
         timestamps = [item[0] for item in data['prices']]
         prices = [item[1] for item in data['prices']]
         market_caps = [item[1] for item in data['market_caps']]
