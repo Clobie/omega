@@ -46,5 +46,18 @@ class CoinGecko:
         query = f"SELECT coin_api_id, coin_symbol, coin_name FROM coingecko_list WHERE coin_api_id = %s;"
         results = db.run_script(query, (name,))
         return results
+    
+    def set_coin_tracking(self, app_id, track):
+        query = f"UPDATE coingecko_list SET coin_tracking = %s WHERE app_id = %s"
+        track_value = 'true'
+        if not track:
+            track_value = 'false'
+        results = db.run_script(query, (track_value, app_id,))
+        return results
+    
+    def get_tracked_coin_app_ids(self):
+        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_tracking = true"
+        results = db.run_script(query)
+        return results
 
 cg = CoinGecko()
