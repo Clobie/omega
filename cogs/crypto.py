@@ -13,16 +13,16 @@ class CryptoPriceCog(commands.Cog):
         self.headers = {"accept": "application/json"}
 
     @commands.command(name='quote')
-    async def get_crypto_quote(self, ctx, app_id: str):
+    async def get_crypto_quote(self, ctx, api_id: str):
         """
         Get the price of a crypto coin
         """
 
-        results = omega.cg.get_table_from_api_id(app_id)
+        results = omega.cg.get_table_from_api_id(api_id)
         if not results:
             results
 
-        results = omega.cg.get_price(app_id)
+        results = omega.cg.get_price(api_id)
         results_json = results.json()
 
         omega.logger.debug("\n\n")
@@ -31,17 +31,17 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug(results_json)
         omega.logger.debug("\n\n")
 
-        price = results_json[app_id]['usd']
+        price = results_json[api_id]['usd']
         if price >= 1:
             price = "${:,.2f}".format(price)
         else:
             price = "${:,.10f}".format(price)
-        market_cap = "${:,.2f}".format(results_json[app_id]['usd_market_cap'])
-        vol_24h = "${:,.2f}".format(results_json[app_id]['usd_24h_vol'])
-        change_24h_value = results_json[app_id]['usd_24h_change']
+        market_cap = "${:,.2f}".format(results_json[api_id]['usd_market_cap'])
+        vol_24h = "${:,.2f}".format(results_json[api_id]['usd_24h_vol'])
+        change_24h_value = results_json[api_id]['usd_24h_change']
         change_24h = "{:+.2f}%".format(change_24h_value)
-        embed = omega.embed.create_embed(f"Price quote for {app_id}", "")
-        embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
+        embed = omega.embed.create_embed(f"Price quote for {api_id}", "")
+        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
@@ -69,13 +69,37 @@ class CryptoPriceCog(commands.Cog):
             embed.add_field(name="", value=desc, inline=False)
         await ctx.send(embed=embed)
     
-    @commands.command(name="tracked")
+    @commands.command(name="tracker")
     async def tracked_coins(self, ctx):
-        results = omega.cg.get_tracked_coin_app_ids()
+        results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
         for item in results:
             embed.add_field(name="", value=f"> **{item[0]}**\n", inline=False)
         await ctx.send(embed=embed)
+    
+    @commands.command(name="track")
+    async def tracked_coins(self, ctx, api_id):
+        """
+        Add a crypto api id to tracker
+        """
+        exists = omega.cg.api_id_exists(api_id)
+        if exists:
+            if omega.cg.set_coin_tracking(api_id, 'true'):
+                embed = omega.embed.create_embed("Added {api_id} to tracker", "")
+                await ctx.send(embed=embed)
+                return
+    
+    @commands.command(name="untrack")
+    async def tracked_coins(self, ctx, api_id):
+        """
+        Remove a crypto api id from the tracker
+        """
+        exists = omega.cg.api_id_exists(api_id)
+        if exists:
+            if omega.cg.set_coin_tracking(api_id, 'false'):
+                embed = omega.embed.create_embed("Removed {api_id} from tracker", "")
+                await ctx.send(embed=embed)
+                return
 
 async def setup(bot):
     await bot.add_cog(CryptoPriceCog(bot))
