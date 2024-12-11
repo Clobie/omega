@@ -21,10 +21,17 @@ class CryptoPriceCog(commands.Cog):
 
         results = omega.cg.get_price(app_id)
         results_json = results.json()
-        price = results_json['bitcoin']['usd']
-        market_cap = results_json['bitcoin']['usd_market_cap']
-        vol_24h = results_json['bitcoin']['usd_24h_vol']
-        change_24h = results_json['bitcoin']['usd_24h_change']
+
+        omega.logger.debug("\n\n")
+        omega.logger.debug(results)
+        omega.logger.debug("\n\n")
+        omega.logger.debug(results_json)
+        omega.logger.debug("\n\n")
+
+        price = results_json[app_id]['usd']
+        market_cap = results_json[app_id]['usd_market_cap']
+        vol_24h = results_json[app_id]['usd_24h_vol']
+        change_24h = results_json[app_id]['usd_24h_change']
         embed = omega.embed.create_embed(f"Price quote for {app_id}", "")
         embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
         await ctx.send(embed=embed)
