@@ -54,9 +54,16 @@ class CoinGecko:
         results = db.run_script(query, (track, app_id,))
         return results
     
-    def get_tracked_coin_app_ids(self):
+    def get_tracked_coin_api_ids(self):
         query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_tracking = true"
         results = db.run_script(query)
         return results
+
+    def api_id_exists(self, api_id):
+        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_api_id = %s"
+        results = db.run_script(query, (api_id))
+        if results[0] == api_id:
+            return True
+        return False
 
 cg = CoinGecko()
