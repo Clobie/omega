@@ -28,16 +28,14 @@ class Database:
             logger.error(f"Database connection error: {e}")
             raise
     
-    def run_script(self, script):
-        self.cursor.execute(script)
+    def run_script(self, script, params = None):
+        self.cursor.execute(script, params)
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
-            #logger.info("Select query executed successfully")
             return result
         else:
             affected_rows = self.cursor.rowcount
             self.connection.commit()
-            #logger.info(f"Script executed successfully, {affected_rows} rows affected")
             return affected_rows
 
     def close(self):

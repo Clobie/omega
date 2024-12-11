@@ -14,14 +14,13 @@ class Credit:
 
     def init_user(self, user_id):
         init_credits = cfg.NEW_USER_CREDITS
-        query_user = (
+        query = (
             "INSERT INTO discord_users (user_id, credits) "
             "VALUES (%s, %s) "
             "ON CONFLICT (user_id) DO NOTHING"
         )
-        formatted_user_query = query_user % (user_id, init_credits)
-        logger.info(formatted_user_query)
-        db.run_script(formatted_user_query)
+        logger.info(f"Inserted user: {user_id}")
+        db.run_script(query, (user_id, init_credits,))
         return init_credits
 
     def convert_cost_to_credits(self, cost):
@@ -35,8 +34,7 @@ class Credit:
         query = (
             "SELECT credits FROM discord_users WHERE user_id = %s;"
         )
-        formatted_query = query % (user_id)
-        result = db.run_script(formatted_query)
+        result = db.run_script(query, (user_id,))
         if not result:
             return self.init_user(user_id)
         
@@ -49,8 +47,7 @@ class Credit:
         query = (
             "SELECT credits FROM discord_servers WHERE server_id = %s;"
         )
-        formatted_query = query % (server_id)
-        result = db.run_script(formatted_query)
+        result = db.run_script(query, (server_id,))
         if not result:
             self.init_user(server_id)
             return 0
@@ -67,8 +64,7 @@ class Credit:
             "WHERE user_id = %s "
             "RETURNING credits;"
         )
-        formatted_query = query % (amount, user_id)
-        new_credits = db.run_script(formatted_query)
+        new_credits = db.run_script(query, (amount, user_id,))
         return new_credits is not None
     
     def server_spend(self, server_id, amount):
@@ -81,8 +77,7 @@ class Credit:
             "WHERE server_id = %s "
             "RETURNING credits;"
         )
-        formatted_query = query % (amount, server_id)
-        new_credits = db.run_script(formatted_query)
+        new_credits = db.run_script(query, (amount, server_id))
         return new_credits is not None
     
     def get_leaderboard(self, total=None):
@@ -91,9 +86,9 @@ class Credit:
         else:
             total = total if total <= 25 else 10
         query = (
-            f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT {total};"
+            f"SELECT user_id, credits FROM discord_users ORDER BY credits DESC LIMIT %s;"
         )
-        result = db.run_script(query)
+        result = db.run_script(query, (total,))
         leaderboard_str = "\n".join([
             f"<@{user_id}>: {int(round(credits, 2)) if round(credits, 2) == round(credits) else round(credits, 2)} credits" 
             for user_id, credits in result
@@ -128,8 +123,7 @@ class Credit:
             "SELECT (SELECT credits FROM deducted) AS from_credits, "
             "       (SELECT credits FROM added) AS to_credits;"
         )
-        formatted_query = query % ((amount, user_from, amount, user_to))
-        db.run_script(formatted_query)
+        db.run_script(query, (amount, user_from, amount, user_to,))
         return True
     
     def gift_user_credits(self, user_to, amount):
@@ -144,8 +138,7 @@ class Credit:
             "WHERE user_id = %s "
             "RETURNING credits;"
         )
-        formatted_query = query % (amount, user_to)
-        new_credits = db.run_script(formatted_query)
+        new_credits = db.run_script(query, (amount, user_to,))
         return new_credits is not None
     
     def take_user_credits(self, user_from, amount):
@@ -162,8 +155,7 @@ class Credit:
             "WHERE user_id = %s "
             "RETURNING credits;"
         )
-        formatted_query = query % (amount, user_from)
-        new_credits = db.run_script(formatted_query)
+        new_credits = db.run_script(query, (amount, user_from))
         return new_credits is not None
 
 credit = Credit()

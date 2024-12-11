@@ -90,12 +90,11 @@ class AI:
         return round(self.total_cost, 6)
     
     def log_usage(self, user_id, tokens, cost, usage_type):
-        script = (
+        query = (
             "INSERT INTO openapi_usage (user_id, tokens, cost_value, usage_type)"
-            "VALUES (%s, %s, %s, %s)"
+            "VALUES (%s, %s, %s, '%s')"
         )
-        formatted_query = script % (user_id, tokens, cost, f"'{usage_type}'")
-        db.run_script(formatted_query)
+        db.run_script(query, (user_id, tokens, cost, usage_type,))
     
     def get_usage(self, user_id):
         script1 = (
@@ -116,11 +115,9 @@ class AI:
             "AND user_id = '%s' "
             "GROUP BY user_id; "
         )
-        formatted_query1 = script1 % (user_id)
-        formatted_query2 = script2 % (user_id)  # Corrected this line
         try:
-            result1 = db.run_script(formatted_query1)
-            result2 = db.run_script(formatted_query2)
+            result1 = db.run_script(script1, (user_id,))
+            result2 = db.run_script(script2, (user_id,))
             if result1:
                 completion_user_id = result1[0][0] or None
                 completion_cost = result1[0][1] or 0
