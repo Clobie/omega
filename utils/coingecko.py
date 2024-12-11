@@ -71,6 +71,7 @@ class CoinGecko:
         url = f"{self.base_api_url}/coins/{api_id}/market_chart/range?vs_currency=usd&from={time_from}&to={time_to}&precision=10"
         results = requests.get(url, self.headers)
         data = results[0].json()
+        db.logger.debug(f"{data}")
         timestamps = [item[0] for item in data['prices']]
         prices = [item[1] for item in data['prices']]
         market_caps = [item[1] for item in data['market_caps']]
@@ -82,6 +83,12 @@ class CoinGecko:
                 "INSERT INTO coingecko_historical_data (api_id, timestamp, price, market_cap, total_volume, interval) "
                 "VALUES (%s, %s, %s, %s, %s, %s)"
             )
+            db.logger.debug(f"{script}")
+            db.logger.debug(f"{timestamps[i]}")
+            db.logger.debug(f"{prices[i]}")
+            db.logger.debug(f"{market_caps[i]}")
+            db.logger.debug(f"{total_volumes[i]}")
+            db.logger.debug(f"{interval}")
             rows_affected = db.run_script(script, (None, timestamps[i], prices[i], market_caps[i], total_volumes[i], interval,))
             total_rows_affected += rows_affected
         logger.debug(f"{total_rows_affected} rows affected.")
