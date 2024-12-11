@@ -76,7 +76,7 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug("1")
         omega.logger.debug(results)
         omega.logger.debug(results[0])
-        quotes = ",".join(item for item in results[0])
+        quotes = ",".join(item[0] for item in results)
         omega.logger.debug("2")
         omega.logger.debug(results[0])
         omega.logger.debug(results)
