@@ -38,7 +38,7 @@ class CoinGecko:
         return results
 
     def get_ids_from_symbol(self, name):
-        query = f"SELECT coin_symbol FROM coingecko_list WHERE coin_symbol = %s;"
+        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_symbol = %s;"
         results = db.run_script(query, (name,))
         return results
 
