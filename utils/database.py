@@ -38,8 +38,8 @@ class Database:
                 logger.error(f"SQL file not found: {script_path}")
                 raise
 
-        logger.debug(script)
-        logger.debug(params)
+        #logger.debug(script)
+        #logger.debug(params)
 
         self.cursor.execute(script, params)
 
