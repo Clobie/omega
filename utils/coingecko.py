@@ -62,6 +62,8 @@ class CoinGecko:
     def api_id_exists(self, api_id):
         query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_api_id = %s"
         results = db.run_script(query, (api_id,))
+        logger.debug(f"Exists: {results}")
+        logger.debug(f"Exists: {results[0]}")
         if results[0] == api_id:
             return True
         return False
