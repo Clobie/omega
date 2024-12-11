@@ -28,10 +28,21 @@ class Database:
             logger.error(f"Database connection error: {e}")
             raise
     
-    def run_script(self, script, params = None):
+    def run_script(self, script, params=None):
+        if script.endswith(".sql"):
+            script_path = os.path.join("./scripts", script)
+            try:
+                with open(script_path, "r") as file:
+                    script = file.read()
+            except FileNotFoundError:
+                logger.error(f"SQL file not found: {script_path}")
+                raise
+
         logger.debug(script)
         logger.debug(params)
+
         self.cursor.execute(script, params)
+
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
             return result

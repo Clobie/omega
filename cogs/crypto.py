@@ -2,6 +2,7 @@
 
 import discord
 from discord.ext import commands, tasks
+from discord.ext.commands import Context
 import requests
 import time
 from datetime import datetime, timedelta
@@ -133,6 +134,26 @@ class CryptoPriceCog(commands.Cog):
                 embed = omega.embed.create_embed(f"Removed {api_id} from tracker", "")
                 await ctx.send(embed=embed)
                 return
+    
+    @commands.command(name="populate")
+    async def populate_crypto(self, ctx, api_id):
+        #"""
+        #Pre-populates a coin in the database
+        #"""
+        exists = omega.cg.api_id_exists(api_id)
+        if exists:
+            if omega.cg.set_coin_tracking(api_id, 'true'):
+                embed = omega.embed.create_embed(f"Added {api_id} to tracker", "")
+                current_time = int(time.time())
+                lookback_hour = current_time - 60 * 60
+                lookback_day = current_time - 60 * 60 * 24
+                lookback_month = current_time - 60 * 60 * 24 * 30
+                rows_affected = omega.cg.query_and_insert_historical_data(api_id, lookback_hour, current_time)
+                rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_day, lookback_hour)
+                rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_month, lookback_day)
+                embed.add_field(name="Entries", value=f"{rows_affected}")
+                await ctx.send(embed=embed)
+        await ctx.send(f"No results for {api_id}")
 
 async def setup(bot):
     await bot.add_cog(CryptoPriceCog(bot))
