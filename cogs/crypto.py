@@ -56,13 +56,17 @@ class CryptoPriceCog(commands.Cog):
             return
         embed = omega.embed.create_embed("Search results", f"Search: {symbol}\n\n")
         desc = ""
+        chunked = False
         for item in results:
             api_id, sym, name = item
             desc += f"> API ID: **{api_id}**\n> Symbol: {sym}\n> Name: {name}\n\n"
             # field limit is 1024, stop before that and chunk.  this gets past field limit of 25 and size limit of 1024
             if len(desc) > 800:
+                chunked = True
                 embed.add_field(name="", value=desc, inline=False)
                 desc = ""
+        if not chunked:
+            embed.add_field(name="", value=desc, inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="tracked")
