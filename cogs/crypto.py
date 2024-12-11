@@ -37,6 +37,17 @@ class CryptoPriceCog(commands.Cog):
                 await ctx.send("No trade information found for this ticker.")
         else:
             await ctx.send("Error retrieving data.")
+    
+    @commands.command(name="search")
+    async def search_crypto_id(self, ctx, symbol: str):
+        results = omega.cg.get_ids_from_name(symbol)
+        if results:
+            await ctx.send(results)
+            return
+        results = omega.cg.get_ids_from_symbol(symbol)
+        if results:
+            await ctx.send(results)
+            return
 
 async def setup(bot):
     await bot.add_cog(CryptoPriceCog(bot))
