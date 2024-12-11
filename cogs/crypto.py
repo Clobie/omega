@@ -157,9 +157,11 @@ class CryptoPriceCog(commands.Cog):
                 lookback_hour = current_time - 60 * 60
                 lookback_day = current_time - 60 * 60 * 24
                 lookback_month = current_time - 60 * 60 * 24 * 30
+                lookback_11month = current_time - 60 * 60 * 24 * 30 * 11
                 rows_affected = omega.cg.query_and_insert_historical_data(api_id, lookback_hour, current_time)
                 rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_day, lookback_hour)
                 rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_month, lookback_day)
+                rows_affected += omega.cg.query_and_insert_historical_data(api_id, lookback_11month, lookback_month)
                 embed.add_field(name=f"Entries added:", value=f"```diff\n+{rows_affected}```")
                 await ctx.send(embed=embed)
                 return
