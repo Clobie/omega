@@ -32,13 +32,18 @@ class CoinGecko:
         url = f"{self.base_api_url}/coins/{coin}/market_chart/range?vs_currency=usd&from={time_start}&to={time_end}&precision=full"
         return requests.get(url, self.headers)
 
-    def get_ids_from_name(self, name):
-        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_name = %s;"
+    def get_table_from_name(self, name):
+        query = f"SELECT * FROM coingecko_list WHERE coin_name = %s;"
         results = db.run_script(query, (name,))
         return results
 
-    def get_ids_from_symbol(self, name):
-        query = f"SELECT coin_api_id FROM coingecko_list WHERE coin_symbol = %s;"
+    def get_table_from_symbol(self, name):
+        query = f"SELECT * FROM coingecko_list WHERE coin_symbol = %s;"
+        results = db.run_script(query, (name,))
+        return results
+    
+    def get_table_from_api_id(self, name):
+        query = f"SELECT * FROM coingecko_list WHERE coin_api_id = %s;"
         results = db.run_script(query, (name,))
         return results
 
