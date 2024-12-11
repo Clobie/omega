@@ -39,6 +39,35 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug("ASDF1")
         omega.logger.debug(data)
         omega.logger.debug("ASDF2")
+
+        time_labels = [
+            'Last Price', 'Price Change 5 Min', '% Change 5 Min', 'Price Change 15 Min', 
+            '% Change 15 Min', 'Price Change 30 Min', '% Change 30 Min', 'Price Change 1 Hour', 
+            '% Change 1 Hour', 'Price Change 24 Hours', '% Change 24 Hours', 'Price Change 3 Months', 
+            '% Change 3 Months', 'Price Change 6 Months', '% Change 6 Months', 'Price Change 1 Year', 
+            '% Change 1 Year'
+        ]
+
+        omega.logger.debug(".\n")
+        omega.logger.debug(".\n")
+        # Extract and print the data
+        for entry in data:
+            name = entry[0]
+            values = entry[1:]
+            
+            omega.logger.debug(f"Coin: {name}")
+            for i, (label, value) in enumerate(zip(time_labels, values)):
+                omega.logger.debug(f"  {label}: {value if value is not None else 'N/A'}")
+            omega.logger.debug(".\n")
+            omega.logger.debug(".\n")
+
+        for entry in data:
+            name = entry[0]
+            values = entry[1:]
+            print(f"Name: {name}")
+            for i, value in enumerate(values, start=1):
+                print(f"  Value {i}: {value}")
+            print("\n")
     
     @generate_alerts.before_loop
     async def before_generate_alerts(self):
