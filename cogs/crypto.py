@@ -53,7 +53,7 @@ class CryptoPriceCog(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="tracked")
-    async def search_crypto_id(self, ctx):
+    async def tracked_coins(self, ctx):
         results = omega.cg.get_tracked_coin_app_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
         for item in results:
