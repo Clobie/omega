@@ -30,6 +30,7 @@ class Database:
     
     def run_script(self, script, params = None):
         logger.debug(script)
+        logger.debug(params)
         self.cursor.execute(script, params)
         if script.strip().lower().startswith("select"):
             result = self.cursor.fetchall()
