@@ -27,3 +27,11 @@ CREATE TABLE openai_usage (
     usage_type TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE coingecko_list (
+    id SERIAL PRIMARY KEY,
+    coin_api_id TEXT,
+    coin_symbol TEXT,
+    coin_name TEXT UNIQUE,
+    coin_tracked BOOLEAN
+);
