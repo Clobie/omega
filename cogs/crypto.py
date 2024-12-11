@@ -18,7 +18,9 @@ class CryptoPriceCog(commands.Cog):
         Get the price of a crypto coin
         """
 
-        # Add a check for a valid app_id
+        results = omega.cg.get_table_from_api_id(app_id)
+        if not results:
+            results
 
         results = omega.cg.get_price(app_id)
         results_json = results.json()
@@ -29,20 +31,24 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug(results_json)
         omega.logger.debug("\n\n")
 
-        price = "${:,.2f}".format(results_json[app_id]['usd'])
+        price = results_json[app_id]['usd']
+        if price >= 1:
+            price = "${:,.2f}".format(price)
+        else:
+            price = "${}".format(price)
         market_cap = "${:,.2f}".format(results_json[app_id]['usd_market_cap'])
         vol_24h = "${:,.2f}".format(results_json[app_id]['usd_24h_vol'])
-        change_24h = "{:.2f}%".format(results_json[app_id]['usd_24h_change'])
-        #last_updated_at = results_json[app_id]['last_updated_at']
+        change_24h_value = results_json[app_id]['usd_24h_change']
+        change_24h = "{:+.2f}%".format(change_24h_value)
         embed = omega.embed.create_embed(f"Price quote for {app_id}", "")
         embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
     async def search_crypto_id(self, ctx, symbol: str):
-        results = omega.cg.get_table_from_api_id(symbol)
+        results = omega.cg.get_table_from_symbol(symbol)
         if not results:
-            results = omega.cg.get_table_from_symbol(symbol)
+            results = omega.cg.get_table_from_api_id(symbol)
         if not results:
             results = omega.cg.get_table_from_name(symbol)
         if not results:
