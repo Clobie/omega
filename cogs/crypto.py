@@ -3,6 +3,7 @@
 import discord
 from discord.ext import commands
 import requests
+from datetime import datetime
 from core.omega import omega
 
 class CryptoPriceCog(commands.Cog):
@@ -28,10 +29,11 @@ class CryptoPriceCog(commands.Cog):
         omega.logger.debug(results_json)
         omega.logger.debug("\n\n")
 
-        price = results_json[app_id]['usd']
-        market_cap = results_json[app_id]['usd_market_cap']
-        vol_24h = results_json[app_id]['usd_24h_vol']
-        change_24h = results_json[app_id]['usd_24h_change']
+        price = "${:,.2f}".format(results_json[app_id]['usd'])
+        market_cap = "${:,.2f}".format(results_json[app_id]['usd_market_cap'])
+        vol_24h = "${:,.2f}".format(results_json[app_id]['usd_24h_vol'])
+        change_24h = "{:.2f}%".format(results_json[app_id]['usd_24h_change'])
+        #last_updated_at = results_json[app_id]['last_updated_at']
         embed = omega.embed.create_embed(f"Price quote for {app_id}", "")
         embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
         await ctx.send(embed=embed)
