@@ -3,6 +3,7 @@
 import random
 import re
 import string
+from datetime import datetime
 from utils.log import logger
 
 class Common:
@@ -25,4 +26,8 @@ class Common:
     def generate_random_string(self, length=10):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+    def get_unix_timestamp(date_str, date_format="%Y-%m-%d %H:%M:%S"):
+        dt = datetime.strptime(date_str, date_format)
+        return int(dt.timestamp())
+    
 common = Common()
