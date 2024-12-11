@@ -68,32 +68,46 @@ class CoinGecko:
         return False
 
     def query_and_insert_historical_data(self, api_id, time_from, time_to):
-        logger.debug(f"results {api_id}")
+        logger.debug(f"Querying historical data for {api_id}")
         url = f"{self.base_api_url}/coins/{api_id}/market_chart/range?vs_currency=usd&from={time_from}&to={time_to}&precision=10"
         results = requests.get(url, self.headers)
-        logger.debug(f"results {results}")
-        data = results.json()
-        logger.debug(f"data {data}")
+        
+        if results.status_code != 200:
+            logger.error(f"Request failed with status code {results.status_code}: {results.text}")
+            return 0
+
+        try:
+            data = results.json()
+            logger.debug(f"Response data: {data}")
+        except ValueError as e:
+            logger.error(f"Failed to parse JSON: {e}")
+            return 0
+
+        if 'prices' not in data or 'market_caps' not in data or 'total_volumes' not in data:
+            logger.error(f"Unexpected response structure: {data}")
+            return 0
+
         timestamps = [item[0] for item in data['prices']]
         prices = [item[1] for item in data['prices']]
         market_caps = [item[1] for item in data['market_caps']]
         total_volumes = [item[1] for item in data['total_volumes']]
+
         interval = common.get_unix_interval(timestamps)
         total_rows_affected = 0
+
         for i in range(len(timestamps)):
             script = (
                 "INSERT INTO coingecko_historical_data (api_id, timestamp, price, market_cap, total_volume, interval) "
                 "VALUES (%s, %s, %s, %s, %s, %s)"
             )
-            logger.debug(f"{script}")
-            logger.debug(f"{timestamps[i]}")
-            logger.debug(f"{prices[i]}")
-            logger.debug(f"{market_caps[i]}")
-            logger.debug(f"{total_volumes[i]}")
-            logger.debug(f"{interval}")
-            rows_affected = db.run_script(script, (api_id, timestamps[i], prices[i], market_caps[i], total_volumes[i], interval,))
+            rows_affected = db.run_script(
+                script,
+                (api_id, timestamps[i], prices[i], market_caps[i], total_volumes[i], interval),
+            )
             total_rows_affected += rows_affected
+
         logger.debug(f"{total_rows_affected} rows affected.")
         return total_rows_affected
+
 
 cg = CoinGecko()
