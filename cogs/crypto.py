@@ -73,19 +73,22 @@ class CryptoPriceCog(commands.Cog):
         """
         results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
-
-        quotes = ",".join(item for item in results)
+        omega.logger.debig("1")
+        quotes = ",".join(item for item in results[0])
+        omega.logger.debig("2")
         price_results = omega.cg.get_price(quotes)
+        omega.logger.debig("3")
         price_json = price_results.json()
+        omega.logger.debig("4")
 
         for item in price_json:
+            omega.logger.debig(f"loopy {item}")
+            omega.logger.debig(f"loopy {item[0]}")
             price = price_json[item]['usd']
             if price >= 1:
                 price = "${:,.2f}".format(price)
             else:
                 price = "${:,.10f}".format(price)
-            market_cap = "${:,.2f}".format(price_json[item]['usd_market_cap'])
-            vol_24h = "${:,.2f}".format(price_json[item]['usd_24h_vol'])
             change_24h_value = price_json[item]['usd_24h_change']
             change_24h = "{:+.2f}%".format(change_24h_value)
             embed.add_field(
