@@ -20,9 +20,12 @@ class CryptoPriceCog(commands.Cog):
         # Add a check for a valid app_id
 
         results = omega.cg.get_price(app_id)
-        price = results[0]
+        price = results['bitcoin']['usd']
+        market_cap = results['bitcoin']['usd_market_cap']
+        vol_24h = results['bitcoin']['usd_24h_vol']
+        change_24h = results['bitcoin']['usd_24h_change']
         embed = omega.embed.create_embed(f"Price quote for {app_id}", "")
-        embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}", inline=False)
+        embed.add_field(name="", value=f"> API ID: **{app_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
