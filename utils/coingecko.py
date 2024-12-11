@@ -105,8 +105,10 @@ class CoinGecko:
         for i in range(len(timestamps)):
             script = (
                 "INSERT INTO coingecko_historical_data (api_id, timestamp, price, market_cap, total_volume, interval) "
-                "VALUES (%s, %s, %s, %s, %s, %s)"
+                "VALUES (%s, %s, %s, %s, %s, %s) "
+                "ON CONFLICT (api_id, timestamp) DO NOTHING"
             )
+
             rows_affected = db.run_script(
                 script,
                 (api_id, timestamps[i], prices[i], market_caps[i], total_volumes[i], interval),
