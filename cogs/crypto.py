@@ -59,7 +59,10 @@ class CryptoPriceCog(commands.Cog):
         for item in results:
             api_id, sym, name = item
             desc += f"> API ID: **{api_id}**\n> Symbol: {sym}\n> Name: {name}\n\n"
-        embed.add_field(name="", value=desc, inline=False)
+            # field limit is 1024, stop before that and chunk.  this gets past field limit of 25 and size limit of 1024
+            if len(desc) > 800:
+                embed.add_field(name="", value=desc, inline=False)
+                desc = ""
         await ctx.send(embed=embed)
     
     @commands.command(name="tracked")
