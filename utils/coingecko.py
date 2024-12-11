@@ -17,7 +17,7 @@ class CoinGecko:
         }
 
     def get_price(self, coins):
-        url = f"{self.base_api_url}/simple/price?ids={coins}"
+        url = f"{self.base_api_url}/simple/price?ids={coins}&vs_currencies=usd"
         return requests.get(url, self.headers)
     
     def get_supported_currencies_list(self):
