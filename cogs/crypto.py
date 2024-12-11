@@ -49,7 +49,7 @@ class CryptoPriceCog(commands.Cog):
         embed = omega.embed.create_embed("Search results", f"Search: {symbol}\n\n")
         for item in results:
             api_id, sym, name = item
-            embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Symbol:\n{sym}> Name: {name}\n\n", inline=False)
+            embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Symbol: {sym}\n> Name: {name}\n\n", inline=False)
         await ctx.send(embed=embed)
 
 async def setup(bot):
