@@ -15,9 +15,8 @@ class CryptoPriceCog(commands.Cog):
     @commands.command(name='quote')
     async def get_crypto_quote(self, ctx, api_id: str):
         """
-        Get the price of a crypto coin
+        Get the price of a crypto coin or token
         """
-
         results = omega.cg.get_table_from_api_id(api_id)
         if not results:
             results
@@ -41,11 +40,14 @@ class CryptoPriceCog(commands.Cog):
         change_24h_value = results_json[api_id]['usd_24h_change']
         change_24h = "{:+.2f}%".format(change_24h_value)
         embed = omega.embed.create_embed(f"Price quote for {api_id}", "")
-        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: {price}\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: {change_24h}", inline=False)
+        embed.add_field(name="", value=f"> API ID: **{api_id}**\n> Price: **{price}**\n> Market Cap: {market_cap}\n> 24h Volume: {vol_24h}\n> 24h Change: **{change_24h}**", inline=False)
         await ctx.send(embed=embed)
     
     @commands.command(name="search")
     async def search_crypto_id(self, ctx, symbol: str):
+        """
+        Search for the api id of a coin or token
+        """
         results = omega.cg.get_table_from_symbol(symbol)
         if not results:
             results = omega.cg.get_table_from_api_id(symbol)
@@ -71,6 +73,9 @@ class CryptoPriceCog(commands.Cog):
     
     @commands.command(name="tracker")
     async def tracked_coins(self, ctx):
+        """
+        List tracked coins or tokens
+        """
         results = omega.cg.get_tracked_coin_api_ids()
         embed = omega.embed.create_embed("Tracked coins", "")
         for item in results:
