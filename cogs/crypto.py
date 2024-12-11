@@ -13,16 +13,26 @@ class CryptoPriceCog(commands.Cog):
         self.base_url_quotes = "https://data.alpaca.markets/v1beta3/crypto/us/latest/quotes"
         self.headers = {"accept": "application/json"}
 
-    @tasks.loop(seconds=3600)
+    @tasks.loop(seconds=30)
     async def update_recent_data(self):
         coin_api_ids = omega.cg.get_tracked_coin_api_ids()
+        omega.logger.debug(f"")
+        omega.logger.debug(f"1h upd ids {coin_api_ids}")
+        omega.logger.debug(f"")
+
         api_ids = [item[0] for item in coin_api_ids]
+        omega.logger.debug(f"1h upd ids2 {api_ids}")
+        omega.logger.debug(f"")
 
         current_time = int(time.time())
-        back_10m = current_time - 600
+        lookback_time = current_time - 30
+        omega.logger.debug(f"t2t {current_time} {lookback_time}")
+        omega.logger.debug(f"")
 
         for item in api_ids:
-            rows_affected = omega.cg.query_and_insert_historical_data(item, back_10m, current_time)
+            rows_affected = omega.cg.query_and_insert_historical_data(item, lookback_time, current_time)
+            omega.logger.debug(f"ra {item} {lookback_time} {current_time}")
+            omega.logger.debug(f"")
             channel = self.bot.get_channel(1256848459558817812)
             await channel.send(f"debug: {rows_affected} rows affected")
 
