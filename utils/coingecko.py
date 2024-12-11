@@ -17,7 +17,7 @@ class CoinGecko:
         }
 
     def get_price(self, coins):
-        url = f"{self.base_api_url}/simple/price?ids={coins}&vs_currencies=usd"
+        url = f"{self.base_api_url}/simple/price?ids={coins}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true&precision=full"
         return requests.get(url, self.headers)
     
     def get_supported_currencies_list(self):
@@ -49,7 +49,7 @@ class CoinGecko:
     
     def set_coin_tracking(self, app_id, track):
         query = f"UPDATE coingecko_list SET coin_tracking = %s WHERE app_id = %s"
-        if track is not 'true' and track is not 'false':
+        if track != 'true' and track != 'false':
             return None
         results = db.run_script(query, (track, app_id,))
         return results
