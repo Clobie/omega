@@ -14,12 +14,12 @@ class CryptoPriceCog(commands.Cog):
         self.headers = {"accept": "application/json"}
         self.update_recent_data.start()
 
-    @tasks.loop(seconds=300)
+    @tasks.loop(seconds=900)
     async def update_recent_data(self):
         coin_api_ids = omega.cg.get_tracked_coin_api_ids()
         api_ids = [item[0] for item in coin_api_ids]
         current_time = int(time.time())
-        lookback_time = current_time - 300
+        lookback_time = current_time - 900
         for item in api_ids:
             rows_affected = omega.cg.query_and_insert_historical_data(item, lookback_time, current_time)
             channel = self.bot.get_channel(1256848459558817812)

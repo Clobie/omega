@@ -99,7 +99,7 @@ class CoinGecko:
         total_volumes = [item[1] for item in data['total_volumes']]
         logger.debug(f"total_volumes data: {total_volumes}")
 
-        interval = common.get_unix_interval(timestamps[0], timestamps[1])
+        interval = ""#common.get_unix_interval(timestamps[0], timestamps[1])
         logger.debug(f"interval data: {interval}")
         total_rows_affected = 0
         for i in range(len(timestamps)):
