@@ -1,9 +1,9 @@
 WITH latest_price AS (
 	select
-		api_id,
-		timestamp,
-		price,
-		ROW_NUMBER() OVER (PARTITION BY api_id ORDER BY timestamp DESC) AS recency_rank
+		api_id
+		,timestamp
+		,price
+		,ROW_NUMBER() OVER (PARTITION BY api_id ORDER BY timestamp DESC) AS recency_rank
 	from coingecko_historical_data
 	where api_id = %s
 	order by timestamp desc
@@ -11,10 +11,10 @@ WITH latest_price AS (
 ),
 recent_price_list as (
 	select
-		api_id,
-		timestamp,
-		price,
-		ROW_NUMBER() OVER (PARTITION BY api_id ORDER BY timestamp DESC) AS recencyrank
+		api_id
+		,timestamp
+		,price
+		,ROW_NUMBER() OVER (PARTITION BY api_id ORDER BY timestamp DESC) AS recencyrank
 	from coingecko_historical_data
 	where api_id = %s
 	and timestamp < (SELECT timestamp FROM latest_price)
