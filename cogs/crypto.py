@@ -13,8 +13,8 @@ class CryptoPriceCog(commands.Cog):
         self.bot = bot
         self.base_url_quotes = "https://data.alpaca.markets/v1beta3/crypto/us/latest/quotes"
         self.headers = {"accept": "application/json"}
-        self.update_recent_data.start()
-        self.generate_alerts.start()
+        #self.update_recent_data.start()
+        #self.generate_alerts.start()
 
     @tasks.loop(seconds=900)
     async def update_recent_data(self):
