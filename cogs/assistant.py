@@ -71,9 +71,9 @@ class Assistant(commands.Cog):
         ctx = await self.bot.get_context(message)
         async with ctx.typing():
 
-            if int(omega.credit.get_user_credits(message.author.id)) == 0:
-                await ctx.send(f"You don't have enough credits for that :(")
-                return
+            #if int(omega.credit.get_user_credits(message.author.id)) == 0:
+            #    await ctx.send(f"You don't have enough credits for that :(")
+            #    return
 
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
@@ -96,7 +96,7 @@ class Assistant(commands.Cog):
             # Get tokens, cost
             tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
             
-            omega.credit.user_spend(message.author.id, credits)
+            #omega.credit.user_spend(message.author.id, credits)
 
             omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 

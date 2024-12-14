@@ -12,7 +12,6 @@ from utils.role import role
 from utils.database import db
 from utils.ai import ai
 from utils.embed import embed
-from utils.coingecko import cg
 
 class Omega:
     def __init__(self):
@@ -27,7 +26,6 @@ class Omega:
         self.db = db
         self.ai = ai
         self.embed = embed
-        self.cg = cg
 
     async def run(self):
         logger.info('Starting bot...')

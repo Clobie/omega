@@ -15,9 +15,9 @@ class Dalle(commands.Cog):
 
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
-        if int(omega.credit.get_user_credits(ctx.author.id)) < 4:
-            await ctx.send(f"You don't have enough credits for that :(")
-            return
+        #if int(omega.credit.get_user_credits(ctx.author.id)) < 4:
+        #    await ctx.send(f"You don't have enough credits for that :(")
+        #    return
         reply_msg = await ctx.send(self.thinking_emoji)
         image_url = omega.ai.generate_image(self.model, prompt)
         async with aiohttp.ClientSession() as session:
@@ -28,8 +28,8 @@ class Dalle(commands.Cog):
                     file = discord.File(io.BytesIO(image_data), filename=filename)
                     footer = omega.ai.get_footer('null', 0.04)
                     omega.ai.update_cost_static(0.04)
-                    credits = omega.credit.convert_cost_to_credits(0.04)
-                    omega.credit.user_spend(ctx.author.id, credits)
+                    #credits = omega.credit.convert_cost_to_credits(0.04)
+                    #omega.credit.user_spend(ctx.author.id, credits)
                     omega.ai.log_usage(ctx.author.id, 0, 0.04, 'dalle3')
                     #await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
