@@ -75,6 +75,17 @@ class Assistant(commands.Cog):
             #    await ctx.send(f"You don't have enough credits for that :(")
             #    return
 
+            if message.author.id == 198953041670569986 and len(message.content) > 500:
+                result = omega.ai.chat_completion(
+                    self.model, 
+                    'You are an AI assistant named Omega, and your task is to summarize text.',
+                    'Please summarize the following:\n\n' + message.content
+                )
+                channel = self.bot.get_channel(1232218996607287319)
+                if channel:
+                    await channel.send('Looks like nicky made another wall of text.  Here is the summary:\n\n' + result)
+                return
+
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
 
