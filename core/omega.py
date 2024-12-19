@@ -12,6 +12,7 @@ from utils.role import role
 from utils.database import db
 from utils.ai import ai
 from utils.embed import embed
+from utils.giphy import gfy
 
 class Omega:
     def __init__(self):
@@ -26,6 +27,7 @@ class Omega:
         self.db = db
         self.ai = ai
         self.embed = embed
+        self.gfy = gfy
 
     async def run(self):
         logger.info('Starting bot...')
