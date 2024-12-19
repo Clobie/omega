@@ -145,11 +145,11 @@ class Assistant(commands.Cog):
             self.clear_context(scope)
             await message.add_reaction("✅")
             return
-        if message.author.id == 198953041670569986 and len(message.content) > 500:
+        if message.author.id == 198953041670569986 and len(message.content) > 350:
             result = omega.ai.chat_completion(
                 self.model, 
                 'You are an AI assistant named Omega, and your task is to summarize text.',
-                'Please summarize the following:\n\n' + message.content
+                'Please summarize the following as short as possible:\n\n' + message.content
             )
             channel = self.bot.get_channel(1232218996607287319)
             if channel:
