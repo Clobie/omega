@@ -31,7 +31,7 @@ Greet the user and briefly explain that you will guide them through filling out 
 
 Inform them that you will ask specific questions and compile their answers into a formatted document.
 
-Ask the user to give you a rough idea of the game they want to create.
+Ask the user to give you a rough idea of the game they want to create. (This will streamline the process.)
 
 
 Process:
@@ -186,6 +186,17 @@ The completed TL;DR Game Design Document in a clear and readable format.
         for scope in to_clear:
             self.clear_context(scope)
             omega.logger.info(f"Cleared inactive context for {scope}")
+
+            if scope.startswith("user_"):
+                user_id = int(scope.split("_")[1])
+                user = self.bot.get_user(user_id)
+                if user:
+                    await user.send(f"Your conversation with Omega has been inactive for 5 minutes. If you need assistance, feel free to send a message!")
+            if scope.startswith("channel_"):
+                channel_id = int(scope.split("_")[1])
+                channel = self.bot.get_channel(channel_id)
+                if channel:
+                    await channel.send(f"Omega has cleared the conversation due to inactivity. If you need assistance, feel free to send a message!")
 
     @clear_inactive_contexts.before_loop
     async def before_clear_inactive_contexts(self):
