@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from core.omega import omega
 
-class Assistant(commands.Cog):
+class GDDAssistant(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -231,4 +231,4 @@ The completed TL;DR Game Design Document in a clear and readable format.
             return
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(Assistant(bot))
+    await bot.add_cog(GDDAssistant(bot))
