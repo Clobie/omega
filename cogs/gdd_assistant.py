@@ -16,10 +16,10 @@ class GDDAssistant(commands.Cog):
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}
         self.context_timestamps = {}
-        self.system_prompt = ""
-        self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.clear_inactive_contexts.start()
+        self.system_prompt = ""
         self.set_system_prompt()
+        self.context_header = [{"role": "system", "content": self.system_prompt}]
 
     def set_system_prompt(self):
         self.system_prompt = """
