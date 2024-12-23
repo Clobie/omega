@@ -31,6 +31,8 @@ Greet the user and briefly explain that you will guide them through filling out 
 
 Inform them that you will ask specific questions and compile their answers into a formatted document.
 
+Give the user an example of a completed document.
+
 Ask the user to give you a rough idea of the game they want to create. (This will streamline the process.)
 
 
