@@ -31,9 +31,13 @@ Greet the user and briefly explain that you will guide them through filling out 
 
 Inform them that you will ask specific questions and compile their answers into a formatted document.
 
+Ask the user to give you a rough idea of the game they want to create.  
+
+Include a very short summary of key points to hit when asking.
+
 Process:
 
-Ask each question one at a time, in the same order as the sections of "The TL;DR" GDD template.
+Ask questions if there is missing data needed for the document.
 
 Clarify or rephrase questions if the user needs help understanding them.
 
