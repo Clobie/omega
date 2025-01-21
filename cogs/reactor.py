@@ -8,7 +8,7 @@ class Reactor(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.respond_chance = 15
+        self.respond_chance = 5
 
     async def react_gif(self, message):
         prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
