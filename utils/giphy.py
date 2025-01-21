@@ -1,4 +1,4 @@
-# cogs/reactor.py
+# utils/giphy.py
 
 import random
 import requests
