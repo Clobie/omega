@@ -3,7 +3,7 @@
 from discord.ext import commands
 from core.omega import omega
 
-class SpamDelete(commands.Cog):
+class Cleanup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,4 +29,4 @@ class SpamDelete(commands.Cog):
         await ctx.send(f"Deleted {len(deleted)} messages.", delete_after=5)
     
 async def setup(bot):
-    await bot.add_cog(SpamDelete(bot))
+    await bot.add_cog(Cleanup(bot))
