@@ -27,9 +27,9 @@ class AutoMod(commands.Cog):
 	def is_similar(self, a: str, b: str):
 		return SequenceMatcher(None, a, b).ratio() > 0.85
 
-    # get the matched string
+    # get the matched string so I can debug what string it matched
 	def get_matched_string(self, a: str, b: str):
-		return SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
+		return [x for x in self.profanity_list if self.is_similar(a, x)][0]
 	
 	@commands.Cog.listener()
 	async def on_message(self, message):
