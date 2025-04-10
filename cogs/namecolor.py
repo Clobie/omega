@@ -14,6 +14,9 @@ class NameColor(commands.Cog):
             with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
                 return [line.strip() for line in f if line.strip()]
         except FileNotFoundError:
+            # create file
+            with open('./data/color_messages.txt', 'w', encoding='utf-8') as f:
+                pass
             return []
 
     def get_color_from_emoji(self, emoji):
