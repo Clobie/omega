@@ -2,11 +2,19 @@
 
 from discord.ext import commands
 from core.omega import omega
+import datetime
+from dateutil import parser
 
 class Cleanup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+    
+    def parse_flexible_date(val: str):
+        try:
+            return parser.parse(val, dayfirst=False).date()
+        except ValueError:
+            return None
+     
     @commands.command(name='clean')
     async def clean(self, ctx, val):
         """
@@ -37,12 +45,24 @@ class Cleanup(commands.Cog):
             await ctx.send("Deleted all images.", delete_after=5)
             return
 
-        if val is None or not val.isdigit():
-            await ctx.send("Specify a valid amount of messages to delete.")
+        if val == 'today':
+            await ctx.channel.purge(limit=None, check=lambda m: m.created_at.date() == datetime.datetime.utcnow().date())
+            await ctx.send("Deleted all messages from today.", delete_after=5)
             return
-        
-        deleted = await ctx.channel.purge(limit=int(val))
-        await ctx.send(f"Deleted {len(deleted)} messages.", delete_after=5)
+
+        if val.isdigit():
+            deleted = await ctx.channel.purge(limit=int(val))
+            await ctx.send(f"Deleted {len(deleted)} messages.", delete_after=5)
+
+        date = self.parse_flexible_date(val)
+        if date:
+            try:
+                await ctx.channel.purge(limit=None, check=lambda m: m.created_at.date() == date)
+                await ctx.send(f"Deleted all messages from {date}.", delete_after=5)
+            except Exception as e:
+                await ctx.send(f"An error occurred while purging messages: {e}", delete_after=5)
+        else:
+            await ctx.send("Invalid date format. Please use a recognizable date.", delete_after=5)
     
 async def setup(bot):
     await bot.add_cog(Cleanup(bot))
