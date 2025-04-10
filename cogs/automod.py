@@ -56,7 +56,8 @@ class AutoMod(commands.Cog):
 		if matched_strings:
 			await message.delete()
 			
-			if message.content.startswith(omega.cfg.COMMAND_PREFIX + 'wordcheck'):
+			command_names = ['wordcheck', 'checkword', 'wc']
+			if any(message.content.startswith(omega.cfg.COMMAND_PREFIX + cmd) for cmd in command_names):
 				return
 
 			await message.channel.send(
@@ -68,9 +69,9 @@ class AutoMod(commands.Cog):
 				for matched_string in matched_strings:
 					f.write(f"{message.author.id}|{message.content}|{matched_string}\n")
 
-	@commands.command(name='automodstats')
+	@commands.command(name='automodstats', aliases=['ams'])
 	async def amrank(self, ctx):
-		with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
+		with open('./data/automod_log.txt', 'rw', encoding='utf-8') as f:
 			log_data = f.readlines()
 			user_warnings = {}
 			for line in log_data:
@@ -78,7 +79,6 @@ class AutoMod(commands.Cog):
 				user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
 			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)
 			rank_list = [f"<@{user_id}>: {count} warnings" for user_id, count in sorted_users]
-			# if there is none found
 			if not rank_list:
 				await ctx.send("No warnings found.")
 				return
@@ -90,8 +90,11 @@ class AutoMod(commands.Cog):
 			f.write("")
 		await ctx.send("Automod log has been reset.")
 	
-	@commands.command(name='wordcheck')
+	@commands.command(name='wordcheck', aliases=['checkword', 'wc'])
 	async def wordcheck(self, ctx, *, word: str):
+		await message.delete()
+		await ctx.send(f"Checking automod logs for {obfuscated_word}")
+		obfuscated_word = re.sub(r'[aeiou]', '\*', word, flags=re.IGNORECASE)
 		with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
 			log_data = f.readlines()
 			user_warnings = {}
@@ -101,7 +104,6 @@ class AutoMod(commands.Cog):
 					user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
 			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)[:10]
 			rank_list = [f"<@{user_id}>: {count} times" for user_id, count in sorted_users]
-			obfuscated_word = re.sub(r'[aeiou]', '_', word, flags=re.IGNORECASE)
 			await ctx.send(f"{obfuscated_word}: {len(user_warnings)} times detected\n" + "\n".join(rank_list))
 	
 	@commands.command(name='banword')
