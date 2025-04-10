@@ -26,6 +26,7 @@ class NameColor(commands.Cog):
             "🟣": (128, 0, 128),
             "⚪": (255, 255, 255),
             "⚫": (0, 0, 0),
+            "🟤": (139, 69, 19),
         }
         return color_map.get(str(emoji), (255, 255, 255))
 
@@ -78,12 +79,12 @@ class NameColor(commands.Cog):
             role_name = self.get_color_name_from_emoji(reaction.emoji)
             role = discord.utils.get(guild.roles, name=role_name)
             if not role:
-                role = await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(reaction.emoji)))
                 total_roles = len(guild.roles)
-                await role.edit(position=total_roles - 2)
+                role = await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(reaction.emoji)), position=total_roles - 2)
+                #total_roles = len(guild.roles)
+                #await role.edit(position=total_roles - 2)
             await user.add_roles(role)
             await reaction.message.remove_reaction(reaction.emoji, user)
-            await user.send(f"You have been given the {role_name} role!")
 
 
 
