@@ -27,10 +27,18 @@ class AutoMod(commands.Cog):
 	def is_similar(self, a: str, b: str):
 		return SequenceMatcher(None, a, b).ratio() > 0.85
 
+    # get the matched string
+	def get_matched_string(self, a: str, b: str):
+		return SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b)).size
+	
 	@commands.Cog.listener()
 	async def on_message(self, message):
 		if message.author.bot:
 			return
+		
+		if not message.guild.me.guild_permissions.manage_messages:
+			return
+
 		normalized = self.normalize(message.content)
 		for profanity in self.profanity_list:
 			if profanity in normalized or self.is_similar(normalized, profanity):
@@ -39,8 +47,9 @@ class AutoMod(commands.Cog):
 					f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 5 seconds.*",
 					delete_after=5
 				)
+				matched_string = self.get_matched_string(normalized, profanity)
 				with open('./data/automod_log.txt', 'a', encoding='utf-8') as f:
-					f.write(f"{message.author.id}|{message.content}\n")
+					f.write(f"{message.author.id}|{message.content}|{matched_string}\n")
 				break
 
 	@commands.command(name='automodstats')
