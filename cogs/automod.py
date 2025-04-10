@@ -101,7 +101,7 @@ class AutoMod(commands.Cog):
 					user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
 			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)[:10]
 			rank_list = [f"<@{user_id}>: {count} times" for user_id, count in sorted_users]
-			obfuscated_word = re.sub(r'[aeiou]', '***', word, flags=re.IGNORECASE)
+			obfuscated_word = re.sub(r'[aeiou]', '_', word, flags=re.IGNORECASE)
 			await ctx.send(f"{obfuscated_word}: {len(user_warnings)} times detected\n" + "\n".join(rank_list))
 	
 	@commands.command(name='banword')
@@ -124,8 +124,6 @@ class AutoMod(commands.Cog):
 		self.profanity_list.remove(word.lower())
 		await ctx.send(f"Removed {word} from the profanity list.")
 	
-
-
 
 async def setup(bot: commands.Bot):
 	await bot.add_cog(AutoMod(bot))
