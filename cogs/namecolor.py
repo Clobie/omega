@@ -26,6 +26,19 @@ class NameColor(commands.Cog):
         }
         return color_map.get(str(emoji), (255, 255, 255))
 
+    def get_color_name_from_emoji(self, emoji):
+        color_map = {
+            "🔴": "Red",
+            "🟠": "Orange",
+            "🟡": "Yellow",
+            "🟢": "Green",
+            "🔵": "Blue",
+            "🟣": "Purple",
+            "⚪": "White",
+            "⚫": "Black",
+        }
+        return color_map.get(str(emoji), "Unknown")
+
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
         embed = omega.embed.create_embed_info("Name Color Setup", "React to this message to get a color role!")
@@ -48,10 +61,9 @@ class NameColor(commands.Cog):
         if user.bot:
             return
 
-        #if reaction emoji is in the message list, see if the role exists, if not create it
         if reaction.message.id in self.color_message_list:
             guild = reaction.message.guild
-            role_name = f"{reaction.emoji} {user.name}'s Color"
+            role_name = self.get_color_name_from_emoji(reaction.emoji)
             role = discord.utils.get(guild.roles, name=role_name)
             if not role:
                 role = await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(reaction.emoji)))
