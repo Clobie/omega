@@ -42,10 +42,13 @@ class AiTimeActionLog(commands.Cog):
         self.last_message = ""
 
     def get_full_context(self, scope):
-        return self.context_header + self.contexts.get(scope, [])
+        context = self.context_header + self.contexts.get(scope, [])
+        omega.logger.info(f"Retrieved full context for scope '{scope}': {context}")
+        return context
 
     def rebuild_context(self, last_message):
-        self.context = [
+        omega.logger.info("Rebuilding context with last_message.")
+        rebuilt = [
             {
                 "role": "system", 
                 "content": self.system_prompt
@@ -59,45 +62,69 @@ class AiTimeActionLog(commands.Cog):
                 "content": last_message
             }
         ]
+        omega.logger.debug(f"Rebuilt context: {rebuilt}")
+        return rebuilt
 
     async def process_action(self, data):
+        omega.logger.info("Processing action with data: " + data)
         if "TASK_COMPLETE" in data:
+            omega.logger.info("Detected TASK_COMPLETE in data. Clearing context and last_message.")
             self.context = []
             self.last_message = ""
+            omega.logger.debug("Context and last_message cleared.")
             return 0
-        
+
         if "INVALID_REQUEST" in data:
+            omega.logger.info("Detected INVALID_REQUEST in data. No further processing.")
             return 0
-        
+
+        omega.logger.info("Data processed normally.")
         return 1
 
     async def parse_message(self, message):
+        omega.logger.info("Parsing new message.")
         current_context = []
         if self.last_message:
+            omega.logger.info("Last message present. Rebuilding context.")
             current_context = self.rebuild_context(self.last_message)
         else:
+            omega.logger.info("No previous message. Using context header only.")
             current_context = self.context_header
 
-        result = await omega.ai.chat_completion_context(
-            self.model,
-            current_context
-        )
+        omega.logger.debug(f"Using context for completion: {current_context}")
+        try:
+            result = await omega.ai.chat_completion_context(
+                self.model,
+                current_context
+            )
+        except Exception as e:
+            omega.logger.error(f"Error during chat_completion_context: {e}")
+            return "INVALID_REQUEST"
 
+        omega.logger.info("Received result from AI.")
         self.last_message = result
+        omega.logger.debug(f"Updated last_message: {self.last_message}")
 
-        if self.process_action(result):
+        process_result = await self.process_action(result)
+        if process_result:
+            omega.logger.info("Sending result message to channel.")
             await message.channel.send(result)
+        else:
+            omega.logger.info("Result did not require sending a message.")
 
         return result
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
+            omega.logger.debug("Message from bot ignored.")
             return
 
         if message.channel.id != 1359963522368278679:
+            omega.logger.debug(f"Message from channel {message.channel.id} ignored.")
             return
 
+        omega.logger.info(f"New message received from user {message.author.id} in allowed channel.")
         result = await self.parse_message(message.content)
         await self.process_action(result)
 
