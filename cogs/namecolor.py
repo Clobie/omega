@@ -79,7 +79,8 @@ class NameColor(commands.Cog):
             role = discord.utils.get(guild.roles, name=role_name)
             if not role:
                 role = await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(reaction.emoji)))
-                await role.edit(position=3)
+                total_roles = len(guild.roles)
+                await role.edit(position=total_roles - 2)
             await user.add_roles(role)
             await reaction.message.remove_reaction(reaction.emoji, user)
             await user.send(f"You have been given the {role_name} role!")
