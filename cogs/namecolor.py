@@ -63,6 +63,15 @@ class NameColor(commands.Cog):
             f.write(f"{message.id}\n")
         self.color_message_list.append(message.id)
 
+        guild = ctx.guild
+        total_roles = len(guild.roles)
+        for role_name in ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "White", "Black", "Brown"]:
+            role = discord.utils.get(guild.roles, name=role_name)
+            if not role:
+                await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(role_name)))
+                await role.edit(position=total_roles - 3)
+                total_roles += 1
+
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
@@ -78,11 +87,6 @@ class NameColor(commands.Cog):
             guild = reaction.message.guild
             role_name = self.get_color_name_from_emoji(reaction.emoji)
             role = discord.utils.get(guild.roles, name=role_name)
-            if not role:
-                total_roles = len(guild.roles)
-                role = await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(reaction.emoji)), position=total_roles - 2)
-                #total_roles = len(guild.roles)
-                #await role.edit(position=total_roles - 2)
             await user.add_roles(role)
             await reaction.message.remove_reaction(reaction.emoji, user)
 
