@@ -29,7 +29,7 @@ class AutoMod(commands.Cog):
 
     # get the matched string
 	def get_matched_string(self, a: str, b: str):
-		return SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b)).size
+		return SequenceMatcher(None, a, b).find_longest_match(0, len(a), 0, len(b))
 	
 	@commands.Cog.listener()
 	async def on_message(self, message):
