@@ -37,19 +37,32 @@ class AutoMod(commands.Cog):
 		
 		if not message.guild.me.guild_permissions.manage_messages:
 			return
+	
+	@commands.Cog.listener()
+	async def on_message(self, message):
+		if message.author.bot:
+			return
+
+		if not message.guild.me.guild_permissions.manage_messages:
+			return
 
 		normalized = self.normalize(message.content)
+		matched_strings = []
+
 		for profanity in self.profanity_list:
 			if profanity in normalized or self.is_similar(normalized, profanity):
-				await message.delete()
-				await message.channel.send(
-					f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 5 seconds.*",
-					delete_after=5
-				)
-				matched_string = self.get_matched_string(normalized, profanity)
-				with open('./data/automod_log.txt', 'a', encoding='utf-8') as f:
+				matched_strings.append(self.get_matched_string(normalized, profanity))
+
+		if matched_strings:
+			await message.delete()
+			await message.channel.send(
+				f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 5 seconds.*",
+				delete_after=5
+			)
+
+			with open('./data/automod_log.txt', 'a', encoding='utf-8') as f:
+				for matched_string in matched_strings:
 					f.write(f"{message.author.id}|{message.content}|{matched_string}\n")
-				break
 
 	@commands.command(name='automodstats')
 	async def amrank(self, ctx):
