@@ -103,6 +103,28 @@ class AutoMod(commands.Cog):
 			rank_list = [f"<@{user_id}>: {count} times" for user_id, count in sorted_users]
 			obfuscated_word = re.sub(r'[aeiou]', '***', word, flags=re.IGNORECASE)
 			await ctx.send(f"{obfuscated_word}: {len(user_warnings)} times detected\n" + "\n".join(rank_list))
+	
+	@commands.command(name='automod addword')
+	@commands.has_permissions(manage_messages=True)
+	async def add_word(self, ctx, *, word: str):
+		with open('./data/profanity.txt', 'a', encoding='utf-8') as f:
+			f.write(f"{word.lower()}\n")
+		self.profanity_list.append(word.lower())
+		await ctx.send(f"Added {word} to the profanity list.")
+	
+	@commands.command(name='automod removeword')
+	@commands.has_permissions(manage_messages=True)
+	async def remove_word(self, ctx, *, word: str):
+		with open('./data/profanity.txt', 'r', encoding='utf-8') as f:
+			lines = f.readlines()
+		with open('./data/profanity.txt', 'w', encoding='utf-8') as f:
+			for line in lines:
+				if line.strip().lower() != word.lower():
+					f.write(line)
+		self.profanity_list.remove(word.lower())
+		await ctx.send(f"Removed {word} from the profanity list.")
+	
+
 
 
 async def setup(bot: commands.Bot):
