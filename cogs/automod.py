@@ -71,18 +71,22 @@ class AutoMod(commands.Cog):
 
 	@commands.command(name='automodstats', aliases=['ams'])
 	async def amrank(self, ctx):
-		with open('./data/automod_log.txt', 'rw', encoding='utf-8') as f:
-			log_data = f.readlines()
-			user_warnings = {}
-			for line in log_data:
-				user_id, _ = line.strip().split('|', 1)
-				user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
-			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)
-			rank_list = [f"<@{user_id}>: {count} warnings" for user_id, count in sorted_users]
-			if not rank_list:
-				await ctx.send("No warnings found.")
-				return
-			await ctx.send("\n".join(rank_list))
+		# check if file exists
+		try:
+			with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
+				log_data = f.readlines()
+				user_warnings = {}
+				for line in log_data:
+					user_id, _ = line.strip().split('|', 1)
+					user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
+				sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)
+				rank_list = [f"<@{user_id}>: {count} warnings" for user_id, count in sorted_users]
+				if not rank_list:
+					await ctx.send("No warnings found.")
+					return
+				await ctx.send("\n".join(rank_list))
+		except FileNotFoundError:
+			await ctx.send("No automod log found.")
 
 	@commands.command(name='automodreset')
 	async def amreset(self, ctx):
