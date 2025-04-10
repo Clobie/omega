@@ -55,7 +55,7 @@ class NameColor(commands.Cog):
         
         with open('./data/color_role_messages.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
-        self.color_message_list.append(message.id)
+        self.color_message_list.append(str(message.id))
         omega.logger.info(f"Stored message ID {message.id} for future reaction processing.")
 
         guild = ctx.guild
