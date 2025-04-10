@@ -45,6 +45,7 @@ class NameColor(commands.Cog):
 
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
+        await ctx.message.delete()
         embed = omega.embed.create_embed_info("Set your name color!", "React to this message to get a color role!")
         message = await ctx.send(embed=embed)
         await message.add_reaction("🔴")
