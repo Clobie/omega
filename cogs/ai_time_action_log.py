@@ -116,6 +116,8 @@ class AiTimeActionLog(commands.Cog):
             )
         except Exception as e:
             omega.logger.error(f"Error during chat_completion_context: {e}")
+            await message.channel.send(f"Error processing your request. {e}")
+            await message.channel.send(current_context)
             return "INVALID_REQUEST"
 
         omega.logger.info("Received result from AI.")
