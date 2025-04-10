@@ -60,16 +60,16 @@ class AiTimeActionLog(commands.Cog):
             }
         ]
 
-    async def process_action(self, message):
-        if "TASK_COMPLETE" in message:
+    async def process_action(self, data):
+        if "TASK_COMPLETE" in data:
             self.context = []
             self.last_message = ""
-            return
+            return 0
         
-        if "INVALID_REQUEST" in message:
-            return
+        if "INVALID_REQUEST" in data:
+            return 0
         
-        await self.bot.send_message(message)
+        return 1
 
     async def parse_message(self, message):
         current_context = []
@@ -84,6 +84,10 @@ class AiTimeActionLog(commands.Cog):
         )
 
         self.last_message = result
+
+        if self.process_action(result):
+            await message.channel.send(result)
+
         return result
 
     @commands.Cog.listener()
