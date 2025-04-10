@@ -16,6 +16,17 @@ class Cleanup(commands.Cog):
             await ctx.send("You do not have the required permissions for that command.")
             return
 
+        if ctx.message.mentions:
+            user = ctx.message.mentions[0]
+            deleted = await ctx.channel.purge(limit=val, check=lambda m: m.author == user)
+            await ctx.send(f"Deleted {len(deleted)} messages from {user.mention}.", delete_after=5)
+            return
+        
+        if val == 'bots':
+            deleted = await ctx.channel.purge(limit=val, check=lambda m: m.author.bot)
+            await ctx.send(f"Deleted {len(deleted)} messages from bots.", delete_after=5)
+            return
+
         if val == 'all':
             await ctx.channel.purge(limit=None)
             await ctx.send("Deleted all messages.", delete_after=5)
