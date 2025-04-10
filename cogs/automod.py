@@ -25,9 +25,8 @@ class AutoMod(commands.Cog):
 		return text.lower()
 
 	def is_similar(self, a: str, b: str):
-		return SequenceMatcher(None, a, b).ratio() > 0.85
+		return SequenceMatcher(None, a, b).ratio() > 0.95
 
-    # get the matched string so I can debug what string it matched
 	def get_matched_string(self, a: str, b: str):
 		return [x for x in self.profanity_list if self.is_similar(a, x)][0]
 	
