@@ -14,9 +14,6 @@ class NameColor(commands.Cog):
             with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
                 return [line.strip() for line in f if line.strip()]
         except FileNotFoundError:
-            # create file
-            with open('./data/color_messages.txt', 'w', encoding='utf-8') as f:
-                pass
             return []
 
     def get_color_from_emoji(self, emoji):
@@ -66,6 +63,12 @@ class NameColor(commands.Cog):
     async def on_reaction_add(self, reaction, user):
         if user.bot:
             return
+
+        if reaction.message.id in self.color_message_list:
+            guild = reaction.message.guild
+            for role in guild.roles:
+                if role.name in ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "White", "Black"]:
+                    await user.remove_roles(role)
 
         if reaction.message.id in self.color_message_list:
             guild = reaction.message.guild
