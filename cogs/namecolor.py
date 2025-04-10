@@ -41,6 +41,7 @@ class NameColor(commands.Cog):
         await message.pin()
         with open('./data/color_message_list.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
+        self.color_message_list.append(message.id)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
