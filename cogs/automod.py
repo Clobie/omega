@@ -104,7 +104,7 @@ class AutoMod(commands.Cog):
 			obfuscated_word = re.sub(r'[aeiou]', '***', word, flags=re.IGNORECASE)
 			await ctx.send(f"{obfuscated_word}: {len(user_warnings)} times detected\n" + "\n".join(rank_list))
 	
-	@commands.command(name='automod addword')
+	@commands.command(name='banword')
 	@commands.has_permissions(manage_messages=True)
 	async def add_word(self, ctx, *, word: str):
 		with open('./data/profanity.txt', 'a', encoding='utf-8') as f:
@@ -112,7 +112,7 @@ class AutoMod(commands.Cog):
 		self.profanity_list.append(word.lower())
 		await ctx.send(f"Added {word} to the profanity list.")
 	
-	@commands.command(name='automod removeword')
+	@commands.command(name='unbanword')
 	@commands.has_permissions(manage_messages=True)
 	async def remove_word(self, ctx, *, word: str):
 		with open('./data/profanity.txt', 'r', encoding='utf-8') as f:
