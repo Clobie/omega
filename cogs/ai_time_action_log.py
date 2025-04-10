@@ -46,22 +46,39 @@ class AiTimeActionLog(commands.Cog):
         omega.logger.info(f"Retrieved full context for scope '{scope}': {context}")
         return context
 
-    def rebuild_context(self, last_message):
+    def rebuild_context(self, new_message):
         omega.logger.info("Rebuilding context with last_message.")
-        rebuilt = [
-            {
-                "role": "system", 
-                "content": self.system_prompt
-            },
-            {
-                "role": "user", 
-                "content": "Here is the starting data:\n\n" + last_message
-            },
-            {
-                "role": "assistant", 
-                "content": last_message
-            }
-        ]
+
+        if self.last_message:
+            rebuilt = [
+                {
+                    "role": "system", 
+                    "content": self.system_prompt
+                },
+                {
+                    "role": "user", 
+                    "content": "Here is the starting data:\n\n" + self.last_message
+                },
+                {
+                    "role": "assistant", 
+                    "content": self.last_message
+                },
+                {
+                    "role": "user", 
+                    "content": new_message
+                },
+            ]
+        else:
+            rebuilt = [
+                {
+                    "role": "system", 
+                    "content": self.system_prompt
+                },
+                {
+                    "role": "user", 
+                    "content": new_message
+                },
+            ]
         omega.logger.debug(f"Rebuilt context: {rebuilt}")
         return rebuilt
 
@@ -86,7 +103,7 @@ class AiTimeActionLog(commands.Cog):
         current_context = []
         if self.last_message:
             omega.logger.info("Last message present. Rebuilding context.")
-            current_context = self.rebuild_context(self.last_message)
+            current_context = self.rebuild_context(message)
         else:
             omega.logger.info("No previous message. Using context header only.")
             current_context = self.context_header
