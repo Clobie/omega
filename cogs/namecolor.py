@@ -68,8 +68,7 @@ class NameColor(commands.Cog):
         for role_name in ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "White", "Black", "Brown"]:
             role = discord.utils.get(guild.roles, name=role_name)
             if not role:
-                await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(role_name)))
-                await role.edit(position=total_roles - 3)
+                await guild.create_role(name=role_name, color=discord.Color.from_rgb(*self.get_color_from_emoji(role_name)), position=total_roles - 3)
                 total_roles += 1
 
     @commands.Cog.listener()
