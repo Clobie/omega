@@ -55,6 +55,10 @@ class AutoMod(commands.Cog):
 
 		if matched_strings:
 			await message.delete()
+			
+			if message.content.startswith(omega.cfg.COMMAND_PREFIX + 'wordcheck'):
+				return
+
 			await message.channel.send(
 				f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 5 seconds.*",
 				delete_after=5
@@ -74,7 +78,32 @@ class AutoMod(commands.Cog):
 				user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
 			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)
 			rank_list = [f"<@{user_id}>: {count} warnings" for user_id, count in sorted_users]
+			# if there is none found
+			if not rank_list:
+				await ctx.send("No warnings found.")
+				return
 			await ctx.send("\n".join(rank_list))
+
+	@commands.command(name='automodreset')
+	async def amreset(self, ctx):
+		with open('./data/automod_log.txt', 'w', encoding='utf-8') as f:
+			f.write("")
+		await ctx.send("Automod log has been reset.")
+	
+	@commands.command(name='wordcheck')
+	async def wordcheck(self, ctx, *, word: str):
+		with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
+			log_data = f.readlines()
+			user_warnings = {}
+			for line in log_data:
+				user_id, message, matched_string = line.strip().split('|', 2)
+				if matched_string == word:
+					user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
+			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)[:10]
+			rank_list = [f"<@{user_id}>: {count} times" for user_id, count in sorted_users]
+			obfuscated_word = re.sub(r'[aeiou]', '***', word, flags=re.IGNORECASE)
+			await ctx.send(f"{obfuscated_word}: {len(user_warnings)} times detected\n" + "\n".join(rank_list))
+
 
 async def setup(bot: commands.Bot):
 	await bot.add_cog(AutoMod(bot))
