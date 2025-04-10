@@ -80,6 +80,7 @@ class AiTimeActionLog(commands.Cog):
                 },
             ]
         omega.logger.debug(f"Rebuilt context: {rebuilt}")
+        self.context = rebuilt
         return rebuilt
 
     async def process_action(self, data):
@@ -101,12 +102,7 @@ class AiTimeActionLog(commands.Cog):
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
         current_context = []
-        if self.last_message:
-            omega.logger.info("Last message present. Rebuilding context.")
-            current_context = self.rebuild_context(message)
-        else:
-            omega.logger.info("No previous message. Using context header only.")
-            current_context = self.context_header
+        self.rebuild_context(message)
 
         omega.logger.debug(f"Using context for completion: {current_context}")
         try:
