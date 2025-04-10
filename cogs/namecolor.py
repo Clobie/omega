@@ -12,7 +12,7 @@ COLOR_MAP = {
     "🟣": {"name": "Purple", "rgb": (128, 0, 128)},
     "⚪": {"name": "White", "rgb": (255, 255, 255)},
     "⚫": {"name": "Black", "rgb": (0, 0, 0)},
-    "🟤": {"name": "Brown", "rgb": (139, 69, 19)},
+    "🟤": {"name": "Brown", "rgb": (228, 167, 123)},
 }
 
 class NameColor(commands.Cog):
