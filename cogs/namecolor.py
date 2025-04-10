@@ -80,7 +80,7 @@ class NameColor(commands.Cog):
             await user.add_roles(role)
             await reaction.message.remove_reaction(reaction.emoji, user)
             await user.send(f"You have been given the {role_name} role!")
-            await role.edit(position=0)
+            await role.edit(position=2)
 
 
 
