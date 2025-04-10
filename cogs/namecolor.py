@@ -81,7 +81,6 @@ class NameColor(commands.Cog):
         # Sort color roles by name (or another criterion if you prefer a custom order)
         for role in sorted(color_roles, key=lambda r: r.name):
             new_positions[role] = new_position
-            new_position -= 1
         # Apply the new positions in a batch update.
         await guild.edit_role_positions(positions=new_positions)
 
