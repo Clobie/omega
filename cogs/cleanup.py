@@ -40,8 +40,8 @@ class Cleanup(commands.Cog):
         if val is None or not val.isdigit():
             await ctx.send("Specify a valid amount of messages to delete.")
             return
-
-        deleted = await ctx.channel.purge(limit=val)
+        
+        deleted = await ctx.channel.purge(limit=int(val))
         await ctx.send(f"Deleted {len(deleted)} messages.", delete_after=5)
     
 async def setup(bot):
