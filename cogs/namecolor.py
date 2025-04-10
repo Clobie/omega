@@ -1,4 +1,3 @@
-# cogs/namecolor.py
 import discord
 from discord.ext import commands
 from core.omega import omega
@@ -35,7 +34,7 @@ class NameColor(commands.Cog):
 
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
-        # Delete the original command message.
+        # Delete the command message.
         await ctx.message.delete()
         embed = omega.embed.create_embed_info(
             "Set your name color!", 
@@ -43,32 +42,48 @@ class NameColor(commands.Cog):
         )
         message = await ctx.send(embed=embed)
         
-        # Add each reaction from our color map.
+        # Add reactions from our color map.
         for emoji in COLOR_MAP.keys():
             await message.add_reaction(emoji)
         await message.pin()
         
-        # Store the message ID in the file and our local list.
+        # Store the message ID.
         with open('./data/color_role_messages.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
         self.color_message_list.append(message.id)
 
         guild = ctx.guild
-        total_roles = len(guild.roles)
-        # Create color roles if they do not already exist.
-        # Roles are named with a "cr_" prefix, e.g., "cr_Red".
+        
+        # Create the missing color roles (named with a "cr_" prefix).
         for emoji, data in COLOR_MAP.items():
             role_name = f"cr_{data['name']}"
             role = discord.utils.get(guild.roles, name=role_name)
             if not role:
-                # Create the role with the specified color.
-                role = await guild.create_role(
+                await guild.create_role(
                     name=role_name,
                     color=discord.Color.from_rgb(*data['rgb'])
                 )
-                # Adjust the role's position.
-                await role.edit(position=total_roles - 3)
-                total_roles += 1
+
+        # Reorder the color roles to be just below the bot's top role.
+        # IMPORTANT: The bot's role must be higher in the role hierarchy than the color roles.
+        bot_top_role = ctx.me.top_role
+        color_roles = []
+        # Retrieve roles we just created (or that already existed).
+        for data in COLOR_MAP.values():
+            role = discord.utils.get(guild.roles, name=f"cr_{data['name']}")
+            if role:
+                color_roles.append(role)
+        # Prepare new positions: starting just below the bot's top role.
+        # Higher numbers indicate higher placement.
+        new_positions = {}
+        # Start at one less than the bot's top role position.
+        new_position = bot_top_role.position - 1
+        # Sort color roles by name (or another criterion if you prefer a custom order)
+        for role in sorted(color_roles, key=lambda r: r.name):
+            new_positions[role] = new_position
+            new_position -= 1
+        # Apply the new positions in a batch update.
+        await guild.edit_role_positions(positions=new_positions)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -86,7 +101,7 @@ class NameColor(commands.Cog):
         color_roles = [role for role in guild.roles if role.name.startswith('cr_')]
         await user.remove_roles(*color_roles)
 
-        # Retrieve color data using the emoji and assign the role.
+        # Retrieve color data using the emoji and assign the corresponding role.
         color_data = self.get_color_data(reaction.emoji)
         if color_data:
             role = discord.utils.get(guild.roles, name=f"cr_{color_data['name']}")
