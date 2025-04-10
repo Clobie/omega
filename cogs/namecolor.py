@@ -18,7 +18,6 @@ COLOR_MAP = {
 class NameColor(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        # Load stored message IDs as integers for accurate comparisons.
         self.color_message_list = self.load_color_message_list()
         omega.logger.info(f"NameColor Cog initialized with {len(self.color_message_list)} stored message IDs.")
 
@@ -33,12 +32,10 @@ class NameColor(commands.Cog):
             return []
 
     def get_color_data(self, emoji):
-        # Return the color data (name and rgb) for the provided emoji.
         return COLOR_MAP.get(str(emoji))
 
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
-        # Delete the command message.
         await ctx.message.delete()
         omega.logger.info(f"'namecolorsetup' command invoked by {ctx.author}.")
         
@@ -48,14 +45,14 @@ class NameColor(commands.Cog):
         )
         message = await ctx.send(embed=embed)
         
-        # Add reactions from our color map.
+        
         for emoji in COLOR_MAP.keys():
             await message.add_reaction(emoji)
             omega.logger.info(f"Added reaction {emoji} to setup message (ID: {message.id}).")
         await message.pin()
         omega.logger.info(f"Pinned setup message with ID: {message.id}.")
         
-        # Store the message ID.
+        
         with open('./data/color_role_messages.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
         self.color_message_list.append(message.id)
@@ -63,7 +60,7 @@ class NameColor(commands.Cog):
 
         guild = ctx.guild
         
-        # Create the missing color roles (named with a "cr_" prefix).
+        
         for emoji, data in COLOR_MAP.items():
             role_name = f"cr_{data['name']}"
             role = discord.utils.get(guild.roles, name=role_name)
@@ -78,29 +75,27 @@ class NameColor(commands.Cog):
         # IMPORTANT: The bot's role must be higher in the role hierarchy than the color roles.
         bot_top_role = ctx.me.top_role
         color_roles = []
-        # Retrieve roles we just created (or that already existed).
+        
         for data in COLOR_MAP.values():
             role = discord.utils.get(guild.roles, name=f"cr_{data['name']}")
             if role:
                 color_roles.append(role)
-        # Prepare new positions: starting just below the bot's top role.
+        
         new_positions = {}
         new_position = bot_top_role.position - 1
         for role in sorted(color_roles, key=lambda r: r.name):
             new_positions[role] = new_position
             omega.logger.info(f"Setting role {role.name} position to {new_position}.")
             new_position -= 1
-        # Apply the new positions in a batch update.
+
         await guild.edit_role_positions(positions=new_positions)
         omega.logger.info("Successfully updated color role positions.")
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        # Ignore bot reactions.
         if user.bot:
             return
 
-        # Process only if the message is a valid color setup message.
         if reaction.message.id not in self.color_message_list:
             return
 
@@ -108,14 +103,12 @@ class NameColor(commands.Cog):
         omega.logger.info(f"Reaction added by {user} on message {reaction.message.id} using emoji {reaction.emoji}.")
 
         await reaction.message.remove_reaction(reaction.emoji, user)
-        
-        # Remove any existing color roles from the user.
+
         color_roles = [role for role in guild.roles if role.name.startswith('cr_')]
         if color_roles:
             await user.remove_roles(*color_roles)
             omega.logger.info(f"Removed existing color roles from {user}.")
 
-        # Retrieve color data using the emoji and assign the corresponding role.
         color_data = self.get_color_data(reaction.emoji)
         if color_data:
             role = discord.utils.get(guild.roles, name=f"cr_{color_data['name']}")
@@ -124,7 +117,6 @@ class NameColor(commands.Cog):
                 omega.logger.info(f"Assigned role {role.name} to {user}.")
         else:
             omega.logger.info(f"No color data found for emoji {reaction.emoji}.")
-        # Remove the reaction so the user can reuse it if needed.
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(NameColor(bot))
