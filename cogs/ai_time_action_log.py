@@ -106,7 +106,7 @@ class AiTimeActionLog(commands.Cog):
 
         omega.logger.debug(f"Using context for completion: {current_context}")
         try:
-            result = await omega.ai.chat_completion_context(
+            result = omega.ai.chat_completion_context(
                 self.model,
                 current_context
             )
