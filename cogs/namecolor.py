@@ -11,7 +11,7 @@ class NameColor(commands.Cog):
     
     def load_color_message_list(self):
         try:
-            with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
+            with open('./data/color_role_messages.txt', 'r', encoding='utf-8') as f:
                 return [line.strip() for line in f if line.strip()]
         except FileNotFoundError:
             return []
@@ -55,7 +55,7 @@ class NameColor(commands.Cog):
         await message.add_reaction("⚪")
         await message.add_reaction("⚫")
         await message.pin()
-        with open('./data/color_message_list.txt', 'a', encoding='utf-8') as f:
+        with open('./data/color_role_messages.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
         self.color_message_list.append(message.id)
 
