@@ -39,12 +39,13 @@ class NameColor(commands.Cog):
             "🟣": "Purple",
             "⚪": "White",
             "⚫": "Black",
+            "🟤": "Brown",
         }
         return color_map.get(str(emoji), "Unknown")
 
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
-        embed = omega.embed.create_embed_info("Name Color Setup", "React to this message to get a color role!")
+        embed = omega.embed.create_embed_info("Set your name color!", "React to this message to get a color role!")
         message = await ctx.send(embed=embed)
         await message.add_reaction("🔴")
         await message.add_reaction("🟠")
@@ -54,6 +55,7 @@ class NameColor(commands.Cog):
         await message.add_reaction("🟣")
         await message.add_reaction("⚪")
         await message.add_reaction("⚫")
+        await message.add_reaction("🟤")
         await message.pin()
         with open('./data/color_role_messages.txt', 'a', encoding='utf-8') as f:
             f.write(f"{message.id}\n")
