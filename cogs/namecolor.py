@@ -10,8 +10,11 @@ class NameColor(commands.Cog):
         self.color_message_list = self.load_color_message_list()
     
     def load_color_message_list(self):
-        with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
-            return [line.strip() for line in f if line.strip()]
+        try:
+            with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
+                return [line.strip() for line in f if line.strip()]
+        except FileNotFoundError:
+            return []
 
     def get_color_from_emoji(self, emoji):
         color_map = {
