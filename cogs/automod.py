@@ -31,19 +31,29 @@ class AutoMod(commands.Cog):
 	async def on_message(self, message):
 		if message.author.bot:
 			return
-
 		normalized = self.normalize(message.content)
-		
 		for profanity in self.profanity_list:
 			if profanity in normalized or self.is_similar(normalized, profanity):
 				await message.delete()
 				await message.channel.send(
-					f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 10 seconds.*",
-					delete_after=10
+					f"{message.author.mention}, your message contained inappropriate language and has been deleted.\n*This message will delete in 5 seconds.*",
+					delete_after=5
 				)
 				with open('./data/automod_log.txt', 'a', encoding='utf-8') as f:
 					f.write(f"{message.author.id}|{message.content}\n")
 				break
+
+	@commands.command(name='automodstats')
+	async def amrank(self, ctx):
+		with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
+			log_data = f.readlines()
+			user_warnings = {}
+			for line in log_data:
+				user_id, _ = line.strip().split('|', 1)
+				user_warnings[user_id] = user_warnings.get(user_id, 0) + 1
+			sorted_users = sorted(user_warnings.items(), key=lambda x: x[1], reverse=True)
+			rank_list = [f"<@{user_id}>: {count} warnings" for user_id, count in sorted_users]
+			await ctx.send("\n".join(rank_list))
 
 async def setup(bot: commands.Bot):
 	await bot.add_cog(AutoMod(bot))
