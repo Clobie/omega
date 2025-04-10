@@ -97,8 +97,8 @@ class AutoMod(commands.Cog):
 	@commands.command(name='wordcheck', aliases=['checkword', 'wc'])
 	async def wordcheck(self, ctx, *, word: str):
 		await message.delete()
-		await ctx.send(f"Checking automod logs for {obfuscated_word}")
 		obfuscated_word = re.sub(r'[aeiou]', '\*', word, flags=re.IGNORECASE)
+		await ctx.send(f"Checking automod logs for {obfuscated_word}")
 		with open('./data/automod_log.txt', 'r', encoding='utf-8') as f:
 			log_data = f.readlines()
 			user_warnings = {}
