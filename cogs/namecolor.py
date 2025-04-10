@@ -13,6 +13,19 @@ class NameColor(commands.Cog):
         with open('./data/color_messages.txt', 'r', encoding='utf-8') as f:
             return [line.strip() for line in f if line.strip()]
 
+    def get_color_from_emoji(self, emoji):
+        color_map = {
+            "🔴": (255, 0, 0),
+            "🟠": (255, 165, 0),
+            "🟡": (255, 255, 0),
+            "🟢": (0, 255, 0),
+            "🔵": (0, 0, 255),
+            "🟣": (128, 0, 128),
+            "⚪": (255, 255, 255),
+            "⚫": (0, 0, 0),
+        }
+        return color_map.get(str(emoji), (255, 255, 255))
+
     @commands.command(name='namecolorsetup')
     async def namecolorsetup(self, ctx):
         embed = omega.embed.create_embed_info("Name Color Setup", "React to this message to get a color role!")
