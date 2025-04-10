@@ -96,7 +96,8 @@ class NameColor(commands.Cog):
         if user.bot:
             return
 
-        if reaction.message.id not in self.color_message_list:
+        if str(reaction.message.id) not in self.color_message_list:
+            omega.logger.info(f"Reaction msg not matched {reaction.message.id} using emoji {reaction.emoji}")
             return
 
         guild = reaction.message.guild
