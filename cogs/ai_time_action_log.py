@@ -26,7 +26,7 @@ notes_here
 ```
 
 6. If the user asks to clear the log, says they are finished with the day, says they are done or any variant that signals they are finished, you will respond ONLY with one instance of the above template, followed by "TASK_COMPLETE" on a new line at the end.
-7. You will respond to all other questions or comments with "INVALID_REQUEST" only.
+7. You will respond to all other questions or comments by politely explaining that you are only a task logger and cannot help with anything else.
 8. You can edit the task log if the user asks you to do so.  You will respond with the same format as above, but with the changes made.
 9. Use military time.
 """
@@ -95,13 +95,16 @@ class AiTimeActionLog(commands.Cog):
         if "INVALID_REQUEST" in data:
             omega.logger.info("Detected INVALID_REQUEST in data. No further processing.")
             return False
+        
+        if "TASKLOG" in data:
+            omega.logger.info("Detected TASKLOG in data. Processing task log.")
+            return True
 
-        omega.logger.info("Data processed normally.")
         return True
 
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
-        current_context = self.rebuild_context(message)
+        current_context = self.rebuild_context(message.content)
 
         result = "asdf"
         omega.logger.debug(f"Using context for completion: {current_context}")
@@ -112,8 +115,8 @@ class AiTimeActionLog(commands.Cog):
             )
         except Exception as e:
             omega.logger.error(f"Error during chat_completion_context: {e}")
-            await message.channel.send(f"Error processing your request. {e}")
-            await message.channel.send(current_context)
+            #await message.channel.send(f"Error processing your request. {e}")
+            #await message.channel.send(current_context)
             return "INVALID_REQUEST"
 
         omega.logger.info("Received result from AI.")
@@ -140,7 +143,7 @@ class AiTimeActionLog(commands.Cog):
             return
 
         omega.logger.info(f"New message received from user {message.author.id} in allowed channel.")
-        result = await self.parse_message(message.content)
+        result = await self.parse_message(message)
         await self.process_action(result)
 
 async def setup(bot: commands.Bot):
