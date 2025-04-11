@@ -90,14 +90,14 @@ class AiTimeActionLog(commands.Cog):
             self.context = []
             self.last_message = ""
             omega.logger.debug("Context and last_message cleared.")
-            return 0
+            return False
 
         if "INVALID_REQUEST" in data:
             omega.logger.info("Detected INVALID_REQUEST in data. No further processing.")
-            return 0
+            return False
 
         omega.logger.info("Data processed normally.")
-        return 1
+        return True
 
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
