@@ -97,6 +97,7 @@ class AiTimeTaskLog(commands.Cog):
             self.clear_context(scope)
             self.add_context(scope, 'user', "show task log")
             self.add_context(scope, 'assistant', result)
+            await message.channel.send("Context cleared and rebuilt for task log.")
             omega.logger.debug("Rebuilt context for scope: " + str(scope) + "\nDebug: " + str(self.contexts[scope]))
 
     @commands.Cog.listener()
