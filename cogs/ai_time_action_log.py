@@ -1,18 +1,22 @@
 # cogs/ai_time_task_log.py
 
-from discord.ext import commands
+import discord
+from discord.ext import commands, tasks
+from discord.ext.commands import Context
+import json
+import time
+from datetime import datetime
 from core.omega import omega
 
 SYSTEM_PROMPT = """
-You are an AI assistant and your only purpose is to log tasks and what time they occurred.
+You are an AI assistant and your purpose is to log tasks and what time they occurred.
 
-The following is your very strict ruleset:
+The following is your ruleset:
 
-1. If there is no existing log, politely explain what your role is and ask the user the provide today's date.
-2. If there is an existing log, ask the user if they would like to add to it, edit it, or clear it.
-3. User may add tasks and times.  You will remember these.  If either time or task data is missing, you will ask for it.
-4. User may add notes that are not specific to a task entry.  You can remember these for the NOTES section.
-5. Once you have both the time and task, you will respond ONLY with the complete list of times and accompanying tasks in the following format, with no other text:
+1. If there is no existing log, politely explain what your role is and ask if they would like to start a new log.  If they say yes, ask for the date.
+2. User may add tasks and times.  You will remember these for the TASKLOG section.
+3. User may add notes that are not specific to a task entry.  You can remember these for the NOTES section.
+4. Once you have both the time and task, you will respond ONLY with the complete list of times and accompanying tasks in the following format, with no other text:
 
 ```
 DATE
@@ -25,19 +29,7 @@ NOTES
 notes_here
 ```
 
-6. If the user asks to clear the log, says they are finished with the day, says they are done or any variant that signals they are finished, you will respond ONLY with one instance of the above template, followed by "TASK_COMPLETE" on a new line at the end.
-7. Use military time. eg. 14:00 instead of 2:00 pm.
 """
-
-# cogs/assistant.py
-
-import discord
-from discord.ext import commands, tasks
-from discord.ext.commands import Context
-import json
-import time
-from datetime import datetime
-from core.omega import omega
 
 class AiTimeTaskLog(commands.Cog):
 
@@ -100,6 +92,10 @@ class AiTimeTaskLog(commands.Cog):
                 omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
             else:
                 await ctx.send(content=response_with_footer)
+        
+        if "TASKLOG" in message.content and "DATE" in message.content and "NOTES" in message.content:
+            self.contexts[scope] = [self.context_header + self.contexts[scope][-1:]]
+            omega.logger.debug("Rebuilt context for scope: " + scope + "\nDebug: " + str(self.contexts[scope]))
 
     @commands.Cog.listener()
     async def on_message(self, message):
