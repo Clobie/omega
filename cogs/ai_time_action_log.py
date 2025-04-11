@@ -93,9 +93,9 @@ class AiTimeTaskLog(commands.Cog):
             else:
                 await ctx.send(content=response_with_footer)
         
-        if "TASKLOG" in message.content and "DATE" in message.content and "NOTES" in message.content:
+        if "TASKLOG" in result and "DATE" in result and "NOTES" in result:
             self.contexts[scope] = [self.context_header + self.contexts[scope][-1:]]
-            omega.logger.debug("Rebuilt context for scope: " + scope + "\nDebug: " + str(self.contexts[scope]))
+            omega.logger.debug("Rebuilt context for scope: " + str(scope) + "\nDebug: " + str(self.contexts[scope]))
 
     @commands.Cog.listener()
     async def on_message(self, message):
