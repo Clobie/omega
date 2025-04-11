@@ -17,13 +17,15 @@ The following is your ruleset:
 2. User may add tasks and times.  You will remember these for the TASKLOG section.
 3. User may add notes that are not specific to a task entry.  You can remember these for the NOTES section.
 4. Once you have both the time and task, you will respond ONLY with the complete list of times and accompanying tasks in the following format, with no other text:
+5. If multiple notes are given at once, put them on separate lines in the NOTES section.
+6. If the user says and variant of "i am done", "I am finished", "clear context", "delete data" or similar, you will respond with the full log in the following format, followed by "END_TASKLOG" at the end.
 
 ```
 DATE
 date_here
 
 TASKLOG
-TIME|TASK (repeat for each task)
+TIME | TASK (repeat for each task)
 
 NOTES
 notes_here
@@ -78,7 +80,7 @@ class AiTimeTaskLog(commands.Cog):
             omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 
             footer = omega.ai.get_footer(tokens, cost)
-            response_with_footer = result + footer
+            response_with_footer = (result + footer).replace("END_TASKLOG", "")
 
             if len(response_with_footer) > 4000:
                 with open('file.txt', 'w') as f:
@@ -92,13 +94,14 @@ class AiTimeTaskLog(commands.Cog):
                 omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
             else:
                 await ctx.send(content=response_with_footer)
-        
+
+        if "END_TASKLOG" in result:
+            self.clear_context(scope)
+
         if "TASKLOG" in result and "DATE" in result and "NOTES" in result:
             self.clear_context(scope)
             self.add_context(scope, 'user', "current log to start from: \n" + result)
             self.add_context(scope, 'assistant', result)
-            await message.channel.send("Context cleared and rebuilt for task log.")
-            omega.logger.debug("Rebuilt context for scope: " + str(scope) + "\nDebug: " + str(self.contexts[scope]))
 
     @commands.Cog.listener()
     async def on_message(self, message):
