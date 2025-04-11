@@ -95,8 +95,7 @@ class AiTimeTaskLog(commands.Cog):
         
         if "TASKLOG" in result and "DATE" in result and "NOTES" in result:
             self.clear_context(scope)
-            self.add_context(scope, 'user', "show task log")
-            self.add_context(scope, 'assistant', result)
+            self.add_context(scope, 'user', "current log to start from: \n" + result)
             await message.channel.send("Context cleared and rebuilt for task log.")
             omega.logger.debug("Rebuilt context for scope: " + str(scope) + "\nDebug: " + str(self.contexts[scope]))
 
