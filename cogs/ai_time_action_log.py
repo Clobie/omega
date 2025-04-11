@@ -31,135 +31,118 @@ notes_here
 9. Use military time.
 """
 
-class AiTimeActionLog(commands.Cog):
+# cogs/assistant.py
+
+import discord
+from discord.ext import commands, tasks
+from discord.ext.commands import Context
+import json
+import time
+from datetime import datetime
+from core.omega import omega
+
+class AiTimeTaskLog(commands.Cog):
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.model = 'gpt-4o-mini'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
-        self.system_prompt = SYSTEM_PROMPT
+        self.contexts = {}
+        self.context_timestamps = {}
+        self.clear_inactive_contexts.start()
+        self.system_prompt = ""
+        self.set_system_prompt()
         self.context_header = [{"role": "system", "content": self.system_prompt}]
-        self.last_message = ""
-        self.context = []
+
+    def set_system_prompt(self):
+        self.system_prompt = SYSTEM_PROMPT
+
+    def get_scope(self, message):
+        if isinstance(message.channel, discord.DMChannel):
+            return f"user_{message.author.id}"
+        else:
+            return f"channel_{message.channel.id}"
+
+    def clear_context(self, scope):
+        if scope in self.contexts:
+            del self.contexts[scope]
+            del self.context_timestamps[scope]
+
+    def add_context(self, scope, role, content):
+        if scope not in self.contexts:
+            self.contexts[scope] = []
+        self.contexts[scope].append({"role": role, "content": content})
+        self.context_timestamps[scope] = time.time()
 
     def get_full_context(self, scope):
-        context = self.context_header + self.contexts.get(scope, [])
-        omega.logger.info(f"Retrieved full context for scope '{scope}': {context}")
-        return context
+        return self.context_header + self.contexts.get(scope, [])
 
-    def append_context(self, scope, message):
-        if scope not in self.contexts:
-            omega.logger.warning(f"Scope '{scope}' not found.")
-        else:
-            self.context.append(
-                {
-                    "role": scope,
-                    "content": message
-                }
-            )
-            omega.logger.info(f"Appended message to context for scope '{scope}': {message}")
+    @tasks.loop(seconds=60)
+    async def clear_inactive_contexts(self):
+        current_time = time.time()
+        to_clear = [scope for scope, last_used in self.context_timestamps.items() if current_time - last_used > 300]
+        for scope in to_clear:
+            self.clear_context(scope)
+            omega.logger.info(f"Cleared inactive context for {scope}")
 
-    def rebuild_context(self, new_message):
-        omega.logger.info("Rebuilding context with last_message.")
+            if scope.startswith("user_"):
+                user_id = int(scope.split("_")[1])
+                user = self.bot.get_user(user_id)
+                if user:
+                    await user.send(f"Your conversation with Omega has been inactive for 5 minutes. If you need assistance, feel free to send a message!")
+            if scope.startswith("channel_"):
+                channel_id = int(scope.split("_")[1])
+                channel = self.bot.get_channel(channel_id)
+                if channel:
+                    await channel.send(f"Omega has cleared the conversation due to inactivity. If you need assistance, feel free to send a message!")
 
-        if self.last_message:
-            rebuilt = [
-                {
-                    "role": "system", 
-                    "content": self.system_prompt
-                },
-                {
-                    "role": "user", 
-                    "content": "Here is the starting data:\n\n" + self.last_message
-                },
-                {
-                    "role": "assistant", 
-                    "content": self.last_message
-                },
-                {
-                    "role": "user", 
-                    "content": new_message
-                },
-            ]
-        else:
-            rebuilt = [
-                {
-                    "role": "system", 
-                    "content": self.system_prompt
-                },
-                {
-                    "role": "user", 
-                    "content": new_message
-                },
-            ]
-        omega.logger.debug(f"Rebuilt context: {rebuilt}")
-        self.context = rebuilt
-        return rebuilt
+    @clear_inactive_contexts.before_loop
+    async def before_clear_inactive_contexts(self):
+        await self.bot.wait_until_ready()
 
-    async def process_action(self, data):
-        omega.logger.info("Processing action with data: " + data)
-        if "TASK_COMPLETE" in data:
-            omega.logger.info("Detected TASK_COMPLETE in data. Clearing context and last_message.")
-            self.context = []
-            self.last_message = ""
-            omega.logger.debug("Context and last_message cleared.")
-            return False
+    async def reply_to_message(self, message, prompt):
+        ctx = await self.bot.get_context(message)
+        async with ctx.typing():
+            scope = self.get_scope(message)
+            self.add_context(scope, 'user', prompt)
+            full_context = self.get_full_context(scope)
+            result = omega.ai.chat_completion_context(self.model, full_context)
+            self.add_context(scope, 'assistant', result)
+            tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
+            omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 
-        if "INVALID_REQUEST" in data:
-            omega.logger.info("Detected INVALID_REQUEST in data. No further processing.")
-            return False
-        
-        if "TASKLOG" in data:
-            omega.logger.info("Detected TASKLOG in data. Processing task log.")
-            self.rebuild_context(data)
-            return True
+            footer = omega.ai.get_footer(tokens, cost)
+            response_with_footer = result + footer
 
-        return True
-
-    async def parse_message(self, message):
-        omega.logger.info("Parsing new message.")
-
-        if not self.last_message:
-            self.rebuild_context(message.content)
-
-        result = "asdf"
-
-        await message.channel.send("debug: " + str(self.context))
-
-        try:
-            result = omega.ai.chat_completion_context(
-                self.model,
-                self.context
-            )
-        except Exception as e:
-            omega.logger.error(f"Error during chat_completion_context: {e}")
-            return "INVALID_REQUEST"
-
-        self.last_message = result
-        self.append_context("assistant", result)
-        omega.logger.debug(f"Updated last_message: {self.last_message}")
-
-        process_result = await self.process_action(result)
-        if process_result:
-            omega.logger.info("Sending result message to channel.")
-            await message.channel.send(result)
-        else:
-            omega.logger.info("Result did not require sending a message.")
-
-        return result
+            if len(response_with_footer) > 4000:
+                with open('file.txt', 'w') as f:
+                    f.write(response_with_footer)
+                file = discord.File('file.txt')
+                await ctx.send(attachments=[file])
+                omega.logger.debug("Response message exceeded 4000 characters, sent as a file.")
+            elif len(response_with_footer) > 2000:
+                embed = omega.embed.create_embed("", response_with_footer)
+                await ctx.send(embed=embed)
+                omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
+            else:
+                await ctx.send(content=response_with_footer)
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
-            omega.logger.debug("Message from bot ignored.")
             return
-
-        if message.channel.id != 1359963522368278679:
-            omega.logger.debug(f"Message from channel {message.channel.id} ignored.")
+        ctx = await self.bot.get_context(message)
+        if ctx.command:
             return
-
-        omega.logger.info(f"New message received from user {message.author.id} in allowed channel.")
-        result = await self.parse_message(message)
-        await self.process_action(result)
+        if message.content == "clear context":
+            scope = self.get_scope(message)
+            self.clear_context(scope)
+            await message.add_reaction("✅")
+            return
+        if message.channel.id == 1359963522368278679:
+            prompt = message.content
+            await self.reply_to_message(message, prompt)
+            return
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(AiTimeActionLog(bot))
+    await bot.add_cog(AiTimeTaskLog(bot))
