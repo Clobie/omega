@@ -123,6 +123,8 @@ class AiTimeActionLog(commands.Cog):
 
         result = "asdf"
 
+        await message.channel.send("debug: " + str(self.context))
+
         try:
             result = omega.ai.chat_completion_context(
                 self.model,
