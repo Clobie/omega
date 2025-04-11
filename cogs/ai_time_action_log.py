@@ -94,7 +94,9 @@ class AiTimeTaskLog(commands.Cog):
                 await ctx.send(content=response_with_footer)
         
         if "TASKLOG" in result and "DATE" in result and "NOTES" in result:
-            self.contexts[scope] = [self.context_header + self.contexts[scope][-1:]]
+            self.clear_context(scope)
+            self.add_context(scope, 'user', "show task log")
+            self.add_context(scope, 'assistant', prompt)
             omega.logger.debug("Rebuilt context for scope: " + str(scope) + "\nDebug: " + str(self.contexts[scope]))
 
     @commands.Cog.listener()
