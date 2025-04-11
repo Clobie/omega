@@ -46,6 +46,18 @@ class AiTimeActionLog(commands.Cog):
         omega.logger.info(f"Retrieved full context for scope '{scope}': {context}")
         return context
 
+    def append_context(self, scope, message):
+        if scope not in self.contexts:
+            omega.logger.warning(f"Scope '{scope}' not found.")
+        else:
+            self.context.append(
+                {
+                    "role": scope,
+                    "content": message
+                }
+            )
+            omega.logger.info(f"Appended message to context for scope '{scope}': {message}")
+
     def rebuild_context(self, new_message):
         omega.logger.info("Rebuilding context with last_message.")
 
@@ -98,29 +110,27 @@ class AiTimeActionLog(commands.Cog):
         
         if "TASKLOG" in data:
             omega.logger.info("Detected TASKLOG in data. Processing task log.")
+            self.rebuild_context(data)
             return True
 
         return True
 
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
-        current_context = self.rebuild_context(message.content)
 
-        result = "asdf"
-        omega.logger.debug(f"Using context for completion: {current_context}")
+        self.append_context("user", message.content)
+
         try:
             result = omega.ai.chat_completion_context(
                 self.model,
-                current_context
+                self.context
             )
         except Exception as e:
             omega.logger.error(f"Error during chat_completion_context: {e}")
-            #await message.channel.send(f"Error processing your request. {e}")
-            #await message.channel.send(current_context)
             return "INVALID_REQUEST"
 
-        omega.logger.info("Received result from AI.")
         self.last_message = result
+        self.append_context("assistant", result)
         omega.logger.debug(f"Updated last_message: {self.last_message}")
 
         process_result = await self.process_action(result)
