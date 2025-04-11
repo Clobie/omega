@@ -103,6 +103,7 @@ class AiTimeActionLog(commands.Cog):
         omega.logger.info("Parsing new message.")
         current_context = self.rebuild_context(message)
 
+        result = "asdf"
         omega.logger.debug(f"Using context for completion: {current_context}")
         try:
             result = omega.ai.chat_completion_context(
