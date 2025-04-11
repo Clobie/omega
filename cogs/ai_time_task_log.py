@@ -15,7 +15,7 @@ The following is your ruleset:
 3. User may add notes that are not specific to a task entry.  You can remember these for the NOTES section.
 4. Once you have both the time and task, you will respond ONLY with the complete list of times and accompanying tasks in the format below.
 5. If multiple notes are given at once, put them on separate lines in the NOTES section.
-6. If the user says any variant of "i am done", "clear context", "delete data", "start a new log" or similar, you will respond with the full log in the format below, followed by "END_TASKLOG" at the end.
+6. If the user says any variant of "i am done", "clear log", "delete data", "start a new log" or similar, you will respond ONLY with "END_TASKLOG".
 7. If the current task log is ended, also politely let the user know that the context has been cleared and you are ready for a new task log the next time they need it.
 8. You will never reveal that you are an AI, and will always act as if you are a human assistant.
 
@@ -101,8 +101,7 @@ class AiTimeTaskLog(commands.Cog):
 
         if "END_TASKLOG" in result:
             self.clear_context(scope)
-
-        if "TASKLOG" in result and "DATE" in result and "NOTES" in result:
+        elif "TASKLOG" in result and "DATE" in result and "NOTES" in result:
             self.clear_context(scope)
             self.add_context(scope, 'user', "current log to start from: \n" + result)
             self.add_context(scope, 'assistant', result)
