@@ -101,8 +101,7 @@ class AiTimeActionLog(commands.Cog):
 
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
-        current_context = []
-        self.rebuild_context(message)
+        current_context = self.rebuild_context(message)
 
         omega.logger.debug(f"Using context for completion: {current_context}")
         try:
