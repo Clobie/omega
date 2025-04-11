@@ -8,10 +8,10 @@ You are an AI assistant and your only purpose is to log tasks and what time they
 
 The following is your very strict ruleset:
 
-1. If a user says a task with no time, you will ask what the time is.
-2. If a user says a time without a task, you will ask what the task is.
-3. If you don't know what the current date is, ask for it.  The date will be the same for all tasks, so only ask once.
-4. User may add notes that are not specific.  You can remember these.
+1. If there is no existing log, politely explain what your role is and ask the user the provide today's date.
+2. If there is an existing log, ask the user if they would like to add to it, edit it, or clear it.
+3. User may add tasks and times.  You will remember these.  If either time or task data is missing, you will ask for it.
+4. User may add notes that are not specific to a task entry.  You can remember these for the NOTES section.
 5. Once you have both the time and task, you will respond ONLY with the complete list of times and accompanying tasks in the following format:
 
 ```
@@ -26,9 +26,7 @@ notes_here
 ```
 
 6. If the user asks to clear the log, says they are finished with the day, says they are done or any variant that signals they are finished, you will respond ONLY with one instance of the above template, followed by "TASK_COMPLETE" on a new line at the end.
-7. You will respond to all other questions or comments by politely explaining that you are only a task logger and cannot help with anything else.
-8. You can edit the task log if the user asks you to do so.  You will respond with the same format as above, but with the changes made.
-9. Use military time.
+7. Use military time. eg. 14:00 instead of 2:00 pm.
 """
 
 # cogs/assistant.py
@@ -77,29 +75,6 @@ class AiTimeTaskLog(commands.Cog):
     def get_full_context(self, scope):
         return self.context_header + self.contexts.get(scope, [])
 
-    @tasks.loop(seconds=60)
-    async def clear_inactive_contexts(self):
-        current_time = time.time()
-        to_clear = [scope for scope, last_used in self.context_timestamps.items() if current_time - last_used > 300]
-        for scope in to_clear:
-            self.clear_context(scope)
-            omega.logger.info(f"Cleared inactive context for {scope}")
-
-            if scope.startswith("user_"):
-                user_id = int(scope.split("_")[1])
-                user = self.bot.get_user(user_id)
-                if user:
-                    await user.send(f"Your conversation with Omega has been inactive for 5 minutes. If you need assistance, feel free to send a message!")
-            if scope.startswith("channel_"):
-                channel_id = int(scope.split("_")[1])
-                channel = self.bot.get_channel(channel_id)
-                if channel:
-                    await channel.send(f"Omega has cleared the conversation due to inactivity. If you need assistance, feel free to send a message!")
-
-    @clear_inactive_contexts.before_loop
-    async def before_clear_inactive_contexts(self):
-        await self.bot.wait_until_ready()
-
     async def reply_to_message(self, message, prompt):
         ctx = await self.bot.get_context(message)
         async with ctx.typing():
@@ -108,7 +83,7 @@ class AiTimeTaskLog(commands.Cog):
             full_context = self.get_full_context(scope)
             result = omega.ai.chat_completion_context(self.model, full_context)
             self.add_context(scope, 'assistant', result)
-            tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
+            tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
             omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 
             footer = omega.ai.get_footer(tokens, cost)
