@@ -36,10 +36,10 @@ class AiTimeActionLog(commands.Cog):
         self.bot = bot
         self.model = 'gpt-4o-mini'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
-        self.context = []
         self.system_prompt = SYSTEM_PROMPT
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.last_message = ""
+        self.context = []
 
     def get_full_context(self, scope):
         context = self.context_header + self.contexts.get(scope, [])
@@ -118,7 +118,10 @@ class AiTimeActionLog(commands.Cog):
     async def parse_message(self, message):
         omega.logger.info("Parsing new message.")
 
-        self.append_context("user", message.content)
+        if not self.last_message:
+            self.rebuild_context(message.content)
+
+        result = "asdf"
 
         try:
             result = omega.ai.chat_completion_context(
