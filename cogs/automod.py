@@ -69,6 +69,24 @@ class AutoMod(commands.Cog):
 				for matched_string in matched_strings:
 					f.write(f"{message.author.id}|{message.content}|{matched_string}\n")
 
+	@commands.command(name='automod', aliases=['am'])
+	async def automod(self, ctx):
+		with open('./data/automod.txt', 'a+', encoding='utf-8') as f:
+			f.seek(0)
+			if str(ctx.guild.id) in f.read():
+				f.seek(0)
+				lines = f.readlines()
+				f.seek(0)
+				for line in lines:
+					if str(ctx.guild.id) not in line.strip():
+						f.write(line)
+				f.truncate()
+				await ctx.send("Automod has been disabled for this server.")
+			else:
+				f.write(f"{ctx.guild.id}\n")
+				await ctx.send("Automod has been enabled for this server.")
+
+
 	@commands.command(name='automodstats', aliases=['ams'])
 	async def amrank(self, ctx):
 		# check if file exists
