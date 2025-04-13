@@ -40,6 +40,10 @@ class AutoMod(commands.Cog):
 	
 	@commands.Cog.listener()
 	async def on_message(self, message):
+		with open('./data/automod.txt', 'r', encoding='utf-8') as f:
+			if str(message.guild.id) not in f.read():
+				return
+		
 		if message.author.bot:
 			return
 
