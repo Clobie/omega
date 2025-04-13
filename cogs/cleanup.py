@@ -20,6 +20,9 @@ class Cleanup(commands.Cog):
         """
         Deletes the specified number of messages from the channel.
         """
+
+        await ctx.message.delete()
+
         if not ctx.author.guild_permissions.manage_messages:
             await ctx.send("You do not have the required permissions for that command.")
             return
@@ -55,10 +58,6 @@ class Cleanup(commands.Cog):
             await ctx.send(f"Deleted {len(deleted)} messages.\n*This message will delete in 5 seconds.*", delete_after=5)
             return
 
-        deleted = await ctx.channel.purge(limit=None, check=lambda m: m.content == val)
-        await ctx.send(f"Deleted {len(deleted)} messages matching '{val}'.\n*This message will delete in 5 seconds.*", delete_after=5)
-
-
         date = self.parse_flexible_date(val)
         if date:
             try:
@@ -66,8 +65,10 @@ class Cleanup(commands.Cog):
                 await ctx.send(f"Deleted all messages from {date}.\n*This message will delete in 5 seconds.*", delete_after=5)
             except Exception as e:
                 await ctx.send(f"An error occurred while purging messages: {e}", delete_after=5)
-        else:
-            await ctx.send("Invalid date format. Please use a recognizable date.", delete_after=5)
+            return
+        
+        deleted = await ctx.channel.purge(limit=None, check=lambda m: m.content == val)
+        await ctx.send(f"Deleted {len(deleted)} messages matching '{val}'.\n*This message will delete in 5 seconds.*", delete_after=5)
     
 async def setup(bot):
     await bot.add_cog(Cleanup(bot))
