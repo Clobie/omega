@@ -53,6 +53,11 @@ class Cleanup(commands.Cog):
         if val.isdigit():
             deleted = await ctx.channel.purge(limit=int(val))
             await ctx.send(f"Deleted {len(deleted)} messages.\n*This message will delete in 5 seconds.*", delete_after=5)
+            return
+
+        deleted = await ctx.channel.purge(limit=None, check=lambda m: m.content == val)
+        await ctx.send(f"Deleted {len(deleted)} messages matching '{val}'.\n*This message will delete in 5 seconds.*", delete_after=5)
+
 
         date = self.parse_flexible_date(val)
         if date:
