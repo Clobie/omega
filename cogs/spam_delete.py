@@ -9,8 +9,6 @@ class SpamDelete(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot:
-            return
         if message.content == "The world has been saved.":
             await message.delete()
     
