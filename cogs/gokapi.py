@@ -46,43 +46,38 @@ class Gokapi(commands.Cog):
         
     @commands.command()
     async def save(self, ctx):
-        """Saves the attachment of the replied-to message to Gokapi."""
-        # Ensure this is a reply
+        """
+        Saves the attachment of the replied-to message to Gokapi.
+        """
         if not ctx.message.reference:
             await ctx.send("Please reply to a message containing an attachment.")
             return
 
-        # Get the referenced message
         ref_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
 
-        # Check if the referenced message has an attachment
         if not ref_msg.attachments:
             await ctx.send("The referenced message has no attachments.")
             return
 
-        # Process the first attachment
         attachment = ref_msg.attachments[0]
         file_name = attachment.filename
 
         try:
-            # Download the attachment
             response = await attachment.read()
             
-            # Upload to Gokapi
             files = {
                 "file": (file_name, response, "application/octet-stream"),
             }
             data = {
                 "allowedDownloads": 0,
                 "expiryDays": 0,
-                "password": "",  # Set a password here if needed
+                "password": "",
             }
             headers = {
                 "accept": "application/json",
                 "apikey": omega.cfg.GOKAPI_API_KEY,
             }
-
-            # Make the POST request
+            
             gokapi_response = requests.post(
                 self.file_save_api_url, 
                 headers=headers, 

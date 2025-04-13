@@ -9,6 +9,9 @@ class InviteMe(commands.Cog):
 
     @commands.command(name="inviteme")
     async def inviteme(self, ctx):
+        """
+        Generate an invite link for the bot.
+        """
         await ctx.send(f"https://discord.com/oauth2/authorize?client_id={omega.cfg.INVITE_ID}")
 
 async def setup(bot):

@@ -15,6 +15,9 @@ class Dalle(commands.Cog):
 
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
+        """
+        Generate an image using DALL-E 3.
+        """
         #if int(omega.credit.get_user_credits(ctx.author.id)) < 4:
         #    await ctx.send(f"You don't have enough credits for that :(")
         #    return

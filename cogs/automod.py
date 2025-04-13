@@ -73,8 +73,14 @@ class AutoMod(commands.Cog):
 				for matched_string in matched_strings:
 					f.write(f"{message.author.id}|{message.content}|{matched_string}\n")
 
+	# add a command descriptor so it shows up in the help menu
+
 	@commands.command(name='automod', aliases=['am'])
+	@commands.has_permissions(manage_messages=True)
 	async def automod(self, ctx):
+		"""
+		Toggles automod on and off for the server.
+		"""
 		with open('./data/automod.txt', 'a+', encoding='utf-8') as f:
 			f.seek(0)
 			if str(ctx.guild.id) in f.read():
@@ -92,6 +98,7 @@ class AutoMod(commands.Cog):
 
 
 	@commands.command(name='automodstats', aliases=['ams'])
+	@commands.has_permissions(manage_messages=True)
 	async def amrank(self, ctx):
 		# check if file exists
 		try:
@@ -111,12 +118,14 @@ class AutoMod(commands.Cog):
 			await ctx.send("No automod log found.")
 
 	@commands.command(name='automodreset')
+	@commands.has_permissions(manage_messages=True)
 	async def amreset(self, ctx):
 		with open('./data/automod_log.txt', 'w', encoding='utf-8') as f:
 			f.write("")
 		await ctx.send("Automod log has been reset.")
 	
 	@commands.command(name='wordcheck', aliases=['checkword', 'wc'])
+	@commands.has_permissions(manage_messages=True)
 	async def wordcheck(self, ctx, *, word: str):
 		await ctx.message.delete()
 		obfuscated_word = re.sub(r'[aeiou]', '\*', word, flags=re.IGNORECASE)

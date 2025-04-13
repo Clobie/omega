@@ -35,6 +35,9 @@ class NameColor(commands.Cog):
         return COLOR_MAP.get(str(emoji))
 
     @commands.command(name='namecolorsetup')
+    @commands.has_permissions(manage_roles=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.has_permissions(administrator=True)
     async def namecolorsetup(self, ctx):
         await ctx.message.delete()
         omega.logger.info(f"'namecolorsetup' command invoked by {ctx.author}.")
@@ -71,8 +74,6 @@ class NameColor(commands.Cog):
                 )
                 omega.logger.info(f"Created role {role_name} with color {data['rgb']}.")
         
-        # Reorder the color roles to be just below the bot's top role.
-        # IMPORTANT: The bot's role must be higher in the role hierarchy than the color roles.
         bot_top_role = ctx.me.top_role
         color_roles = []
         

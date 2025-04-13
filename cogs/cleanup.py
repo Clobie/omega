@@ -18,7 +18,8 @@ class Cleanup(commands.Cog):
     @commands.command(name='clean')
     async def clean(self, ctx, *, val):
         """
-        Deletes the specified number of messages from the channel.
+        Channel cleanup command.
+        Usage: !clean [number|all|bots|images|today|date|user|message]
         """
 
         await ctx.message.delete()
