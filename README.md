@@ -6,34 +6,63 @@ If you would like to contribute, please open a PR
 
 # Features
 Automod
+
     Removes profanity
+    
     Logs warnings for users
+    
 AI Assistant
+
     General AI Chat
+    
     "TL;DR" Game Design Document Assistant
+    
     Time and Task log assistant
+    
 Cleanup
+
     Clean channels by user, message type, number of messages, etc
+    
 Credit system
+
     Trade/earn credits
+    
 Dalle-3
+
     Generate images
+    
 Gokapi
+
     Save attachments to file server
+    
     List saved files for download
+    
 Inviteme
+
     Generates bot invite link
+    
 Name color
+
     React to name color post to get a custom name color
+    
 QR
+
     Generates custom QR codes
+    
 Reactor
+
     Detect conversation topics and sentiments, and occasionally react with relevant GIFs
+    
 Spam
+
     Flag words or phrases that will automatically be deleted
+    
 Update
+
     Designate a channel to send bot updates, commits, etc
+    
     Automatically updates the bot when a new commit is detected on main branch
+    
 
 # Installation
 
