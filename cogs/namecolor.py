@@ -24,7 +24,7 @@ class NameColor(commands.Cog):
     def load_color_message_list(self):
         try:
             with open('./data/color_role_messages.txt', 'r', encoding='utf-8') as f:
-                message_ids = [int(line.strip()) for line in f if line.strip()]
+                message_ids = [str(line.strip()) for line in f if line.strip()]
                 omega.logger.info(f"Loaded color message IDs: {message_ids}")
                 return message_ids
         except FileNotFoundError:
