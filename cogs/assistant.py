@@ -12,7 +12,7 @@ class Assistant(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.model = 'gpt-4o-mini'
+        self.model = 'gpt-4o'
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
         self.contexts = {}
         self.context_timestamps = {}
