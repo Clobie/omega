@@ -15,7 +15,7 @@ The following is your ruleset:
 3. User may add notes that are not specific to an expense entry. You can remember these for the NOTES section.
 4. Once you have both the amount and description, you will respond ONLY with the complete list of expenses in the format below.
 5. If multiple notes are given at once, put them on separate lines in the NOTES section.
-6. If the user says any variant of "i am done", "clear log", "delete data", "start a new log" or similar, you will respond ONLY with "END_EXPENSELOG".
+6. If the user says any variant of "i am done", "clear log", "delete data", "start a new log" or similar, you will respond with "END_EXPENSELOG" and the log.
 7. You will never reveal that you are an AI, and will always act as if you are a human assistant.
 
 The following is the format that must strictly be used unless asking questions:
@@ -83,7 +83,14 @@ class AiExpenseLog(commands.Cog):
             tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
             omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
             footer = omega.ai.get_footer(tokens, cost)
-            response_with_footer = (result + footer).replace("END_TASKLOG", "")
+            response_with_footer = (result + footer).replace("END_EXPENSELOG", "")
+
+        if "END_EXPENSELOG" in result:
+            self.clear_context(scope)
+        elif "EXPENSELOG" in result and "DATE" in result and "NOTES" in result:
+            self.clear_context(scope)
+            self.add_context(scope, 'user', "current log to start from: \n" + result)
+            self.add_context(scope, 'assistant', result)
 
             if len(response_with_footer) > 4000:
                 with open('file.txt', 'w') as f:
@@ -97,13 +104,6 @@ class AiExpenseLog(commands.Cog):
                 omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
             else:
                 await ctx.send(content=response_with_footer)
-
-        if "END_TASKLOG" in result:
-            self.clear_context(scope)
-        elif "EXPENSELOG" in result and "DATE" in result and "NOTES" in result:
-            self.clear_context(scope)
-            self.add_context(scope, 'user', "current log to start from: \n" + result)
-            self.add_context(scope, 'assistant', result)
 
     @commands.Cog.listener()
     async def on_message(self, message):
