@@ -85,12 +85,12 @@ class AiExpenseLog(commands.Cog):
             footer = omega.ai.get_footer(tokens, cost)
             response_with_footer = (result + footer).replace("END_EXPENSELOG", "")
 
-        if "END_EXPENSELOG" in result:
-            self.clear_context(scope)
-        elif "EXPENSELOG" in result and "DATE" in result and "NOTES" in result:
-            self.clear_context(scope)
-            self.add_context(scope, 'user', "current log to start from: \n" + result)
-            self.add_context(scope, 'assistant', result)
+            if "END_EXPENSELOG" in result:
+                self.clear_context(scope)
+            elif "EXPENSELOG" in result and "DATE" in result and "NOTES" in result:
+                self.clear_context(scope)
+                self.add_context(scope, 'user', "current log to start from: \n" + result)
+                self.add_context(scope, 'assistant', result)
 
             if len(response_with_footer) > 4000:
                 with open('file.txt', 'w') as f:
