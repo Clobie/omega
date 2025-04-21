@@ -21,7 +21,7 @@ class Credits(commands.Cog):
             return
         if message.startswith(omega.cfg.PREFIX):
             return
-        omega.credit.add_user_credits(message.author.id, 1)  # Add 1 credit for each message sent
+        omega.credit.gift_user_credits(message.author.id, 1)  # Add 1 credit for each message sent
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
