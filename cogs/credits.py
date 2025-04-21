@@ -17,9 +17,7 @@ class Credits(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        if not message.guild:
-            return
-        if message.startswith(omega.cfg.PREFIX):
+        if message.startswith(omega.cfg.COMMAND_PREFIX):
             return
         omega.credit.gift_user_credits(message.author.id, 1)  # Add 1 credit for each message sent
 
