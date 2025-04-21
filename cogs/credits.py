@@ -13,7 +13,7 @@ class Credits(commands.Cog):
     async def on_ready(self):
         pass
     
-    @commands.listener()
+    @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
