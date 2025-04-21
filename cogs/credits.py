@@ -12,6 +12,16 @@ class Credits(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         pass
+    
+    @commands.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        if not message.guild:
+            return
+        if message.startswith(omega.cfg.PREFIX):
+            return
+        omega.credit.add_user_credits(message.author.id, 1)  # Add 1 credit for each message sent
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
