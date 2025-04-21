@@ -13,6 +13,11 @@ from utils.database import db
 from utils.ai import ai
 from utils.embed import embed
 from utils.giphy import gfy
+from utils.discord_log_handler import DiscordLogHandler
+
+
+# temp
+import logging
 
 class Omega:
     def __init__(self):
@@ -28,6 +33,12 @@ class Omega:
         self.ai = ai
         self.embed = embed
         self.gfy = gfy
+
+        # temp
+        discord_handler = DiscordLogHandler(self.bot, 1363678201636847686)
+        discord_handler.setLevel(logging.DEBUG)
+        discord_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        self.logger.addHandler(discord_handler)
 
     async def run(self):
         logger.info('Starting bot...')
