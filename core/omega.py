@@ -39,7 +39,7 @@ class Omega:
         discord_handler.setLevel(logging.DEBUG)
         discord_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(discord_handler)
-
+        
     async def run(self):
         logger.info('Starting bot...')
 
