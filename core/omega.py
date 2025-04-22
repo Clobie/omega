@@ -35,11 +35,11 @@ class Omega:
         self.gfy = gfy
 
         # temp
-        discord_handler = DiscordLogHandler(self.bot, 1363678201636847686, level=logging.DEBUG, flush_interval=5, batch_size=10)
+        discord_handler = DiscordLogHandler(self.bot, 1363678201636847686)
         discord_handler.setLevel(logging.DEBUG)
         discord_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(discord_handler)
-        
+
     async def run(self):
         logger.info('Starting bot...')
 
