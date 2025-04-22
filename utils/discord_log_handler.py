@@ -16,3 +16,4 @@ class DiscordLogHandler(logging.Handler):
 	def emit(self, record):
 		log_entry = self.format(record)
 		asyncio.create_task(self._send_log(log_entry))
+	
