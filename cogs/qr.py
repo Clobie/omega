@@ -80,7 +80,7 @@ class QR(commands.Cog, name="qr"):
             await attachment.save(f'logos/{user.id}_logo.png')
             await context.send(f"Logo saved for {user.name}.")
         else:
-            await context.send("Please upload a valid image file, or ensure the reply has an image.")
+            await context.send("Please attach a valid image file, or reply to a post with an image attachment.")
     
     @commands.command(name="getlogo")
     async def get_logo(self, context, user: discord.User = None):
@@ -93,6 +93,21 @@ class QR(commands.Cog, name="qr"):
         logo_path = f'logos/{user.id}_logo.png'
         if os.path.exists(logo_path):
             await context.send(file=discord.File(logo_path))
+        else:
+            await context.send("No logo found for you.")
+    
+    @commands.command(name="removelogo")
+    async def remove_logo(self, context, user: discord.User = None):
+        """
+        Remove your logo for bot functions.
+        """
+        if not user:
+            user = context.author
+
+        logo_path = f'logos/{user.id}_logo.png'
+        if os.path.exists(logo_path):
+            os.remove(logo_path)
+            await context.send(f"Logo removed for {user.name}.")
         else:
             await context.send("No logo found for you.")
 
