@@ -29,7 +29,7 @@ class Credit:
         if cost < 0:
             logger.warning("Cost is negative, returning minimum credits (1).")
             return 1
-        credits_per_cent = 10
+        credits_per_cent = 1
         credits = cost * 100 * credits_per_cent
         logger.info(f"Converted cost {cost} to {credits} credits.")
         return max(1, round(credits))
