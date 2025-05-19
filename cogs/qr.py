@@ -44,7 +44,7 @@ class QR(commands.Cog, name="qr"):
 
         if logo:
             logo_size = int(qr_img.size[0] * 0.2)
-            logo = logo.resize((logo_size, logo_size), Image.ANTIALIAS)
+            logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
             logo_position = (
                 (qr_img.size[0] - logo_size) // 2,
                 (qr_img.size[1] - logo_size) // 2
