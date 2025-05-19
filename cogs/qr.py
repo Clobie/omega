@@ -36,19 +36,22 @@ class QR(commands.Cog, name="qr"):
         user_id = context.author.id
         logo_path = f'logos/{user_id}_logo.png'
         if os.path.exists(logo_path):
-            logo = Image.open(logo_path)
+            logo = Image.open(logo_path).convert("RGBA")
         else:
             logo_path = f'logos/default_logo.png'
             if os.path.exists(logo_path):
-                logo = Image.open(logo_path)
+                logo = Image.open(logo_path).convert("RGBA")
 
         if logo:
             logo_size = int(qr_img.size[0] * 0.2)
             logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+
+            mask = Image.new('L', logo.size, 255)
             logo_position = (
                 (qr_img.size[0] - logo_size) // 2,
                 (qr_img.size[1] - logo_size) // 2
             )
+
             qr_img.paste(logo, logo_position, mask=logo)
 
         unique_filename = f'qr_{int(time.time())}.png'
