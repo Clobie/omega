@@ -18,6 +18,7 @@ def color_distance(c1, c2):
 class RemoveBG(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
 
     @commands.command(name="removebg")
     async def removebg(
@@ -32,9 +33,7 @@ class RemoveBG(commands.Cog):
         weight: tolerance for color similarity (default: 30)
         Attach an image to your message.
         """
-        if not ctx.message.attachments:
-            await ctx.send("Please attach an image.")
-            return
+        reply_msg = await ctx.send(self.thinking_emoji)
 
         attachment = None
 
@@ -56,7 +55,6 @@ class RemoveBG(commands.Cog):
             await ctx.send("Could not open the image.")
             return
 
-        # Parse color
         if re.match(r"^\d{1,3},\d{1,3},\d{1,3}$", color):
             target_color = tuple(map(int, color.split(',')))
         else:
@@ -81,7 +79,8 @@ class RemoveBG(commands.Cog):
             user = ctx.author
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
             filename = f"{user.id}_{timestamp}_image.png"
-            await ctx.send(file=File(fp=image_binary, filename=filename))
+            #await ctx.send(file=File(fp=image_binary, filename=filename))
+            await reply_msg.edit(content='', attachments=[File(fp=image_binary, filename=filename)])
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(RemoveBG(bot))
