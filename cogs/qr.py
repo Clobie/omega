@@ -78,6 +78,20 @@ class QR(commands.Cog, name="qr"):
             await context.send(f"Logo saved for {user.name}.")
         else:
             await context.send("Please upload a valid image file, or ensure the reply has an image.")
+    
+    @commands.command(name="getlogo")
+    async def get_logo(self, context, user: discord.User = None):
+        """
+        Get your logo for bot functions.
+        """
+        if not user:
+            user = context.author
+
+        logo_path = f'logos/{user.id}_logo.png'
+        if os.path.exists(logo_path):
+            await context.send(file=discord.File(logo_path))
+        else:
+            await context.send("No logo found for you.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(QR(bot))
