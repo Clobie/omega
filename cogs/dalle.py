@@ -36,9 +36,9 @@ class Dalle(commands.Cog):
                     credits = omega.credit.convert_cost_to_credits(self.total_cost)
                     omega.credit.user_spend(ctx.author.id, credits)
                     omega.ai.log_usage(ctx.author.id, 0, self.total_cost, 'dalle3')
-                    credits_remaining = omega.common.to_superscript(omega.credit.get_user_credits(ctx.author.id))
+                    credits_remaining = omega.credit.get_user_credits(ctx.author.id)
                     footer = omega.ai.get_footer('null', self.total_cost)
-                    footer += f"\n{credits_remaining}"
+                    footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
                     #await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
 
