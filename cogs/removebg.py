@@ -27,11 +27,7 @@ class RemoveBG(commands.Cog):
         weight: int = 30
     ):
         """
-        Makes the background of an image transparent.
-        Usage: !removebg [color] [weight]
-        color: hex code or 'r,g,b' (default: white)
-        weight: tolerance for color similarity (default: 30)
-        Attach an image to your message.
+        Replaces the background of an image with a specified color.  Default white.
         """
         reply_msg = await ctx.send(self.thinking_emoji)
 
@@ -79,7 +75,6 @@ class RemoveBG(commands.Cog):
             user = ctx.author
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
             filename = f"{user.id}_{timestamp}_image.png"
-            #await ctx.send(file=File(fp=image_binary, filename=filename))
             await reply_msg.edit(content='', attachments=[File(fp=image_binary, filename=filename)])
 
 async def setup(bot: commands.Bot):
