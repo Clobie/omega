@@ -32,11 +32,13 @@ class Dalle(commands.Cog):
                     image_data = await resp.read()
                     filename = omega.common.generate_random_string() + "_image.png"
                     file = discord.File(io.BytesIO(image_data), filename=filename)
-                    footer = omega.ai.get_footer('null', self.total_cost)
                     omega.ai.update_cost_static(self.total_cost)
                     credits = omega.credit.convert_cost_to_credits(self.total_cost)
                     omega.credit.user_spend(ctx.author.id, credits)
                     omega.ai.log_usage(ctx.author.id, 0, self.total_cost, 'dalle3')
+                    credits_remaining = omega.common.to_superscript(omega.credit.get_user_credits(ctx.author.id))
+                    footer = omega.ai.get_footer('null', self.total_cost)
+                    footer += f"\n{credits_remaining}"
                     #await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
                     await reply_msg.edit(content=footer, attachments=[file])
 
