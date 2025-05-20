@@ -5,6 +5,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 from core.omega import omega
+import os
 
 class Dalle(commands.Cog):
 
@@ -47,43 +48,39 @@ class Dalle(commands.Cog):
         Edit an image using DALL-E 3.
         Reply to a message with an image attachment with this command, or use the command with an image attachment.
         """
-        image_attachment = None
+
+        user = ctx.author
+
+        attachment = None
+
+        reply_msg = await ctx.send(self.thinking_emoji)
 
         if ctx.message.attachments:
-            image_attachment = ctx.message.attachments[0]
+            attachment = ctx.message.attachments[0]
         elif ctx.message.reference:
             ref_message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             if ref_message.attachments:
-                image_attachment = ref_message.attachments[0]
+                attachment = ref_message.attachments[0]
 
-        if not image_attachment:
-            await ctx.send("Please reply to a message with an image or attach an image to edit.")
+        if not attachment:
+            await reply_msg.edit(content="No image attachment found. Please attach an image or reply to a message with an image.")
             return
         
         if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
             await ctx.send("You don't have enough credits for that :(")
             return
 
-        reply_msg = await ctx.send(self.thinking_emoji)
+        file_path = f'download/{str(user.id)}/{attachment.filename}'
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(image_attachment.url) as resp:
-                if resp.status != 200:
-                    await reply_msg.edit(content="Failed to download the image.")
-                    return
-                image_data = await resp.read()
+        if attachment and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
+            await attachment.save(file_path)
 
-        edited_image_url = await omega.ai.edit_image(self.model, prompt, image_data)
-        if not edited_image_url:
+        edited_image_path = await omega.ai.edit_image(self.model, prompt, file_path)
+        if not edited_image_path:
             await reply_msg.edit(content="Failed to edit the image.")
             return
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(edited_image_url) as resp:
-                if resp.status != 200:
-                    await reply_msg.edit(content="Failed to download the edited image.")
-                    return
-                edited_image_data = await resp.read()
+        edited_image_data = open(edited_image_path, "rb").read()
 
         filename = omega.common.generate_random_string() + "_edited.png"
         file = discord.File(io.BytesIO(edited_image_data), filename=filename)
