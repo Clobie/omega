@@ -91,20 +91,20 @@ class Dalle(commands.Cog):
         footer = omega.ai.get_footer('null', self.total_cost)
         footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
 
-        #await reply_msg.edit(content=edited_image_url, attachments=[])
+        await reply_msg.edit(content=edited_image_url, attachments=[])
 
-        file_path_edited = f'download/{str(user.id)}/{attachment.filename}_edited_{omega.common.generate_random_string()}.png'
-        with open(file_path_edited, 'wb') as f:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(edited_image_url) as resp:
-                    if resp.status == 200:
-                        image_data = await resp.read()
-                        f.write(image_data)
-                    else:
-                        await ctx.send("Failed to download the edited image.")
-                        return
+        #file_path_edited = f'download/{str(user.id)}/{attachment.filename}_edited_{omega.common.generate_random_string()}.png'
+        #with open(file_path_edited, 'wb') as f:
+        #    async with aiohttp.ClientSession() as session:
+        #        async with session.get(edited_image_url) as resp:
+        #            if resp.status == 200:
+        #                image_data = await resp.read()
+        #                f.write(image_data)
+        #            else:
+        #                await ctx.send("Failed to download the edited image.")
+        #                return
 
-        await reply_msg.edit(content=footer, attachments=[discord.File(file_path_edited)])
+        #await reply_msg.edit(content=footer, attachments=[discord.File(file_path_edited)])
 
 
 async def setup(bot: commands.Bot):
