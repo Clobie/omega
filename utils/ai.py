@@ -35,7 +35,7 @@ class AI:
     def generate_image(self, image_path, prompt):
         result = self.client.images.edit(
             model="gpt-image-1",
-            image=open(image_path, "rb"),
+            image=[open(image_path, "rb"),],
             prompt=prompt
         )
 
