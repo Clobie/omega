@@ -32,7 +32,18 @@ class AI:
             print(context)
             return f"Error: {str(e)}"
 
-    def generate_image(self, image_path, prompt):
+    def generate_image(self, model, prompt):
+        response = self.client.images.generate(
+            model=model,
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+        image_url = response.data[0].url
+        return image_url
+
+    async def edit_image(self, prompt: str, image_path: str):
         result = self.client.images.edit(
             model="gpt-image-1",
             image=[open(image_path, "rb"),],
@@ -47,16 +58,6 @@ class AI:
         with open(edited_image_path, "wb") as image_file:
             image_file.write(image_bytes)
         return image_path
-
-    async def edit_image(self, prompt: str, image_path: str):
-        result = self.client.images.edit(
-            model="dall-e-2",
-            image=open(image_path, "rb"),
-            prompt=prompt,
-            n=1,
-            size="1024x1024",
-        )
-        return result.data[0].url
 
     def load_cost_from_file(self):
         """Load accumulated cost from a file."""
