@@ -71,6 +71,8 @@ class Dalle(commands.Cog):
             return
 
         file_path = f'download/{str(user.id)}/{attachment.filename}'
+        if not os.path.exists(f'download/{str(user.id)}'):
+            os.makedirs(f'download/{str(user.id)}')
 
         if attachment and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
             await attachment.save(file_path)
