@@ -3,7 +3,7 @@
 from openai import OpenAI
 import tiktoken
 import json
-import aiohttp
+import base64
 from utils.common import common
 from utils.config import cfg
 from utils.log import logger
@@ -43,43 +43,20 @@ class AI:
         image_url = response.data[0].url
         return image_url
 
-    async def edit_image(self, model: str, prompt: str, image_bytes: bytes):
-        """
-        Sends the image and prompt to the DALL·E edit endpoint and returns the URL of the edited image.
-        Returns None if something goes wrong.
-        """
-
-        url = "https://api.openai.com/v1/images/edits"
-
-        form_data = aiohttp.FormData()
-        form_data.add_field("model", model)
-        form_data.add_field("prompt", prompt)
-        form_data.add_field(
-            "image",
-            image_bytes,
-            filename="image.png",
-            content_type="image/png"
+    async def edit_image(self, prompt: str, image_path: str):
+        result = self.client.images.edit(
+            model="gpt-image-1",
+            image=open(image_path, "rb"),
+            prompt=prompt
         )
-        
+        image_base64 = result.data[0].b64_json
+        image_bytes = base64.b64decode(image_base64)
+        random_string = common.generate_random_string()
+        file_path = f"./download/{random_string}.png"
+        with open(file_path, "wb") as file:
+            file.write(image_bytes)
+        return file_path
 
-        # form_data.add_field("mask", mask_bytes, filename="mask.png", content_type="image/png")
-
-        headers = {
-            "Authorization": f"Bearer {cfg.OPENAI_API_KEY}",
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=form_data, headers=headers) as resp:
-                if resp.status != 200:
-                    print(f"OpenAI edit_image failed: {resp.status} - {await resp.text()}")
-                    return None
-                data = await resp.json()
-                # The response typically contains a list of images with URLs
-                if "data" in data and len(data["data"]) > 0 and "url" in data["data"][0]:
-                    return data["data"][0]["url"]
-                return None
-
-    
     def load_cost_from_file(self):
         """Load accumulated cost from a file."""
         try:
