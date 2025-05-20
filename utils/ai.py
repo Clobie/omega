@@ -43,7 +43,7 @@ class AI:
         image_url = response.data[0].url
         return image_url
 
-    async def edit_image(model: str, prompt: str, image_bytes: bytes) -> str | None:
+    async def edit_image(model: str, prompt: str, image_bytes: bytes):
         """
         Sends the image and prompt to the DALL·E edit endpoint and returns the URL of the edited image.
         Returns None if something goes wrong.
