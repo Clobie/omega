@@ -51,12 +51,12 @@ class Dalle(commands.Cog):
         if ctx.message.reference:
             referenced_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             for attachment in referenced_msg.attachments:
-                if attachment.content_type and attachment.content_type.startswith("image/"):
+                if attachment.content_type and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
                     image_attachment = attachment
                     break
         else:
             for attachment in ctx.message.attachments:
-                if attachment.content_type and attachment.content_type.startswith("image/"):
+                if attachment.content_type and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
                     image_attachment = attachment
                     break
 
