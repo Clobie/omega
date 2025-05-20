@@ -48,17 +48,13 @@ class Dalle(commands.Cog):
         Reply to a message with an image attachment with this command, or use the command with an image attachment.
         """
         image_attachment = None
-        if ctx.message.reference:
-            referenced_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-            for attachment in referenced_msg.attachments:
-                if attachment.content_type and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
-                    image_attachment = attachment
-                    break
-        else:
-            for attachment in ctx.message.attachments:
-                if attachment.content_type and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
-                    image_attachment = attachment
-                    break
+
+        if ctx.message.attachments:
+            image_attachment = ctx.message.attachments[0]
+        elif ctx.message.reference:
+            ref_message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+            if ref_message.attachments:
+                image_attachment = ref_message.attachments[0]
 
         if not image_attachment:
             await ctx.send("Please reply to a message with an image or attach an image to edit.")
