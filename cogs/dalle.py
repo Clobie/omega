@@ -77,7 +77,7 @@ class Dalle(commands.Cog):
         if attachment and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
             await attachment.save(file_path)
 
-        edited_image_path = await omega.ai.edit_image(self.model, prompt, file_path)
+        edited_image_path = await omega.ai.edit_image(str(user.id), prompt, file_path)
         if not edited_image_path:
             await reply_msg.edit(content="Failed to edit the image.")
             return
