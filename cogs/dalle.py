@@ -73,7 +73,7 @@ class Dalle(commands.Cog):
                     return
                 image_data = await resp.read()
 
-        edited_image_url = omega.ai.edit_image(self.model, prompt, image_data)
+        edited_image_url = await omega.ai.edit_image(self.model, prompt, image_data)
         if not edited_image_url:
             await reply_msg.edit(content="Failed to edit the image.")
             return
