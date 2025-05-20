@@ -32,18 +32,23 @@ class AI:
             print(context)
             return f"Error: {str(e)}"
 
-    def generate_image(self, model, prompt):
-        response = self.client.images.generate(
-            model=model,
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
+    def generate_image(self, image_path, prompt):
+        result = self.client.images.edit(
+            model="gpt-image-1",
+            image=open(image_path, "rb"),
+            prompt=prompt
         )
-        image_url = response.data[0].url
-        return image_url
 
-    async def edit_image(self, user_id: str, prompt: str, image_path: str):
+        image_base64 = result.data[0].b64_json
+        image_bytes = base64.b64decode(image_base64)
+
+        # Save the image to a file in ./downloads/user.id/oldfilename_edited_timestamp.png
+        edited_image_path = f"./downloads/{cfg.user_id}/{image_path.split('/')[-1].split('.')[0]}_edited_{common.generate_random_string()}.png"
+        with open(edited_image_path, "wb") as image_file:
+            image_file.write(image_bytes)
+        return image_path
+
+    async def edit_image(self, prompt: str, image_path: str):
         result = self.client.images.edit(
             model="dall-e-2",
             image=open(image_path, "rb"),
