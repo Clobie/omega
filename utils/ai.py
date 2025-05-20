@@ -45,18 +45,13 @@ class AI:
 
     async def edit_image(self, user_id: str, prompt: str, image_path: str):
         result = self.client.images.edit(
-            #model="gpt-image-1",
             model="dall-e-2",
             image=open(image_path, "rb"),
-            prompt=prompt
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
         )
-        image_base64 = result.data[0].b64_json
-        image_bytes = base64.b64decode(image_base64)
-        random_string = common.generate_random_string()
-        file_path = f"./download/{user_id}/{random_string}.png"
-        with open(file_path, "wb") as file:
-            file.write(image_bytes)
-        return file_path
+        return result.data[0].url
 
     def load_cost_from_file(self):
         """Load accumulated cost from a file."""
