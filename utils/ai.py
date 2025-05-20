@@ -45,7 +45,8 @@ class AI:
 
     async def edit_image(self, user_id: str, prompt: str, image_path: str):
         result = self.client.images.edit(
-            model="gpt-image-1",
+            #model="gpt-image-1",
+            model="dall-e-3",
             image=open(image_path, "rb"),
             prompt=prompt
         )
