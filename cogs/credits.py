@@ -93,7 +93,7 @@ class Credits(commands.Cog):
             await ctx.send(f"You've given {amount} credits to {member.mention}.")
     
     @commands.command(name='take')
-    async def take(self, ctx, member: discord.Member, amount: int):
+    async def take(self, ctx, amount: int, member: discord.Member):
         if not isinstance(member, discord.Member) or not isinstance(amount, int):
             await ctx.send("Command usage is !take @user amount")
             return
