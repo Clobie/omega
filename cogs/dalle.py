@@ -77,8 +77,8 @@ class Dalle(commands.Cog):
         if attachment and attachment.filename.endswith(('.png', '.jpg', '.jpeg')):
             await attachment.save(file_path)
 
-        edited_image_url = await omega.ai.edit_image(prompt, file_path)
-        if not edited_image_url:
+        edited_image_path = await omega.ai.edit_image(str(user.id), prompt, file_path)
+        if not edited_image_path:
             await reply_msg.edit(content="Failed to edit the image.")
             return
 
@@ -91,7 +91,7 @@ class Dalle(commands.Cog):
         footer = omega.ai.get_footer('null', self.total_cost)
         footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
 
-        await reply_msg.edit(content=edited_image_url, attachments=[])
+        await reply_msg.edit(content='', attachments=[discord.File(edited_image_path)])
 
         #file_path_edited = f'download/{str(user.id)}/{attachment.filename}_edited_{omega.common.generate_random_string()}.png'
         #with open(file_path_edited, 'wb') as f:
