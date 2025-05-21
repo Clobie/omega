@@ -35,7 +35,12 @@ class Dalle(commands.Cog):
         Generate an image using DALL-E 3.
         """
         if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
-            await ctx.send(f"You don't have enough credits for that :(")
+            await ctx.send(
+                (
+                    f"You don't have enough credits for that :(\n"
+                    f"Use `!credits` to check your balance, or `!getcredits` to see how to get more credits!\n"
+                )
+            )
             return
         reply_msg = await ctx.send(self.thinking_emoji)
         image_url = omega.ai.generate_image(self.model, prompt)

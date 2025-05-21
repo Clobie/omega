@@ -11,7 +11,7 @@ class Credits(commands.Cog):
         self.user_message_count = {}
         self.user_last_message_time = {}
         self.required_message_count_to_reward = 50
-        self.message_reward_cooldown = 10  # seconds
+        self.message_reward_cooldown = 10
         self.reward_amount = 5
 
     @commands.Cog.listener()
@@ -25,18 +25,15 @@ class Credits(commands.Cog):
 
         user_id = message.author.id
 
-        # Initialize counters if not present
         if user_id not in self.user_message_count:
             self.user_message_count[user_id] = 0
         if user_id not in self.user_last_message_time:
             self.user_last_message_time[user_id] = message.created_at
 
-        # Only count if 30 seconds have passed since last message
         if (message.created_at - self.user_last_message_time[user_id]).total_seconds() > self.message_reward_cooldown:
             self.user_last_message_time[user_id] = message.created_at
             self.user_message_count[user_id] += 1
 
-            # Reward the user if they have sent enough messages
             if self.user_message_count[user_id] >= self.required_message_count_to_reward:
                 self.user_message_count[user_id] = 0
                 omega.credit.gift_user_credits(user_id, self.reward_amount)
