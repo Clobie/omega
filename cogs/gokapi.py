@@ -61,7 +61,14 @@ class Gokapi(commands.Cog):
 
         attachment = ref_msg.attachments[0]
         
-        file_name = f"{omega.common.generate_random_string(8)}-{omega.common.slugify(file_name)}.png"
+        # get file extension
+        mime_type, _ = mimetypes.guess_type(attachment.filename)
+        if mime_type:
+            file_extension = mime_type.split('/')[1]
+        else:
+            file_extension = file_name.split('.')[-1] if '.' in file_name else 'bin'
+
+        file_name = f"{omega.common.generate_random_string(8)}-{omega.common.slugify(file_name)}.{file_extension}"
 
         try:
             response = await attachment.read()
