@@ -10,7 +10,7 @@ class Credits(commands.Cog):
         self.bot = bot
         self.user_message_count = {}
         self.user_last_message_time = {}
-        self.required_message_count_to_reward = 1
+        self.required_message_count_to_reward = 10
         self.message_reward_cooldown = 30  # seconds
 
     @commands.Cog.listener()
