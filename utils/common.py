@@ -117,3 +117,5 @@ class Common:
             return True
         except ValueError:
             return False
+
+common = Common()
