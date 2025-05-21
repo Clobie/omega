@@ -10,8 +10,8 @@ class Credits(commands.Cog):
         self.bot = bot
         self.user_message_count = {}
         self.user_last_message_time = {}
-        self.required_message_count_to_reward = 10
-        self.message_reward_cooldown = 30  # seconds
+        self.required_message_count_to_reward = 25
+        self.message_reward_cooldown = 10  # seconds
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -42,8 +42,6 @@ class Credits(commands.Cog):
                 await message.channel.send(
                     f"Hey {message.author.mention}, you just received 5 credits for being active! Use `!credits` to check your balance."
                 )
-                if omega.common.chance(10):
-                    await message.channel.send(self.suggest_generate(message.author.mention, credits))
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
@@ -59,20 +57,6 @@ class Credits(commands.Cog):
         credits = omega.credit.get_user_credits(user_id)
         user_name = user.name if user else ctx.author.name
         await ctx.send(f"{user_name} has {credits} credits.")
-        if omega.common.chance(10):
-            await ctx.send(self.suggest_generate(user_name, credits))
-
-    def suggest_generate(self, user_name, credits):
-        result = omega.ai.chat_completion(
-            f"gpt-4o",
-            (
-                f"User {user_name} has {credits} credits. What should they do with them? Give them a suggestion."
-                f"The suggestion should explain how to use the !generate command to create an image."
-                f"Make sure to include the command usage and a brief explanation of how to use it.  It costs 5 credits to generate an image."
-                f"The suggestion should be as brief as possible.  No more than 3 sentences.  Preferably 1-2. Include an example"
-            ),
-        )
-        return result
 
     @commands.command(name='give')
     async def give(self, ctx, member: discord.Member, amount: int):

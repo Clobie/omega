@@ -91,7 +91,7 @@ class Dalle(commands.Cog):
         footer = omega.ai.get_footer('null', self.total_cost)
         footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
 
-        await reply_msg.edit(content='', attachments=[discord.File(edited_image_path)])
+        await reply_msg.edit(content=footer, attachments=[discord.File(edited_image_path)])
 
         #file_path_edited = f'download/{str(user.id)}/{attachment.filename}_edited_{omega.common.generate_random_string()}.png'
         #with open(file_path_edited, 'wb') as f:
