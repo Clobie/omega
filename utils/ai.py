@@ -54,7 +54,7 @@ class AI:
         edited_image_path = f"{image_path}_edited_{common.generate_random_string()}.png"
         with open(edited_image_path, "wb") as image_file:
             image_file.write(image_bytes)
-        return image_path
+        return edited_image_path
 
     def load_cost_from_file(self):
         """Load accumulated cost from a file."""
