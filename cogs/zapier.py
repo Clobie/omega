@@ -34,6 +34,18 @@ class Zapier(commands.Cog):
             await message.channel.send(f"{amount_cents} cents and user ID {user_id} parsed from message.")
             if amount_cents is not None and user_id is not None:
                 omega.credit.gift_user_credits(user_id, amount_cents)
+            
+            #send a private message to the user
+            user = await self.bot.fetch_user(user_id)
+            if user:
+                embed = discord.Embed(
+                    title="Omega Notification",
+                    description=f"You have received {amount_cents} credits.",
+                    color=omega.cfg.PRIMARYCOLOR
+                )
+                await user.send(embed=embed)
+            else:
+                await message.channel.send(f"User with ID {user_id} not found.")
 
 async def setup(bot: commands.Bot):
     cog = Zapier(bot)
