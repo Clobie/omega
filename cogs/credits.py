@@ -8,7 +8,11 @@ from core.omega import omega
 class Credits(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-    
+        self.user_message_count = {}
+        self.user_last_message_time = {}
+        self.required_message_count_to_reward = 5
+        self.message_reward_cooldown = 30  # seconds
+
     @commands.Cog.listener()
     async def on_ready(self):
         pass
@@ -17,10 +21,27 @@ class Credits(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        if message.startswith(omega.cfg.COMMAND_PREFIX):
-            omega.credit.gift_user_credits(message.author.id, 2)
-        else:
-            omega.credit.gift_user_credits(message.author.id, 1)
+
+        user_id = message.author.id
+
+        # Initialize counters if not present
+        if user_id not in self.user_message_count:
+            self.user_message_count[user_id] = 0
+        if user_id not in self.user_last_message_time:
+            self.user_last_message_time[user_id] = message.created_at
+
+        # Only count if 30 seconds have passed since last message
+        if (message.created_at - self.user_last_message_time[user_id]).total_seconds() > self.message_reward_cooldown:
+            self.user_last_message_time[user_id] = message.created_at
+            self.user_message_count[user_id] += 1
+
+            # Reward the user if they have sent enough messages
+            if self.user_message_count[user_id] >= self.required_message_count_to_reward:
+                self.user_message_count[user_id] = 0
+                omega.credit.gift_user_credits(user_id, 5)
+                await message.channel.send(
+                    f"Hey {message.author.mention}, you just received 5 credits for being active! Use `!credits` to check your balance."
+                )
 
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx, total = 10):
