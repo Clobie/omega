@@ -51,7 +51,7 @@ class AI:
         )
         image_base64 = result.data[0].b64_json
         image_bytes = base64.b64decode(image_base64)
-        edited_image_path = f"./downloads/{user_id}/{image_path.split('/')[-1].split('.')[0]}_edited_{common.generate_random_string()}.png"
+        edited_image_path = f"{image_path}_edited_{common.generate_random_string()}.png"
         with open(edited_image_path, "wb") as image_file:
             image_file.write(image_bytes)
         return image_path
