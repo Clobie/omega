@@ -88,23 +88,10 @@ class Dalle(commands.Cog):
         omega.ai.log_usage(ctx.author.id, 0, self.total_cost, 'dalle3_edit')
 
         credits_remaining = omega.credit.get_user_credits(ctx.author.id)
-        footer = omega.ai.get_footer('null', self.total_cost)
-        footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
+        #footer = omega.ai.get_footer('null', self.total_cost)
+        footer = omega.common.to_superscript(f"{credits_remaining} credits remaining")
 
         await reply_msg.edit(content=footer, attachments=[discord.File(edited_image_path)])
-
-        #file_path_edited = f'download/{str(user.id)}/{attachment.filename}_edited_{omega.common.generate_random_string()}.png'
-        #with open(file_path_edited, 'wb') as f:
-        #    async with aiohttp.ClientSession() as session:
-        #        async with session.get(edited_image_url) as resp:
-        #            if resp.status == 200:
-        #                image_data = await resp.read()
-        #                f.write(image_data)
-        #            else:
-        #                await ctx.send("Failed to download the edited image.")
-        #                return
-
-        #await reply_msg.edit(content=footer, attachments=[discord.File(file_path_edited)])
 
 
 async def setup(bot: commands.Bot):
