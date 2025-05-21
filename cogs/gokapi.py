@@ -61,7 +61,7 @@ class Gokapi(commands.Cog):
 
         attachment = ref_msg.attachments[0]
         
-        file_name = f"{omega.common.generate_random_string(8)}-{omega.common.slugify(attachment.filename)}"
+        file_name = f"{omega.common.generate_random_string(8)}-{omega.common.slugify(file_name)}.png"
 
         try:
             response = await attachment.read()
