@@ -43,7 +43,7 @@ class Dalle(commands.Cog):
             )
             return
         reply_msg = await ctx.send(self.thinking_emoji)
-        image_url = omega.ai.generate_image(self.model, prompt)
+        image_url = await omega.ai.generate_image(self.model, prompt)
         async with aiohttp.ClientSession() as session:
             async with session.get(image_url) as resp:
                 if resp.status == 200:

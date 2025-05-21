@@ -60,8 +60,8 @@ class Gokapi(commands.Cog):
             return
 
         attachment = ref_msg.attachments[0]
-        if not file_name:
-            file_name = f"{omega.common.generate_random_string(5)}_{omega.common.slugify(attachment.filename)}"
+        
+        file_name = f"{omega.common.generate_random_string(8)}-{omega.common.slugify(attachment.filename)}"
 
         try:
             response = await attachment.read()
