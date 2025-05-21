@@ -42,7 +42,7 @@ class Credits(commands.Cog):
                 await message.channel.send(
                     f"Hey {message.author.mention}, you just received 5 credits for being active! Use `!credits` to check your balance."
                 )
-                if omega.common.chance(100):
+                if omega.common.chance(10):
                     await message.channel.send(self.suggest_generate(message.author.mention, credits))
 
     @commands.command(name='leaderboard')
