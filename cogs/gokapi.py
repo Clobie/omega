@@ -45,7 +45,7 @@ class Gokapi(commands.Cog):
             await ctx.send(f"Failed to retrieve the file list. {response.status_code}")
         
     @commands.command()
-    async def save(self, ctx):
+    async def save(self, ctx, *, file_name: str):
         """
         Saves the attachment of the replied-to message to Gokapi.
         """
@@ -60,7 +60,8 @@ class Gokapi(commands.Cog):
             return
 
         attachment = ref_msg.attachments[0]
-        file_name = attachment.filename
+        if not file_name:
+            file_name = f"{omega.common.generate_random_string(5)}_{omega.common.slugify(attachment.filename)}"
 
         try:
             response = await attachment.read()
