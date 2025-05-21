@@ -17,6 +17,18 @@ class Dalle(commands.Cog):
         self.base_profit = 0.01
         self.total_cost = self.base_cost + self.base_profit
 
+    @commands.command(name='getcredits')
+    async def get_credits(self, ctx):
+        # Let the user know that they can either ask clobie nicely (yay!) or buy credits at https://ko-fi.com/clobie
+        await ctx.send(
+            (
+                f"Hey {ctx.author.mention}! You can get credits by:\n"
+                f"1. Asking Clobie nicely (yay!)\n"
+                f"2. Buying credits at https://ko-fi.com/s/fbec71b619\n"
+                f"3. Earning credits by being active in the server!\n"
+            )
+        )
+
     @commands.command(name='generate')
     async def generate_image(self, ctx, *, prompt):
         """
@@ -67,7 +79,12 @@ class Dalle(commands.Cog):
             return
         
         if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
-            await ctx.send("You don't have enough credits for that :(")
+            await ctx.send(
+                (
+                    f"You don't have enough credits for that :(\n"
+                    f"Use `!credits` to check your balance, or `!getcredits` to see how to get more credits!\n"
+                )
+            )
             return
 
         file_path = f'download/{str(user.id)}/{attachment.filename}'

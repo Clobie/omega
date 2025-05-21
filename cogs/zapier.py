@@ -35,7 +35,6 @@ class Zapier(commands.Cog):
             if amount_cents is not None and user_id is not None:
                 omega.credit.gift_user_credits(user_id, amount_cents)
             
-            #send a private message to the user
             user = await self.bot.fetch_user(user_id)
             if user:
                 embed = discord.Embed(
