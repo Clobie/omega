@@ -3,6 +3,7 @@
 import discord
 from discord.ext import commands
 import re
+from core.omega import omega
 
 class Zapier(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -31,6 +32,8 @@ class Zapier(commands.Cog):
                 dummy_function(amount_cents, user_id)
             
             await message.channel.send(f"{amount_cents} cents and user ID {user_id} parsed from message.")
+            if amount_cents is not None and user_id is not None:
+                omega.credit.gift_user_credits(user_id, amount_cents)
 
 async def setup(bot: commands.Bot):
     cog = Zapier(bot)
