@@ -52,12 +52,12 @@ class Assistant(commands.Cog):
                 user_id = int(scope.split("_")[1])
                 user = self.bot.get_user(user_id)
                 if user:
-                    await user.send(f"*Context cleared due to inactivity*")
+                    await user.send(f"*Context cleared due to inactivity*", delete_after=5)
             if scope.startswith("channel_"):
                 channel_id = int(scope.split("_")[1])
                 channel = self.bot.get_channel(channel_id)
                 if channel:
-                    await channel.send(f"*Context cleared due to inactivity*")
+                    await channel.send(f"*Context cleared due to inactivity*", delete_after=5)
 
     @clear_inactive_contexts.before_loop
     async def before_clear_inactive_contexts(self):
