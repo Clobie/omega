@@ -10,8 +10,9 @@ class Credits(commands.Cog):
         self.bot = bot
         self.user_message_count = {}
         self.user_last_message_time = {}
-        self.required_message_count_to_reward = 25
+        self.required_message_count_to_reward = 50
         self.message_reward_cooldown = 10  # seconds
+        self.reward_amount = 5
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -38,9 +39,9 @@ class Credits(commands.Cog):
             # Reward the user if they have sent enough messages
             if self.user_message_count[user_id] >= self.required_message_count_to_reward:
                 self.user_message_count[user_id] = 0
-                omega.credit.gift_user_credits(user_id, 5)
+                omega.credit.gift_user_credits(user_id, self.reward_amount)
                 await message.channel.send(
-                    f"Hey {message.author.mention}, you just received 5 credits for being active! Use `!credits` to check your balance."
+                    f"Hey {message.author.mention}, you just received {self.reward_amount} credits for being active! Use `!credits` to check your balance."
                 )
 
     @commands.command(name='leaderboard')
@@ -107,6 +108,17 @@ class Credits(commands.Cog):
             await ctx.send(f"You've taken {amount} credits from {member.mention}.")
         else:
             await ctx.send(f"Failed to take credits from {member.mention}. They may not have enough credits.")
+    
+    @commands.command(name='reset')
+    async def reset(self, ctx, amount: int = 0):
+        if not ctx.author.id == int(omega.cfg.BOT_OWNER):
+            await ctx.send("You do not have the required permissions for that command.")
+            return
+        if amount < 0:
+            await ctx.send("Specify a valid amount of credits to reset.")
+            return
+        omega.credit.reset_credits_for_all_users(amount)
+        await ctx.send(f"All user credits have been reset to {amount}.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Credits(bot))

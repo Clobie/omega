@@ -188,4 +188,13 @@ class Credit:
         logger.info(f"Took {amount} credits from user {user_from}. Remaining: {new_credits}.")
         return new_credits is not None
 
+    def reset_credits_for_all_users(self, amount=0):
+        logger.debug("Resetting credits for all users.")
+        query = (
+            "UPDATE discord_users "
+            "SET credits = %s;"
+        )
+        db.run_script(query, (amount,))
+        logger.info(f"All user credits reset to {amount}.")
+
 credit = Credit()
