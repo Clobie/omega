@@ -8,10 +8,11 @@ class DiscordLogHandler(logging.Handler):
 		self.channel_id = channel_id
 
 	async def _send_log(self, message):
-		await self.bot.wait_until_ready()
-		channel = self.bot.get_channel(self.channel_id)
-		if channel:
-			await channel.send(f'`[Log]` {message}')
+		pass
+		#await self.bot.wait_until_ready()
+		#channel = self.bot.get_channel(self.channel_id)
+		#if channel:
+		#	await channel.send(f'`[Log]` {message}')
 
 	def emit(self, record):
 		log_entry = self.format(record)
