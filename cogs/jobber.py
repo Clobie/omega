@@ -63,7 +63,10 @@ class Jobber(commands.Cog):
         await reply_msg.edit(content="Your resume:\n\n{data}")
     
     @commands.command(name='addjob')
-    async def add_job(self, ctx, url: str = None):
+    async def add_job(self, ctx):
+
+        url = f"https://ratracerebellion.com/job-postings/"
+
         reply_msg = await ctx.send(self.thinking_emoji)
         if not url:
             await reply_msg.edit(content="Please provide a URL to a job listing.")
@@ -87,30 +90,19 @@ class Jobber(commands.Cog):
             tag.decompose()
         visible_text = body.get_text(separator="\n", strip=True)
 
-        # Save visible text as HTML in a <pre> tag
-        html_content = f"<pre>{visible_text}</pre>"
-
         # Sanitize filename
         sanitized_url = re.sub(r'[^a-zA-Z0-9._-]', '_', url)
         file_path = os.path.join(self.user_directory, "jobs", f"{sanitized_url}.html")
 
-        cut_dni = html_content.split("#LI-DNI")[0]
 
         with open(file_path, "w", encoding="utf-8") as f:
-            f.write(cut_dni)
+            f.write(visible_text)
 
         omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
         await reply_msg.edit(content="Job listing fetched and saved successfully.")
+        await ctx.send(visible_text[0:200] + "...")  # Send the first 500 characters of the job listing
 
-        summary = omega.ai.chat_completion(
-            model="gpt-4",
-            system_prompt="You are a helpful assistant. Extract the job title, requirements, and summary from the text.",
-            user_prompt=cut_dni
-        )
 
-        await ctx.send(summary)
-
-        
 
 
     # Task loop to do the following once per hour:
