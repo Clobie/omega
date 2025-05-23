@@ -58,7 +58,7 @@ class Jobber(commands.Cog):
         await reply_msg.edit(f"Your resume:\n\n{data}")
     
     @commands.command(name='addjob')
-    async def add_job(self, ctx, *, url=None):
+    async def add_job(self, ctx, url=None):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if url is None:
             await reply_msg.edit("Please provide a URL to a job listing.")
