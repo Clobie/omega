@@ -5,7 +5,6 @@ from discord.ext import commands, tasks
 from core.omega import omega
 import os
 import sys
-import fitz
 
 class Jobber(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -13,50 +12,28 @@ class Jobber(commands.Cog):
         self.purge_after_days = 30
         self.user_directory = "./downloads/"
 
-
-    # Example of how to use the AI class and the logger class (Remove this)
-    async def get_ai_response(self, model, system_prompt, user_prompt):
-        response = omega.ai.chat_completion(model, system_prompt, user_prompt)
-        omega.logger.info(f"AI response: {response}")
-        return response
-
-    # Example of how to use the database class (Remove this)
-    async def insert_data_to_db(self, web_url):
-        omega.db.run_script(
-            "INSERT INTO job_listings (url) VALUES (?)",
-            (web_url,)
-        )
-        omega.logger.info(f"Inserted URL into database: {web_url}")
-
     # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
     # (separate file, this is just a comment for the task)
 
     @commands.command(name='addresume')
-    async def add_resume(self, ctx, *, url: str):
-        if not omega.common.is_valid_url(url):
-            await ctx.send("Invalid URL. Please provide a valid URL.")
-            return
-        
-        attachment = ctx.message.attachments[0]
-        if not attachment.filename.endswith('.pdf'):
-            await ctx.send("Please provide a PDF file.")
-            return
-        
-        file_path = f"{self.user_directory}{ctx.author.id}/{attachment.filename}"
-        if not os.path.exists(f"{self.user_directory}{ctx.author.id}"):
-            os.makedirs(f"{self.user_directory}{ctx.author.id}")
-        await attachment.save(file_path)
-
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        doc.close()
+    async def add_resume(self, ctx, *, data):
+        """
+        Add a resume to the database. The resume can be a .txt file or plan text.
+        """
+        if ctx.message.attachments:
+            if not ctx.message.attachments[0].filename.endswith('.txt'):
+                await ctx.send("Please upload a .txt file or paste the text of your resume directly.")
+                return
+            if not os.path.exists(f"{self.user_directory}{ctx.author.id}"):
+                os.makedirs(f"{self.user_directory}{ctx.author.id}")
+            await ctx.message.attachments[0].save(f"{self.user_directory}{ctx.author.id}/resume.txt")
 
         redacted_text = omega.ai.chat_completion(
             model="gpt-4",
-            system_prompt="You are a helpful assistant. Redact any sensitive information in the text and format it to be more readable if possible. Do not change any critical information.",
-            user_prompt=text
+            system_prompt=(
+                f"You are a helpful assistant. Redact any sensitive information in the text."
+            ),
+            user_prompt=data
         )
 
         file_text_path = f"{self.user_directory}{ctx.author.id}/resume.txt"
@@ -64,7 +41,7 @@ class Jobber(commands.Cog):
             f.write(redacted_text)
         omega.logger.info(f"Saved resume for user {ctx.author.id} at {file_text_path}")
 
-        embed = omega.create_embed_info(
+        embed = omega.embed.create_embed_info(
             "debug",
             redacted_text
         )
