@@ -26,14 +26,14 @@ class Jobber(commands.Cog):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if ctx.message.attachments:
             if not ctx.message.attachments[0].filename.endswith('.txt'):
-                await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
+                await reply_msg.edit(content="Please upload a .txt file or paste the text of your resume directly.")
                 return
             if not os.path.exists(f"{self.user_directory}/{ctx.author.id}"):
                 os.makedirs(f"{self.user_directory}/{ctx.author.id}")
             await ctx.message.attachments[0].save(f"{self.user_directory}/{ctx.author.id}/resume.txt")
             data = open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r").read()
         elif data is None:
-            await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
+            await reply_msg.edit(content="Please upload a .txt file or paste the text of your resume directly.")
             return
         redacted_text = omega.ai.chat_completion(
             model="gpt-4",
@@ -45,30 +45,30 @@ class Jobber(commands.Cog):
         with open(f"{file_text_path}", "w") as f:
             f.write(redacted_text)
         omega.logger.info(f"Saved resume for user {ctx.author.id} at {file_text_path}")
-        await reply_msg.edit(f"Resume saved for user {ctx.author.id} at {file_text_path}")
+        await reply_msg.edit(content=f"Resume saved for user {ctx.author.id} at {file_text_path}")
     
     @commands.command(name='resume')
     async def get_resume(self, ctx):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if not os.path.exists(f"{self.user_directory}/{ctx.author.id}/resume.txt"):
-            await reply_msg.edit("You don't have a resume saved. Please upload one using the `addresume` command.")
+            await reply_msg.edit(content="You don't have a resume saved. Please upload one using the `addresume` command.")
             return
         with open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r") as f:
             data = f.read()
-        await reply_msg.edit(f"Your resume:\n\n{data}")
+        await reply_msg.edit(content="Your resume:\n\n{data}")
     
     @commands.command(name='addjob')
     async def add_job(self, ctx, url):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if url is None:
-            await reply_msg.edit("Please provide a URL to a job listing.")
+            await reply_msg.edit(content="Please provide a URL to a job listing.")
             return
         if not omega.common.is_valid_url(url):
-            await reply_msg.edit("Please provide a valid URL.")
+            await reply_msg.edit(content="Please provide a valid URL.")
             return
         response = requests.get(url)
         if response.status_code != 200:
-            await reply_msg.edit("Failed to fetch the job listing. Please check the URL.")
+            await reply_msg.edit(content="Failed to fetch the job listing. Please check the URL.")
             return
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -87,7 +87,7 @@ class Jobber(commands.Cog):
             f.write(str(body))
         omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
 
-        await reply_msg.edit(f"Job listing fetched successfully.")
+        await reply_msg.edit(content="Job listing fetched successfully.")
 
 
     # Task loop to do the following once per hour:
