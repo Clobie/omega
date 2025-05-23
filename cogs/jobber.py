@@ -82,10 +82,11 @@ class Jobber(commands.Cog):
         #sanitize url
         sanitized_url = re.sub(r'[^a-zA-Z0-9/:._-]', '', url)
 
-        with open(f"{self.user_directory}{ctx.author.id}/{sanitized_url}.html", "w") as f:
-            f.write(str(body))
-        omega.logger.info(f"Saved job listing for user {ctx.author.id} at {self.user_directory}{ctx.author.id}/job_listing.html")
+        file_path = f"{self.user_directory}{ctx.author.id}/{sanitized_url}.html"
 
+        with open(file_path, "w") as f:
+            f.write(str(body))
+        omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
 
         await reply_msg.edit(f"Job listing fetched successfully.")
 
