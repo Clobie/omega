@@ -16,17 +16,35 @@ class Jobber(commands.Cog):
         self.purge_after_days = 30
         self.user_directory = "./downloads"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
-
         if not os.path.exists(self.user_directory):
             os.makedirs(self.user_directory)
         if not os.path.exists(f"{self.user_directory}/jobs"):
             os.makedirs(f"{self.user_directory}/jobs")
+        self.db_init()
+
+
+    def db_init(self):
+        check_query = "SELECT * FROM information_schema.tables WHERE table_name = 'job_listings';"
+        existing = omega.db.run_script(check_query)
+        if not existing:
+            create_query = """
+            CREATE TABLE job_listings (
+                id SERIAL PRIMARY KEY,
+                company VARCHAR(255),
+                title VARCHAR(255),
+                link VARCHAR(255),
+                pay VARCHAR(255),
+                snapshot TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """
+            omega.db.run_script(create_query)
+            omega.logger.info("Created job_listings table in the database.")
 
     def extract_jobs_from_html(self, html):
         soup = BeautifulSoup(html, "html.parser")
         job_entries = []
         p_tags = soup.find_all("p")
-
         for i, p in enumerate(p_tags):
             text = p.get_text(strip=True)
             if "Company" in text and "Job/Gig" in text:
@@ -36,29 +54,20 @@ class Jobber(commands.Cog):
                 link = None
                 pay = None
                 snapshot = None
-
-                # Parse company
                 if "Company" in text:
                     company_line = next((line for line in text.splitlines() if "Company" in line), "")
                     company = company_line.split(":", 1)[-1].split("Job/Gig")[0].strip()
-
-                # Parse link and title
                 a_tag = p.find("a")
                 if a_tag:
                     title = a_tag.get_text(strip=True)
                     link = a_tag.get("href", None)
-
-                # Parse pay
                 if "Pay" in text:
                     pay_line = next((line for line in text.splitlines() if "Pay" in line), "")
                     pay = pay_line.split("Pay:", 1)[-1].strip()
-
-                # Parse snapshot from the next <p> tag
                 if i + 1 < len(p_tags):
                     snapshot_text = p_tags[i + 1].get_text(strip=True)
                     if "Snapshot" in snapshot_text or not snapshot_text.startswith("Company:"):
                         snapshot = snapshot_text
-
                 job_entries.append({
                     "company": company,
                     "title": title,
@@ -66,7 +75,6 @@ class Jobber(commands.Cog):
                     "pay": pay,
                     "snapshot": snapshot
                 })
-
         return job_entries
 
     @commands.command(name='addresume')
@@ -129,26 +137,35 @@ class Jobber(commands.Cog):
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
         await reply_msg.edit(content=f"Found {total_jobs} job entries. Processing...")
+
         
-
-        # debug
-        embed_text = ""
         for job in job_entries:
-            if len(embed_text) < 3500:
-                title = job.get("title")
-                pay = job.get("pay")
-                embed_text += f"**Title:** {title} - **Pay:** {pay}\n"
-            else:
-                embed = omega.embed.create_embed_info(
-                    "Jobs",
-                    description=embed_text
-                )
-                await ctx.send(embed=embed)
-                embed_text = ""
-
+            self.add_job_to_db(job)
+        #    company = job.get("company")
+        #    title = job.get("title")
+        #    link = job.get("link")
+        #    pay = job.get("pay")
+        #    snapshot = job.get("snapshot")
 
         # Save the job entry to the database
+        # Turn this into a task loop
+    
+    def add_job_to_db(self, job):
+        check_query = "SELECT id FROM job_listings WHERE link = %s;"
 
+        existing = omega.db.run_script(check_query, (job["link"],))
+
+        if existing:
+            omega.logger.info(f"Job with link {job['link']} already exists in the database.")
+            return False
+
+        insert_query = (
+            "INSERT INTO job_listings (company, title, link, pay, snapshot) "
+            "VALUES (%s, %s, %s, %s, %s);"
+        )
+        omega.db.run_script(insert_query, (job["company"], job["title"], job["link"], job["pay"], job["snapshot"],))
+        omega.logger.info(f"Inserted job with link {job['link']} into the database.")
+        return True
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
