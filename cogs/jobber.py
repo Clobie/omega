@@ -14,7 +14,7 @@ class Jobber(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.purge_after_days = 30
-        self.user_directory = "./downloads/"
+        self.user_directory = "./downloads"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
 
 
@@ -28,10 +28,10 @@ class Jobber(commands.Cog):
             if not ctx.message.attachments[0].filename.endswith('.txt'):
                 await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
                 return
-            if not os.path.exists(f"{self.user_directory}{ctx.author.id}"):
-                os.makedirs(f"{self.user_directory}{ctx.author.id}")
-            await ctx.message.attachments[0].save(f"{self.user_directory}{ctx.author.id}/resume.txt")
-            data = open(f"{self.user_directory}{ctx.author.id}/resume.txt", "r").read()
+            if not os.path.exists(f"{self.user_directory}/{ctx.author.id}"):
+                os.makedirs(f"{self.user_directory}/{ctx.author.id}")
+            await ctx.message.attachments[0].save(f"{self.user_directory}/{ctx.author.id}/resume.txt")
+            data = open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r").read()
         elif data is None:
             await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
             return
@@ -41,7 +41,7 @@ class Jobber(commands.Cog):
             user_prompt=data
         )
         redacted_text = re.sub(r'\r\n|\n+', '\n', redacted_text.strip())
-        file_text_path = f"{self.user_directory}{ctx.author.id}/resume.txt"
+        file_text_path = f"{self.user_directory}/{ctx.author.id}/resume.txt"
         with open(f"{file_text_path}", "w") as f:
             f.write(redacted_text)
         omega.logger.info(f"Saved resume for user {ctx.author.id} at {file_text_path}")
@@ -50,10 +50,10 @@ class Jobber(commands.Cog):
     @commands.command(name='resume')
     async def get_resume(self, ctx):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
-        if not os.path.exists(f"{self.user_directory}{ctx.author.id}/resume.txt"):
+        if not os.path.exists(f"{self.user_directory}/{ctx.author.id}/resume.txt"):
             await reply_msg.edit("You don't have a resume saved. Please upload one using the `addresume` command.")
             return
-        with open(f"{self.user_directory}{ctx.author.id}/resume.txt", "r") as f:
+        with open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r") as f:
             data = f.read()
         await reply_msg.edit(f"Your resume:\n\n{data}")
     
@@ -81,7 +81,7 @@ class Jobber(commands.Cog):
 
         sanitized_url = re.sub(r'[^a-zA-Z0-9._-]', '_', url)
 
-        file_path = f"{self.user_directory}/{sanitized_url}.html"
+        file_path = f"{self.user_directory}/jobs/{sanitized_url}.html"
 
         with open(file_path, "w") as f:
             f.write(str(body))
