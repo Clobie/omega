@@ -16,7 +16,7 @@ class Jobber(commands.Cog):
     # (separate file, this is just a comment for the task)
 
     @commands.command(name='addresume')
-    async def add_resume(self, ctx, *, data):
+    async def add_resume(self, ctx, *, data=None):
         """
         Add a resume to the database. The resume can be a .txt file or plan text.
         """
