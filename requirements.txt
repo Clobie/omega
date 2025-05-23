@@ -9,3 +9,4 @@ requests
 tiktoken
 psycopg2-binary
 fitz
+bs4

@@ -74,12 +74,20 @@ class Jobber(commands.Cog):
 
         body = soup.find('body')
 
-        embed = omega.embed.create_embed_info(
-            "debug",
-            body
-        )
+        #embed = omega.embed.create_embed_info(
+        #    "debug",
+        #    body
+        #)
 
-        await reply_msg.edit(embed=embed)
+        #sanitize url
+        sanitized_url = re.sub(r'[^a-zA-Z0-9/:._-]', '', url)
+
+        with open(f"{self.user_directory}{ctx.author.id}/{sanitized_url}.html", "w") as f:
+            f.write(str(body))
+        omega.logger.info(f"Saved job listing for user {ctx.author.id} at {self.user_directory}{ctx.author.id}/job_listing.html")
+
+
+        await reply_msg.edit(f"Job listing fetched successfully.")
 
 
     # Task loop to do the following once per hour:
