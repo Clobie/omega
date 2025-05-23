@@ -5,51 +5,80 @@ from discord.ext import commands, tasks
 from core.omega import omega
 import os
 import sys
+import re
+import aiohttp
 
 class Jobber(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.purge_after_days = 30
         self.user_directory = "./downloads/"
+        self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
+
 
     # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
     # (separate file, this is just a comment for the task)
 
     @commands.command(name='addresume')
     async def add_resume(self, ctx, *, data=None):
-        """
-        Add a resume to the database. The resume can be a .txt file or plan text.
-        """
+        reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if ctx.message.attachments:
             if not ctx.message.attachments[0].filename.endswith('.txt'):
-                await ctx.send("Please upload a .txt file or paste the text of your resume directly.")
+                await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
                 return
             if not os.path.exists(f"{self.user_directory}{ctx.author.id}"):
                 os.makedirs(f"{self.user_directory}{ctx.author.id}")
             await ctx.message.attachments[0].save(f"{self.user_directory}{ctx.author.id}/resume.txt")
             data = open(f"{self.user_directory}{ctx.author.id}/resume.txt", "r").read()
         elif data is None:
-            await ctx.send("Please upload a .txt file or paste the text of your resume directly.")
+            await reply_msg.edit("Please upload a .txt file or paste the text of your resume directly.")
             return
-
         redacted_text = omega.ai.chat_completion(
             model="gpt-4",
             system_prompt="You are a helpful assistant. Redact any sensitive information in the text.",
             user_prompt=data
         )
-
+        redacted_text = re.sub(r'\r\n|\n+', '\n', redacted_text.strip())
         file_text_path = f"{self.user_directory}{ctx.author.id}/resume.txt"
         with open(f"{file_text_path}", "w") as f:
             f.write(redacted_text)
         omega.logger.info(f"Saved resume for user {ctx.author.id} at {file_text_path}")
-
-        embed = omega.embed.create_embed_info(
-            "debug",
-            redacted_text
-        )
-
-        await ctx.send(embed=embed)
-
+        await reply_msg.edit(f"Resume saved for user {ctx.author.id} at {file_text_path}")
+    
+    @commands.command(name='resume')
+    async def get_resume(self, ctx):
+        reply_msg = await ctx.send(f"{self.thinking_emoji}")
+        if not os.path.exists(f"{self.user_directory}{ctx.author.id}/resume.txt"):
+            await reply_msg.edit("You don't have a resume saved. Please upload one using the `addresume` command.")
+            return
+        with open(f"{self.user_directory}{ctx.author.id}/resume.txt", "r") as f:
+            data = f.read()
+        await reply_msg.edit(f"Your resume:\n\n{data}")
+    
+    @commands.command(name='addjob')
+    async def add_job(self, ctx, *, url=None):
+        if url is None:
+            await ctx.send("Please provide a URL to a job listing.")
+            return
+        if not omega.common.is_valid_url(url):
+            await ctx.send("Please provide a valid URL.")
+            return
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status != 200:
+                        await ctx.send(f"Failed to fetch the job listing. Status code: {response.status}")
+                        return
+                    html_body = await response.text()
+            sanitized_url = re.sub(r'[^a-zA-Z0-9]', '_', url)
+            filename = f"job_{sanitized_url}.html"
+            file_path = os.path.join("jobs", filename)
+            os.makedirs("jobs", exist_ok=True)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(html_body)
+            await ctx.send(f"Job listing saved to `{file_path}`.")
+        except Exception as e:
+            await ctx.send(f"An error occurred while fetching the job listing: {e}")
     
 
 
