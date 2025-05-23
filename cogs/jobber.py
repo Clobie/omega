@@ -7,6 +7,8 @@ import os
 import sys
 import re
 import aiohttp
+from bs4 import BeautifulSoup
+import requests
 
 class Jobber(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -57,30 +59,27 @@ class Jobber(commands.Cog):
     
     @commands.command(name='addjob')
     async def add_job(self, ctx, *, url=None):
+        reply_msg = await ctx.send(f"{self.thinking_emoji}")
         if url is None:
-            await ctx.send("Please provide a URL to a job listing.")
+            await reply_msg.edit("Please provide a URL to a job listing.")
             return
         if not omega.common.is_valid_url(url):
-            await ctx.send("Please provide a valid URL.")
+            await reply_msg.edit("Please provide a valid URL.")
             return
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        await ctx.send(f"Failed to fetch the job listing. Status code: {response.status}")
-                        return
-                    html_body = await response.text()
-            sanitized_url = re.sub(r'[^a-zA-Z0-9]', '_', url)
-            filename = f"job_{sanitized_url}.html"
-            file_path = os.path.join("jobs", filename)
-            os.makedirs("jobs", exist_ok=True)
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(html_body)
-            await ctx.send(f"Job listing saved to `{file_path}`.")
-        except Exception as e:
-            await ctx.send(f"An error occurred while fetching the job listing: {e}")
-    
+        response = requests.get(url)
+        if response.status_code != 200:
+            await reply_msg.edit("Failed to fetch the job listing. Please check the URL.")
+            return
+        soup = BeautifulSoup(response.text, 'html.parser')
 
+        body = soup.find('body')
+
+        embed = omega.embed.create_embed_info(
+            "debug",
+            body
+        )
+
+        await reply_msg.edit(embed=embed)
 
 
     # Task loop to do the following once per hour:
