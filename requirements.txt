@@ -7,4 +7,5 @@ qrcode
 pillow
 requests
 tiktoken
-psycopg2
+psycopg2-binary
+fitz
