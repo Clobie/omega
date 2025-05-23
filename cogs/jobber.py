@@ -17,6 +17,11 @@ class Jobber(commands.Cog):
         self.user_directory = "./downloads"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
 
+        if not os.path.exists(self.user_directory):
+            os.makedirs(self.user_directory)
+        if not os.path.exists(f"{self.user_directory}/jobs"):
+            os.makedirs(f"{self.user_directory}/jobs")
+
 
     # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
     # (separate file, this is just a comment for the task)
@@ -58,36 +63,42 @@ class Jobber(commands.Cog):
         await reply_msg.edit(content="Your resume:\n\n{data}")
     
     @commands.command(name='addjob')
-    async def add_job(self, ctx, url):
-        reply_msg = await ctx.send(f"{self.thinking_emoji}")
-        if url is None:
+    async def add_job(self, ctx, url: str = None):
+        reply_msg = await ctx.send(self.thinking_emoji)
+        if not url:
             await reply_msg.edit(content="Please provide a URL to a job listing.")
             return
         if not omega.common.is_valid_url(url):
             await reply_msg.edit(content="Please provide a valid URL.")
             return
-        response = requests.get(url)
-        if response.status_code != 200:
-            await reply_msg.edit(content="Failed to fetch the job listing. Please check the URL.")
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+        except Exception as e:
+            await reply_msg.edit(content=f"Failed to fetch the job listing: {e}")
             return
+
         soup = BeautifulSoup(response.text, 'html.parser')
+        body = soup.body or soup
 
-        body = soup.find('body')
+        # Remove scripts and styles
+        for tag in body(["script", "style"]):
+            tag.decompose()
+        visible_text = body.get_text(separator="\n", strip=True)
 
-        #embed = omega.embed.create_embed_info(
-        #    "debug",
-        #    body
-        #)
+        # Save visible text as HTML in a <pre> tag
+        html_content = f"<pre>{visible_text}</pre>"
 
+        # Sanitize filename
         sanitized_url = re.sub(r'[^a-zA-Z0-9._-]', '_', url)
+        file_path = os.path.join(self.user_directory, "jobs", f"{sanitized_url}.html")
 
-        file_path = f"{self.user_directory}/jobs/{sanitized_url}.html"
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
 
-        with open(file_path, "w") as f:
-            f.write(str(body))
         omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
-
-        await reply_msg.edit(content="Job listing fetched successfully.")
+        await reply_msg.edit(content="Job listing fetched and saved successfully.")
 
 
     # Task loop to do the following once per hour:
