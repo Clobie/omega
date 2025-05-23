@@ -22,9 +22,54 @@ class Jobber(commands.Cog):
         if not os.path.exists(f"{self.user_directory}/jobs"):
             os.makedirs(f"{self.user_directory}/jobs")
 
+    def extract_jobs_from_html(html):
+        soup = BeautifulSoup(html, "html.parser")
+        job_entries = []
+        p_tags = soup.find_all("p")
 
-    # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
-    # (separate file, this is just a comment for the task)
+        for i, p in enumerate(p_tags):
+            text = p.get_text(strip=True)
+            if "Company" in text and "Job/Gig" in text:
+                # Initialize fields
+                company = None
+                title = None
+                link = None
+                pay = None
+                snapshot = None
+
+                # Parse company
+                if "Company" in text:
+                    company_line = next((line for line in text.splitlines() if "Company" in line), "")
+                    company = company_line.split(":", 1)[-1].split("Job/Gig")[0].strip()
+
+                # Parse link and title
+                a_tag = p.find("a")
+                if a_tag:
+                    title = a_tag.get_text(strip=True)
+                    link = a_tag.get("href", None)
+
+                # Parse pay
+                if "Pay" in text:
+                    pay_line = next((line for line in text.splitlines() if "Pay" in line), "")
+                    pay = pay_line.split("Pay:", 1)[-1].strip()
+
+                # Parse snapshot from the next <p> tag
+                if i + 1 < len(p_tags):
+                    snapshot_text = p_tags[i + 1].get_text(strip=True)
+                    if "Snapshot" in snapshot_text or not snapshot_text.startswith("Company:"):
+                        snapshot = snapshot_text
+
+                job_entries.append({
+                    "company": company,
+                    "title": title,
+                    "link": link,
+                    "pay": pay,
+                    "snapshot": snapshot
+                })
+
+        return job_entries
+
+
 
     @commands.command(name='addresume')
     async def add_resume(self, ctx, *, data=None):
@@ -81,29 +126,39 @@ class Jobber(commands.Cog):
         except Exception as e:
             await reply_msg.edit(content=f"Failed to fetch the job listing: {e}")
             return
+        
+        html = response.text
 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        body = soup.body or soup
+        job_entries = self.extract_jobs_from_html(html)
+        if not job_entries:
+            await reply_msg.edit(content="No job entries found.")
+            return
+        
+        total_jobs = len(job_entries)
+        omega.logger.info(f"Found {total_jobs} job entries.")
 
-        # Remove scripts and styles
-        for tag in body(["script", "style"]):
-            tag.decompose()
-        visible_text = body.get_text(separator="\n", strip=True)
+        await reply_msg.edit(content=f"Found {total_jobs} job entries. Processing...")
 
-        # Sanitize filename
-        sanitized_url = re.sub(r'[^a-zA-Z0-9._-]', '_', url)
-        file_path = os.path.join(self.user_directory, "jobs", f"{sanitized_url}.html")
-
-
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(visible_text)
-
-        omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
-        await reply_msg.edit(content="Job listing fetched and saved successfully.")
-        await ctx.send(visible_text[0:200] + "...")  # Send the first 500 characters of the job listing
+        await ctx.send(f"First job entry:\n\n{job_entries[0]}")
 
 
+async def setup(bot: commands.Bot):
+    cog = Jobber(bot)
+    await bot.add_cog(cog)
 
+
+
+
+
+
+
+
+
+
+
+
+    # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
+    # (separate file, this is just a comment for the task)
 
     # Task loop to do the following once per hour:
     # 1. Parse a website URL for any potential job listings
@@ -136,10 +191,3 @@ class Jobber(commands.Cog):
     # Follow the same steps as the task loop that scrapes the website for job listings
 
     # 
-
-
-
-
-async def setup(bot: commands.Bot):
-    cog = Jobber(bot)
-    await bot.add_cog(cog)
