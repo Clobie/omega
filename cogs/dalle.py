@@ -65,7 +65,15 @@ class Dalle(commands.Cog):
         Edit an image using DALL-E 3.
         Reply to a message with an image attachment with this command, or use the command with an image attachment.
         """
-
+        if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
+            await ctx.send(
+                (
+                    f"You don't have enough credits for that :(\n"
+                    f"Use `!credits` to check your balance, or `!getcredits` to see how to get more credits!\n"
+                )
+            )
+            return
+        
         user = ctx.author
 
         attachment = None
@@ -81,15 +89,6 @@ class Dalle(commands.Cog):
 
         if not attachment:
             await reply_msg.edit(content="No image attachment found. Please attach an image or reply to a message with an image.")
-            return
-        
-        if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
-            await ctx.send(
-                (
-                    f"You don't have enough credits for that :(\n"
-                    f"Use `!credits` to check your balance, or `!getcredits` to see how to get more credits!\n"
-                )
-            )
             return
 
         file_path = f'download/{str(user.id)}/{attachment.filename}'
