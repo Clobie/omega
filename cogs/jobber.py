@@ -22,7 +22,7 @@ class Jobber(commands.Cog):
         if not os.path.exists(f"{self.user_directory}/jobs"):
             os.makedirs(f"{self.user_directory}/jobs")
 
-    def extract_jobs_from_html(html):
+    def extract_jobs_from_html(self, html):
         soup = BeautifulSoup(html, "html.parser")
         job_entries = []
         p_tags = soup.find_all("p")
