@@ -27,12 +27,14 @@ class Jobber(commands.Cog):
             if not os.path.exists(f"{self.user_directory}{ctx.author.id}"):
                 os.makedirs(f"{self.user_directory}{ctx.author.id}")
             await ctx.message.attachments[0].save(f"{self.user_directory}{ctx.author.id}/resume.txt")
+            data = open(f"{self.user_directory}{ctx.author.id}/resume.txt", "r").read()
+        elif data is None:
+            await ctx.send("Please upload a .txt file or paste the text of your resume directly.")
+            return
 
         redacted_text = omega.ai.chat_completion(
             model="gpt-4",
-            system_prompt=(
-                f"You are a helpful assistant. Redact any sensitive information in the text."
-            ),
+            system_prompt="You are a helpful assistant. Redact any sensitive information in the text.",
             user_prompt=data
         )
 
