@@ -134,14 +134,17 @@ class Jobber(commands.Cog):
         # debug
         embed_text = ""
         for job in job_entries:
-            title = job.get("title")
-            pay = job.get("pay")
-            embed_text += f"**Title:** {title} - **Pay:** {pay}\n"
-        embed = omega.embed.create_embed_info(
-            "Jobs",
-            description=embed_text
-        )
-        await ctx.send(embed=embed)
+            if embed_text.len() < 4096:
+                title = job.get("title")
+                pay = job.get("pay")
+                embed_text += f"**Title:** {title} - **Pay:** {pay}\n"
+            else:
+                embed = omega.embed.create_embed_info(
+                    "Jobs",
+                    description=embed_text
+                )
+                await ctx.send(embed=embed)
+                embed_text = ""
 
 
         # Save the job entry to the database
