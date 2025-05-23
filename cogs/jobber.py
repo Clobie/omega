@@ -69,8 +69,6 @@ class Jobber(commands.Cog):
 
         return job_entries
 
-
-
     @commands.command(name='addresume')
     async def add_resume(self, ctx, *, data=None):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
@@ -109,9 +107,7 @@ class Jobber(commands.Cog):
     
     @commands.command(name='addjob')
     async def add_job(self, ctx):
-
         url = f"https://ratracerebellion.com/job-postings/"
-
         reply_msg = await ctx.send(self.thinking_emoji)
         if not url:
             await reply_msg.edit(content="Please provide a URL to a job listing.")
@@ -119,27 +115,36 @@ class Jobber(commands.Cog):
         if not omega.common.is_valid_url(url):
             await reply_msg.edit(content="Please provide a valid URL.")
             return
-
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
         except Exception as e:
             await reply_msg.edit(content=f"Failed to fetch the job listing: {e}")
             return
-        
         html = response.text
-
         job_entries = self.extract_jobs_from_html(html)
         if not job_entries:
             await reply_msg.edit(content="No job entries found.")
             return
-        
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
-
         await reply_msg.edit(content=f"Found {total_jobs} job entries. Processing...")
+        
 
-        await ctx.send(f"First job entry:\n\n{job_entries[0]}")
+        # debug
+        embed_text = ""
+        for job in job_entries:
+            title = job.get("title")
+            pay = job.get("pay")
+            embed_text += f"**Title:** {title} - **Pay:** {pay}\n"
+        embed = omega.embed.create_embed_info(
+            "Jobs",
+            description=embed_text
+        )
+        await ctx.send(embed=embed)
+
+
+        # Save the job entry to the database
 
 
 async def setup(bot: commands.Bot):
