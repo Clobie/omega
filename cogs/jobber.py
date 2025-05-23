@@ -94,7 +94,7 @@ class Jobber(commands.Cog):
         sanitized_url = re.sub(r'[^a-zA-Z0-9._-]', '_', url)
         file_path = os.path.join(self.user_directory, "jobs", f"{sanitized_url}.html")
 
-        cut_dni = html_content.split("#LN-DNI")[0]
+        cut_dni = html_content.split("#LI-DNI")[0]
 
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(cut_dni)
