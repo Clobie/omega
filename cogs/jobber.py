@@ -102,6 +102,16 @@ class Jobber(commands.Cog):
         omega.logger.info(f"Saved job listing for user {ctx.author.id} at {file_path}")
         await reply_msg.edit(content="Job listing fetched and saved successfully.")
 
+        summary = omega.ai.chat_completion(
+            model="gpt-4",
+            system_prompt="You are a helpful assistant. Extract the job title, requirements, and summary from the text.",
+            user_prompt=cut_dni
+        )
+
+        await ctx.send(summary)
+
+        
+
 
     # Task loop to do the following once per hour:
     # 1. Parse a website URL for any potential job listings
