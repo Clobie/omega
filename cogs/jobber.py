@@ -134,7 +134,7 @@ class Jobber(commands.Cog):
         # debug
         embed_text = ""
         for job in job_entries:
-            if embed_text.len() < 4096:
+            if len(embed_text) < 4096:
                 title = job.get("title")
                 pay = job.get("pay")
                 embed_text += f"**Title:** {title} - **Pay:** {pay}\n"
