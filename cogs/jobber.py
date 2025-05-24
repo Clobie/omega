@@ -22,7 +22,6 @@ class Jobber(commands.Cog):
             os.makedirs(f"{self.user_directory}/jobs")
         self.db_init()
 
-
     def db_init(self):
         check_query = "SELECT * FROM information_schema.tables WHERE table_name = 'job_listings';"
         existing = omega.db.run_script(check_query)
@@ -40,6 +39,23 @@ class Jobber(commands.Cog):
             """
             omega.db.run_script(create_query)
             omega.logger.info("Created job_listings table in the database.")
+
+    def add_job_to_db(self, job):
+        check_query = "SELECT id FROM job_listings WHERE link = %s;"
+
+        existing = omega.db.run_script(check_query, (job["link"],))
+
+        if existing:
+            omega.logger.info(f"Job with link {job['link']} already exists in the database.")
+            return False
+
+        insert_query = (
+            "INSERT INTO job_listings (company, title, link, pay, snapshot) "
+            "VALUES (%s, %s, %s, %s, %s);"
+        )
+        omega.db.run_script(insert_query, (job["company"], job["title"], job["link"], job["pay"], job["snapshot"],))
+        omega.logger.info(f"Inserted job with link {job['link']} into the database.")
+        return True
 
     def extract_jobs_from_html(self, html):
         soup = BeautifulSoup(html, "html.parser")
@@ -111,8 +127,9 @@ class Jobber(commands.Cog):
             return
         with open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r") as f:
             data = f.read()
-        await reply_msg.edit(content="Your resume:\n\n{data}")
+        await reply_msg.edit(content=f"Your resume:\n\n{data}")
     
+
     @commands.command(name='addjob')
     async def add_job(self, ctx):
         url = f"https://ratracerebellion.com/job-postings/"
@@ -136,11 +153,16 @@ class Jobber(commands.Cog):
             return
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
-        await reply_msg.edit(content=f"Found {total_jobs} job entries. Processing...")
 
         
+        jobs_added = 0
         for job in job_entries:
-            self.add_job_to_db(job)
+            if self.add_job_to_db(job):
+                jobs_added += 1
+        if jobs_added > 0:
+            await reply_msg.edit(content=f"Added {jobs_added} new job entries to the database out of {total_jobs}.")
+        else:
+            await reply_msg.edit(content=f"No new job entries were added to the database out of {total_jobs}.")
         #    company = job.get("company")
         #    title = job.get("title")
         #    link = job.get("link")
@@ -149,23 +171,6 @@ class Jobber(commands.Cog):
 
         # Save the job entry to the database
         # Turn this into a task loop
-    
-    def add_job_to_db(self, job):
-        check_query = "SELECT id FROM job_listings WHERE link = %s;"
-
-        existing = omega.db.run_script(check_query, (job["link"],))
-
-        if existing:
-            omega.logger.info(f"Job with link {job['link']} already exists in the database.")
-            return False
-
-        insert_query = (
-            "INSERT INTO job_listings (company, title, link, pay, snapshot) "
-            "VALUES (%s, %s, %s, %s, %s);"
-        )
-        omega.db.run_script(insert_query, (job["company"], job["title"], job["link"], job["pay"], job["snapshot"],))
-        omega.logger.info(f"Inserted job with link {job['link']} into the database.")
-        return True
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
