@@ -13,9 +13,10 @@ class Dalle(commands.Cog):
         self.bot = bot
         self.model = "dall-e-3"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
-        self.base_cost = 0.04
-        self.base_profit = 0.01
-        self.total_cost = self.base_cost + self.base_profit
+        self.dalle3_cost = 0.04
+        self.gpt_image_1_cost = 0.25
+        self.base_profit = 1
+        self.percent_profit = 0.1
 
     @commands.command(name='getcredits')
     async def get_credits(self, ctx):
@@ -50,12 +51,13 @@ class Dalle(commands.Cog):
                     image_data = await resp.read()
                     filename = omega.common.generate_random_string() + "_image.png"
                     file = discord.File(io.BytesIO(image_data), filename=filename)
-                    omega.ai.update_cost_static(self.total_cost)
-                    credits = omega.credit.convert_cost_to_credits(self.total_cost)
+                    cost = (self.dalle3_cost + self.base_profit) * (1 + self.percent_profit)
+                    omega.ai.update_cost_static(cost)
+                    credits = omega.credit.convert_cost_to_credits(cost)
                     omega.credit.user_spend(ctx.author.id, credits)
-                    omega.ai.log_usage(ctx.author.id, 0, self.total_cost, 'dalle3')
+                    omega.ai.log_usage(ctx.author.id, 0, cost, 'dalle3')
                     credits_remaining = omega.credit.get_user_credits(ctx.author.id)
-                    footer = omega.ai.get_footer('null', self.total_cost)
+                    footer = omega.ai.get_footer('null', cost)
                     footer += omega.common.to_superscript(f"\n{credits_remaining} credits remaining")
                     await reply_msg.edit(content=footer, attachments=[file])
     
@@ -65,7 +67,7 @@ class Dalle(commands.Cog):
         Edit an image using DALL-E 3.
         Reply to a message with an image attachment with this command, or use the command with an image attachment.
         """
-        if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
+        if int(omega.credit.get_user_credits(ctx.author.id)) < 30:
             await ctx.send(
                 (
                     f"You don't have enough credits for that :(\n"
@@ -103,13 +105,14 @@ class Dalle(commands.Cog):
             await reply_msg.edit(content="Failed to edit the image.")
             return
 
-        omega.ai.update_cost_static(self.total_cost)
-        credits = omega.credit.convert_cost_to_credits(self.total_cost)
+        cost = (self.gpt_image_1_cost + self.base_profit) * (1 + self.percent_profit)
+        omega.ai.update_cost_static(cost)
+        credits = omega.credit.convert_cost_to_credits(cost)
         omega.credit.user_spend(ctx.author.id, credits)
-        omega.ai.log_usage(ctx.author.id, 0, self.total_cost, 'dalle3_edit')
+        omega.ai.log_usage(ctx.author.id, 0, cost, 'gpt-image-1')
 
         credits_remaining = omega.credit.get_user_credits(ctx.author.id)
-        #footer = omega.ai.get_footer('null', self.total_cost)
+        #footer = omega.ai.get_footer('null', cost)
         footer = omega.common.to_superscript(f"{credits_remaining} credits remaining")
 
         await reply_msg.edit(content=footer, attachments=[discord.File(edited_image_path)])
