@@ -110,10 +110,10 @@ class Jobber(commands.Cog):
             return
         job_summaries = ""
         for job in results:
-            created_at = job['created_at']
+            created_at = job[5]
             days_ago = (datetime.now() - created_at).days
             days_ago_string = omega.common.to_superscript(f"added {days_ago} days ago")
-            entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']} - {days_ago_string}\n"
+            entry = f"**{job[2]}** at {job[1]} - Pay: {job[4]} - {days_ago_string}\n"
             if (len(job_summaries) + len(entry)) > 2000:
                 await ctx.send(job_summaries)
                 job_summaries = ""
