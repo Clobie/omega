@@ -154,13 +154,24 @@ class Jobber(commands.Cog):
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
 
-        
+        new_jobs = []
         jobs_added = 0
         for job in job_entries:
             if self.add_job_to_db(job):
                 jobs_added += 1
+                new_jobs.append(job)
         if jobs_added > 0:
             await reply_msg.edit(content=f"Added {jobs_added} new job entries to the database out of {total_jobs}.")
+            await ctx.send(
+                f"New job entries:\n" +
+                "\n".join(
+                    f"**{job['title']}** at {job['company']}\n"
+                    f"Link: {job['link']}\n"
+                    f"Pay: {job['pay']}\n"
+                    f"Snapshot: {job['snapshot']}\n\n"
+                    for job in new_jobs
+                )
+            )
         else:
             await reply_msg.edit(content=f"No new job entries were added to the database out of {total_jobs}.")
         #    company = job.get("company")
