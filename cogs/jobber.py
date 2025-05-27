@@ -120,8 +120,16 @@ class Jobber(commands.Cog):
             return
         
         keywords_text_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
-        with open(keywords_text_path, "w") as f:
-            f.write(keywords)
+        # Append new keywords to the file
+        with open(keywords_text_path, "a", encoding="utf-8") as f:
+            for kw in keywords:
+                f.write(kw + "\n")
+        # Remove duplicates and rewrite the file
+        with open(keywords_text_path, "r", encoding="utf-8") as f:
+            all_keywords = [line.strip() for line in f if line.strip()]
+        unique_keywords = sorted(set(all_keywords), key=all_keywords.index)
+        with open(keywords_text_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(unique_keywords))
 
         omega.logger.info(f"Saved keywords for user {ctx.author.id} at {keywords_text_path}")
         await proccessing_msg.edit(content=f"Resume processed for {ctx.author.id}.\n")
@@ -225,7 +233,60 @@ class Jobber(commands.Cog):
             await ctx.send(embed=embed)
 
 
+    @commands.command(name='keywords', aliases=['kw'])
+    async def keywords(self, ctx):
+        keywords_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
+        if not os.path.exists(keywords_path):
+            await ctx.send("You don't have keywords saved. Please run the `addresume` command to generate keywords.")
+            return
+        with open(keywords_path, "r") as f:
+            keywords = [line.strip() for line in f if line.strip()]
+        if not keywords:
+            await ctx.send("No keywords found.")
+            return
+        body = "\n".join(f"- {kw}" for kw in keywords)
+        embed = omega.embed.create_embed_info("Your Resume Keywords", body)
+        await ctx.send(embed=embed)
+    
+    @commands.command(name='addkeyword', aliases=['addkw'])
+    async def add_keywords(self, ctx, *, keyword: str = None):
+        keywords_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
+        if not os.path.exists(keywords_path):
+            await ctx.send("You don't have keywords saved. Please run the `addresume` command to generate keywords.")
+            return
+        if not keyword or not keyword.strip():
+            await ctx.send("Please provide a keyword to add.")
+            return
+        keyword = keyword.strip()
+        with open(keywords_path, "r", encoding="utf-8") as f:
+            keywords = [line.strip() for line in f if line.strip()]
+        if keyword in keywords:
+            await ctx.send(f"`{keyword}` is already in your keywords list.")
+            return
+        keywords.append(keyword)
+        with open(keywords_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(keywords))
+        await ctx.send(f"Added `{keyword}` to your keywords.")
 
+    @commands.command(name='removekeyword', aliases=['removekw'])
+    async def remove_keywords(self, ctx, *, keyword: str = None):
+        keywords_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
+        if not os.path.exists(keywords_path):
+            await ctx.send("You don't have keywords saved. Please run the `addresume` command to generate keywords.")
+            return
+        if not keyword or not keyword.strip():
+            await ctx.send("Please provide a keyword to remove.")
+            return
+        keyword = keyword.strip()
+        with open(keywords_path, "r", encoding="utf-8") as f:
+            keywords = [line.strip() for line in f if line.strip()]
+        if keyword not in keywords:
+            await ctx.send(f"`{keyword}` is not in your keywords list.")
+            return
+        keywords = [kw for kw in keywords if kw != keyword]
+        with open(keywords_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(keywords))
+        await ctx.send(f"Removed `{keyword}` from your keywords.")
 
 
 
@@ -340,14 +401,16 @@ class Jobber(commands.Cog):
             )
             job_summaries = ""
             for job in new_jobs:
-                entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
-                if (len(job_summaries) + len(entry)) > 2000:
-                    await channel.send(job_summaries)
+                entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n{job['link']}\n\n"
+                if (len(job_summaries) + len(entry)) > 4000:
+                    embed = omega.embed.create_embed_info("Job Info", job_summaries)
+                    await channel.send(embed=embed)
                     job_summaries = ""
                 else:
                     job_summaries += entry
             if job_summaries:
-                await channel.send(job_summaries)
+                embed = omega.embed.create_embed_info("Job Info", job_summaries)
+                await channel.send(embed=embed)
             
 
         user_job_matches = {}
@@ -377,11 +440,11 @@ class Jobber(commands.Cog):
             user_obj = self.bot.get_user(user_id)
             if user_obj:
                 try:
-                    body = ""
+                    body = "Hey!  You have some new job matches to check out!\n\n"
                     for job in jobs:
                         entry = (
                             f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
-                            f"{job['link']}\n"
+                            f"{job['link']}\n\n"
                         )
                         if len(body) + len(entry) > 4000:
                             embed = omega.embed.create_embed_info("New Job Matches", body)
