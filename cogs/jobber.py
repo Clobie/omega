@@ -87,7 +87,110 @@ class Jobber(commands.Cog):
             f.write(redacted_text)
         omega.logger.info(f"Saved resume for user {ctx.author.id} at {file_text_path}")
         await reply_msg.edit(content=f"Resume saved for user {ctx.author.id} at {file_text_path}")
+
+        proccessing_msg = await ctx.send(self.thinking_emoji + " Processing your resume...")
+
+        keywords = omega.ai.chat_completion(
+            model="gpt-4",
+            system_prompt="You are a helpful assistant. Using the provided resume text, generate a list of potential job titles that can be used for job matching.  Be as thorough as possible.",
+            user_prompt=redacted_text
+        )
+
+        keywords = re.sub(r'\r\n|\n+', '\n', keywords.strip())
+
+        if not keywords:
+            await proccessing_msg.edit(content="Issue :(")
+            return
+        
+        keywords_text_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
+        with open(keywords_text_path, "w") as f:
+            f.write(keywords)
+        omega.logger.info(f"Saved keywords for user {ctx.author.id} at {keywords_text_path}")
+        await proccessing_msg.edit(content=f"Resume processed for {ctx.author.id}.\n")
     
+
+
+
+
+
+
+    @commands.command(name='jobmatch', aliases=['matchjobs'])
+    async def job_match(self, ctx):
+        reply_msg = await ctx.send(self.thinking_emoji)
+
+        user_id = str(ctx.author.id)
+        resume_path = f"{self.user_directory}/{user_id}/resume.txt"
+        keywords_path = f"{self.user_directory}/{user_id}/keywords.txt"
+
+        if not os.path.exists(resume_path):
+            await reply_msg.edit(content="You don't have a resume saved. Please upload one using the `addresume` command.")
+            return
+        if not os.path.exists(keywords_path):
+            await reply_msg.edit(content="You don't have keywords saved. Please run the `addresume` command to generate keywords.")
+            return
+
+        with open(resume_path, "r") as f:
+            resume_text = f.read().strip()
+        with open(keywords_path, "r") as f:
+            keywords = [line.strip() for line in f if line.strip()]
+
+        if not resume_text or not keywords:
+            await reply_msg.edit(content="Your resume or keywords are empty. Please ensure you have uploaded a resume and generated keywords.")
+            return
+
+        query = "SELECT * FROM job_listings WHERE title ILIKE %s;"
+        seen = set()
+        results = []
+
+        for keyword in keywords:
+            search_term = f"%{keyword}%"
+            jobs = omega.db.run_script(query, (search_term,))
+            for job in jobs:
+                if job[0] not in seen:
+                    seen.add(job[0])
+                    results.append(job)
+
+        if not results:
+            await reply_msg.edit(content="No job listings found matching your resume keywords.")
+            return
+
+        embeds = []
+        body = ""
+        for job in results:
+            title = job[2]
+            company = job[1]
+            link = job[3]
+            pay = job[4]
+            created_at = job[6]
+
+            try:
+                days_ago = (datetime.now() - created_at).days
+            except Exception:
+                days_ago = "?"
+            days_ago_string = omega.common.to_superscript(f"added {days_ago} days ago")
+
+            entry = f"**{title}** at {company} - Pay: {pay} - {days_ago_string}\n<{link}>\n\n"
+
+            if len(body) + len(entry) > 4000:
+                embed = omega.embed.create_embed_info("Job Matches", body)
+                embeds.append(embed)
+                body = ""
+
+            body += entry
+
+        if body:
+            embed = omega.embed.create_embed_info("Job Matches", body)
+            embeds.append(embed)
+
+        await reply_msg.delete()
+        for embed in embeds:
+            await ctx.send(embed=embed)
+
+
+
+
+
+
     @commands.command(name='resume')
     async def get_resume(self, ctx):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
@@ -98,7 +201,7 @@ class Jobber(commands.Cog):
             data = f.read()
         await reply_msg.edit(content=f"Your resume:\n\n{data}")
 
-    @commands.command(name='findjobs')
+    @commands.command(name='findjobs', aliases=['searchjobs', 'jobsearch'])
     async def find_jobs(self, ctx, *, search):
         query = (
             "SELECT * FROM job_listings WHERE title ILIKE %s OR company ILIKE %s OR snapshot ILIKE %s;"
@@ -108,16 +211,26 @@ class Jobber(commands.Cog):
         if not results:
             await ctx.send("No job listings found matching your search.")
             return
-        job_summaries = ""
+        body = ""
+        embeds = []
         for job in results:
             created_at = job[6]
             days_ago = (datetime.now() - created_at).days
             days_ago_string = omega.common.to_superscript(f"added {days_ago} days ago")
-            entry = f"**{job[2]}** at {job[1]} - Pay: {job[4]} - {days_ago_string}\n{job[3]}\n\n"
-            if (len(job_summaries) + len(entry)) > 2000:
-                await ctx.send(job_summaries)
-                job_summaries = ""
-            job_summaries += entry
+            entry = (
+                f"**{job[2]}** at {job[1]} - Pay: {job[4]} - {days_ago_string}\n"
+                f"<{job[3]}>\n\n"
+            )
+            if len(body) + len(entry) > 4000:
+                embed = omega.embed.create_embed_info("Job Listings", body)
+                embeds.append(embed)
+                body = ""
+            body += entry
+        if body:
+            embed = omega.embed.create_embed_info("Job Listings", body)
+            embeds.append(embed)
+        for embed in embeds:
+            await ctx.send(embed=embed)
 
     @tasks.loop(hours=4)
     async def ratracerebellion_scraper_loop(self):
