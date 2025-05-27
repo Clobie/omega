@@ -342,7 +342,7 @@ class Jobber(commands.Cog):
             for job in new_jobs:
                 entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
                 if (len(job_summaries) + len(entry)) > 2000:
-                    await channel.send(entry)
+                    await channel.send(job_summaries)
                     job_summaries = ""
                 else:
                     job_summaries += entry
@@ -350,8 +350,6 @@ class Jobber(commands.Cog):
                 await channel.send(job_summaries)
             
 
-
-        # Build a dictionary mapping user_id to list of matching jobs
         user_job_matches = {}
 
         query = "SELECT user_id FROM job_notifications;"
@@ -374,21 +372,28 @@ class Jobber(commands.Cog):
                 if matches:
                     user_job_matches[user_id] = matches
 
-        # Send job details to each user
+        # Send a single embed with all job details to each user
         for user_id, jobs in user_job_matches.items():
             user_obj = self.bot.get_user(user_id)
             if user_obj:
-                for job in jobs:
-                    try:
-                        msg = (
-                            f"**{job['title']}** at {job['company']}\n"
-                            f"Pay: {job['pay']}\n"
-                            f"Link: {job['link']}\n"
-                            f"Summary: {job['snapshot']}\n"
+                try:
+                    body = ""
+                    for job in jobs:
+                        entry = (
+                            f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
+                            f"{job['link']}\n"
                         )
-                        await user_obj.send(msg)
-                    except discord.Forbidden:
-                        omega.logger.warning(f"Could not send DM to user {user_id}. They may have DMs disabled.")
+                        if len(body) + len(entry) > 4000:
+                            embed = omega.embed.create_embed_info("New Job Matches", body)
+                            await user_obj.send(embed=embed)
+                            body = ""
+                        else:
+                            body += entry
+                    if body:
+                        embed = omega.embed.create_embed_info("New Job Matches", body)
+                        await user_obj.send(embed=embed)
+                except discord.Forbidden:
+                    omega.logger.warning(f"Could not send DM to user {user_id}. They may have DMs disabled.")
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
