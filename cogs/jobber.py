@@ -351,6 +351,9 @@ class Jobber(commands.Cog):
             
 
 
+        # Build a dictionary mapping user_id to list of matching jobs
+        user_job_matches = {}
+
         query = "SELECT user_id FROM job_notifications;"
         rows = omega.db.run_script(query)
 
@@ -369,14 +372,23 @@ class Jobber(commands.Cog):
                 matches = [job for job in new_jobs if self.is_job_similar(job, keywords)]
                 
                 if matches:
-                    user_obj = self.bot.get_user(user_id)
-                    if user_obj:
-                        try:
-                            await user_obj.send(
-                                "New job listings have been added that match your resume keywords. Check the job board for details."
-                            )
-                        except discord.Forbidden:
-                            omega.logger.warning(f"Could not send DM to user {user_id}. They may have DMs disabled.")
+                    user_job_matches[user_id] = matches
+
+        # Send job details to each user
+        for user_id, jobs in user_job_matches.items():
+            user_obj = self.bot.get_user(user_id)
+            if user_obj:
+                for job in jobs:
+                    try:
+                        msg = (
+                            f"**{job['title']}** at {job['company']}\n"
+                            f"Pay: {job['pay']}\n"
+                            f"Link: {job['link']}\n"
+                            f"Summary: {job['snapshot']}\n"
+                        )
+                        await user_obj.send(msg)
+                    except discord.Forbidden:
+                        omega.logger.warning(f"Could not send DM to user {user_id}. They may have DMs disabled.")
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
