@@ -105,7 +105,7 @@ class Dalle(commands.Cog):
             await reply_msg.edit(content="Failed to edit the image.")
             return
 
-        cost = (self.gpt_image_1_cost + self.base_profit) * (1 + self.percent_profit)
+        cost = round((self.gpt_image_1_cost + self.base_profit) * (1 + self.percent_profit), 0)
         omega.ai.update_cost_static(cost)
         credits = omega.credit.convert_cost_to_credits(cost)
         omega.credit.user_spend(ctx.author.id, credits)
