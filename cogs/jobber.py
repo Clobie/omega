@@ -27,8 +27,8 @@ class Jobber(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        if not self.job_scraper_loop.is_running():
-            self.job_scraper_loop.start()
+        if not self.ratracerebellion_scraper_loop.is_running():
+            self.ratracerebellion_scraper_loop.start()
 
     def db_init(self):
         check_query = "SELECT * FROM information_schema.tables WHERE table_name = 'job_listings';"
