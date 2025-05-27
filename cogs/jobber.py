@@ -9,6 +9,7 @@ import re
 import aiohttp
 from bs4 import BeautifulSoup
 import requests
+from datetime import datetime
 
 class Jobber(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -61,41 +62,6 @@ class Jobber(commands.Cog):
         omega.logger.info(f"Inserted job with link {job['link']} into the database.")
         return True
 
-    def extract_jobs_from_html(self, html):
-        soup = BeautifulSoup(html, "html.parser")
-        job_entries = []
-        p_tags = soup.find_all("p")
-        for i, p in enumerate(p_tags):
-            text = p.get_text(strip=True)
-            if "Company" in text and "Job/Gig" in text:
-                company = None
-                title = None
-                link = None
-                pay = None
-                snapshot = None
-                if "Company" in text:
-                    company_line = next((line for line in text.splitlines() if "Company" in line), "")
-                    company = company_line.split(":", 1)[-1].split("Job/Gig")[0].strip()
-                a_tag = p.find("a")
-                if a_tag:
-                    title = a_tag.get_text(strip=True)
-                    link = a_tag.get("href", None)
-                if "Pay" in text:
-                    pay_line = next((line for line in text.splitlines() if "Pay" in line), "")
-                    pay = pay_line.split("Pay:", 1)[-1].strip()
-                if i + 1 < len(p_tags):
-                    snapshot_text = p_tags[i + 1].get_text(strip=True)
-                    if "Snapshot" in snapshot_text or not snapshot_text.startswith("Company:"):
-                        snapshot = snapshot_text
-                job_entries.append({
-                    "company": company,
-                    "title": title,
-                    "link": link,
-                    "pay": pay,
-                    "snapshot": snapshot
-                })
-        return job_entries
-
     @commands.command(name='addresume')
     async def add_resume(self, ctx, *, data=None):
         reply_msg = await ctx.send(f"{self.thinking_emoji}")
@@ -131,10 +97,68 @@ class Jobber(commands.Cog):
         with open(f"{self.user_directory}/{ctx.author.id}/resume.txt", "r") as f:
             data = f.read()
         await reply_msg.edit(content=f"Your resume:\n\n{data}")
-    
 
-    @tasks.loop(hours=1)
+    @commands.command(name='findjobs')
+    async def find_jobs(self, ctx, *, search):
+        query = (
+            "SELECT * FROM job_listings WHERE title ILIKE %s OR company ILIKE %s OR snapshot ILIKE %s;"
+        )
+        search_term = f"%{search}%"
+        results = omega.db.run_script(query, (search_term, search_term, search_term,))
+        if not results:
+            await ctx.send("No job listings found matching your search.")
+            return
+        job_summaries = ""
+        for job in results:
+            created_at = job['created_at']
+            days_ago = (datetime.now() - created_at).days
+            days_ago_string = omega.common.to_superscript(f"added {days_ago} days ago")
+            entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']} - {days_ago_string}\n"
+            if (len(job_summaries) + len(entry)) > 2000:
+                await ctx.send(job_summaries)
+                job_summaries = ""
+            job_summaries += entry
+
+    @tasks.loop(hours=4)
     async def ratracerebellion_scraper_loop(self):
+        current_hour = discord.utils.utcnow().hour
+        if current_hour >= 22 or current_hour < 6:
+            omega.logger.info("Skipping ratracerebellion scraper loop due to time restriction.")
+            return
+        def extract_jobs_from_html(html):
+            soup = BeautifulSoup(html, "html.parser")
+            job_entries = []
+            p_tags = soup.find_all("p")
+            for i, p in enumerate(p_tags):
+                text = p.get_text(strip=True)
+                if "Company" in text and "Job/Gig" in text:
+                    company = None
+                    title = None
+                    link = None
+                    pay = None
+                    snapshot = None
+                    if "Company" in text:
+                        company_line = next((line for line in text.splitlines() if "Company" in line), "")
+                        company = company_line.split(":", 1)[-1].split("Job/Gig")[0].strip()
+                    a_tag = p.find("a")
+                    if a_tag:
+                        title = a_tag.get_text(strip=True)
+                        link = a_tag.get("href", None)
+                    if "Pay" in text:
+                        pay_line = next((line for line in text.splitlines() if "Pay" in line), "")
+                        pay = pay_line.split("Pay:", 1)[-1].strip()
+                    if i + 1 < len(p_tags):
+                        snapshot_text = p_tags[i + 1].get_text(strip=True)
+                        if "Snapshot" in snapshot_text or not snapshot_text.startswith("Company:"):
+                            snapshot = snapshot_text
+                    job_entries.append({
+                        "company": company,
+                        "title": title,
+                        "link": link,
+                        "pay": pay,
+                        "snapshot": snapshot
+                    })
+            return job_entries
         url = "https://ratracerebellion.com/job-postings/"
         channel = self.bot.get_channel(self.update_channel_id)
         if not channel:
@@ -147,13 +171,12 @@ class Jobber(commands.Cog):
             await channel.send(f"Failed to fetch job board: {e}\n\nURL: {url}")
             return
         html = response.text
-        job_entries = self.extract_jobs_from_html(html)
+        job_entries = extract_jobs_from_html(html)
         if not job_entries:
             await channel.send(f"No job entries found.")
             return
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
-
         new_jobs = []
         jobs_added = 0
         for job in job_entries:
@@ -164,13 +187,17 @@ class Jobber(commands.Cog):
             await channel.send(
                 f"Added {jobs_added} new job entries to the database out of {total_jobs} found."
             )
-
-            job_summaries = "\n".join(
-                f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
-                for job in new_jobs
-            )
-            if len(job_summaries) < 2000:
+            job_summaries = ""
+            for job in new_jobs:
+                entry = f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
+                if (len(job_summaries) + len(entry)) > 2000:
+                    await channel.send(entry)
+                    job_summaries = ""
+                else:
+                    job_summaries += entry
+            if job_summaries:
                 await channel.send(job_summaries)
+    
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
