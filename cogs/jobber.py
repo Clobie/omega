@@ -411,31 +411,21 @@ class Jobber(commands.Cog):
             if job_summaries:
                 embed = omega.embed.create_embed_info("Job Info", job_summaries)
                 await channel.send(embed=embed)
-            
-
         user_job_matches = {}
-
         query = "SELECT user_id FROM job_notifications;"
         rows = omega.db.run_script(query)
-
         if rows:
             for row in rows:
                 user_id = int(row[0])
                 keywords_file = f"./downloads/{user_id}/keywords.txt"
-                
                 if not os.path.isfile(keywords_file):
                     omega.logger.warning(f"Keywords file not found for user {user_id}")
                     continue
-                
                 with open(keywords_file, "r", encoding="utf-8") as f:
                     keywords = [line.strip() for line in f if line.strip()]
-                
                 matches = [job for job in new_jobs if self.is_job_similar(job, keywords)]
-                
                 if matches:
                     user_job_matches[user_id] = matches
-
-        # Send a single embed with all job details to each user
         for user_id, jobs in user_job_matches.items():
             user_obj = self.bot.get_user(user_id)
             if user_obj:
@@ -464,23 +454,6 @@ async def setup(bot: commands.Bot):
 
 
 
-
-
-
-
-
-
-
-
-
-    # Create a jobber_tables_init.sql file that can be used to create the necessary tables in the database
-    # (separate file, this is just a comment for the task)
-
-    # Task loop to do the following once per hour:
-    # 1. Parse a website URL for any potential job listings
-    # 2. Use AI to parse the job listing and extract the complete job summary, URL, job title, requirements, etc. Then save it to the database
-    # Make sure to think about speed and efficiency, and make sure to not spam the website with requests
-    # Make sure to consider speed for the db, use multiple tables if necessary
 
     # Task loop to do the following once per day:
     # 1. Check if any job listings have been updated in the last self.purge_after_days
