@@ -44,6 +44,11 @@ class Jobber(commands.Cog):
                 snapshot TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE job_notifications (
+                user_id VARCHAR(255) PRIMARY KEY,
+                notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
             """
             omega.db.run_script(create_query)
             omega.logger.info("Created job_listings table in the database.")
@@ -114,7 +119,27 @@ class Jobber(commands.Cog):
         await proccessing_msg.edit(content=f"Resume processed for {ctx.author.id}.\n")
     
 
-
+    @commands.command(name='notifyme', aliases=['notifyjobs'])
+    async def notify_me(self, ctx):
+        if not os.path.exists(f"{self.user_directory}/{ctx.author.id}/resume.txt"):
+            await ctx.send("You don't have a resume saved. Please upload one using the `addresume` command first.")
+            return
+        if not os.path.exists(f"{self.user_directory}/{ctx.author.id}/keywords.txt"):
+            await ctx.send("You don't have keywords saved. Please run the `addresume` command to generate keywords, or add them manually with the `addkw` and `removekw` commands.")
+            return
+        query = "SELECT * FROM job_notifications WHERE user_id = %s;"
+        existing = omega.db.run_script(query, (str(ctx.author.id),))
+        if existing:
+            query = "DELETE FROM job_notifications WHERE user_id = %s;"
+            omega.db.run_script(query, (str(ctx.author.id),))
+            omega.logger.info(f"User {ctx.author.id} has been removed from the job notification list.")
+            await ctx.send("You have been removed from the job notification list. You will no longer receive notifications when new jobs are posted that match your resume keywords.")
+            return
+        else:
+            query = "INSERT INTO job_notifications (user_id) VALUES (%s) ON CONFLICT (user_id) DO NOTHING;"
+            omega.db.run_script(query, (str(ctx.author.id),))
+            omega.logger.info(f"User {ctx.author.id} has been added to the job notification list.")
+            await ctx.send(f"You have been added to the job notification list. You will receive notifications when new jobs are posted that match your resume keywords.")
 
 
 
