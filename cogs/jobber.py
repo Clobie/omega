@@ -92,11 +92,15 @@ class Jobber(commands.Cog):
 
         keywords = omega.ai.chat_completion(
             model="gpt-4",
-            system_prompt="You are a helpful assistant. Using the provided resume text, generate a list of potential job titles that can be used for job matching.  Be as thorough as possible.",
+            system_prompt="You are a helpful assistant. Using the provided resume text, generate a list of potential job titles that can be used for job matching.  Be as thorough as possible.  Do not use a numbered list.  ONLY job titles separated by new lines.",
             user_prompt=redacted_text
         )
 
         keywords = re.sub(r'\r\n|\n+', '\n', keywords.strip())
+        keywords = [
+            re.sub(r'^[\s]*[0-9]+[.)][\s]*', '', line).strip()
+            for line in keywords.split('\n') if line.strip()
+        ]
 
         if not keywords:
             await proccessing_msg.edit(content="Issue :(")
@@ -105,6 +109,7 @@ class Jobber(commands.Cog):
         keywords_text_path = f"{self.user_directory}/{ctx.author.id}/keywords.txt"
         with open(keywords_text_path, "w") as f:
             f.write(keywords)
+
         omega.logger.info(f"Saved keywords for user {ctx.author.id} at {keywords_text_path}")
         await proccessing_msg.edit(content=f"Resume processed for {ctx.author.id}.\n")
     
