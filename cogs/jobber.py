@@ -66,6 +66,14 @@ class Jobber(commands.Cog):
         omega.db.run_script(insert_query, (job["company"], job["title"], job["link"], job["pay"], job["snapshot"],))
         omega.logger.info(f"Inserted job with link {job['link']} into the database.")
         return True
+    
+    def is_job_similar(self, job, keywords):
+        title = job.get("title", "").lower()
+        company = job.get("company", "").lower()
+        for keyword in keywords:
+            if keyword.lower() in title or keyword.lower() in company:
+                return True
+        return False
 
     @commands.command(name='addresume')
     async def add_resume(self, ctx, *, data=None):
@@ -262,7 +270,7 @@ class Jobber(commands.Cog):
         for embed in embeds:
             await ctx.send(embed=embed)
 
-    @tasks.loop(hours=4)
+    @tasks.loop(hours=1)
     async def ratracerebellion_scraper_loop(self):
         current_hour = discord.utils.utcnow().hour
         if current_hour >= 22 or current_hour < 6:
@@ -340,7 +348,35 @@ class Jobber(commands.Cog):
                     job_summaries += entry
             if job_summaries:
                 await channel.send(job_summaries)
-    
+            
+
+
+        query = "SELECT user_id FROM job_notifications;"
+        rows = omega.db.run_script(query)
+
+        if rows:
+            for row in rows:
+                user_id = int(row[0])
+                keywords_file = f"./downloads/{user_id}/keywords.txt"
+                
+                if not os.path.isfile(keywords_file):
+                    omega.logger.warning(f"Keywords file not found for user {user_id}")
+                    continue
+                
+                with open(keywords_file, "r", encoding="utf-8") as f:
+                    keywords = [line.strip() for line in f if line.strip()]
+                
+                matches = [job for job in new_jobs if self.is_job_similar(job, keywords)]
+                
+                if matches:
+                    user_obj = self.bot.get_user(user_id)
+                    if user_obj:
+                        try:
+                            await user_obj.send(
+                                "New job listings have been added that match your resume keywords. Check the job board for details."
+                            )
+                        except discord.Forbidden:
+                            omega.logger.warning(f"Could not send DM to user {user_id}. They may have DMs disabled.")
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
