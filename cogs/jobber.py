@@ -16,11 +16,18 @@ class Jobber(commands.Cog):
         self.purge_after_days = 30
         self.user_directory = "./downloads"
         self.thinking_emoji = "<a:ai_thinking:1309172561250353224>"
+        self.update_channel_id = 1376922139239645204
+
         if not os.path.exists(self.user_directory):
             os.makedirs(self.user_directory)
         if not os.path.exists(f"{self.user_directory}/jobs"):
             os.makedirs(f"{self.user_directory}/jobs")
         self.db_init()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        if not self.job_scraper_loop.is_running():
+            self.job_scraper_loop.start()
 
     def db_init(self):
         check_query = "SELECT * FROM information_schema.tables WHERE table_name = 'job_listings';"
@@ -42,13 +49,10 @@ class Jobber(commands.Cog):
 
     def add_job_to_db(self, job):
         check_query = "SELECT id FROM job_listings WHERE link = %s;"
-
         existing = omega.db.run_script(check_query, (job["link"],))
-
         if existing:
             omega.logger.info(f"Job with link {job['link']} already exists in the database.")
             return False
-
         insert_query = (
             "INSERT INTO job_listings (company, title, link, pay, snapshot) "
             "VALUES (%s, %s, %s, %s, %s);"
@@ -64,7 +68,6 @@ class Jobber(commands.Cog):
         for i, p in enumerate(p_tags):
             text = p.get_text(strip=True)
             if "Company" in text and "Job/Gig" in text:
-                # Initialize fields
                 company = None
                 title = None
                 link = None
@@ -130,26 +133,23 @@ class Jobber(commands.Cog):
         await reply_msg.edit(content=f"Your resume:\n\n{data}")
     
 
-    @commands.command(name='addjob')
-    async def add_job(self, ctx):
-        url = f"https://ratracerebellion.com/job-postings/"
-        reply_msg = await ctx.send(self.thinking_emoji)
-        if not url:
-            await reply_msg.edit(content="Please provide a URL to a job listing.")
-            return
-        if not omega.common.is_valid_url(url):
-            await reply_msg.edit(content="Please provide a valid URL.")
+    @tasks.loop(hours=1)
+    async def ratracerebellion_scraper_loop(self):
+        url = "https://ratracerebellion.com/job-postings/"
+        channel = self.bot.get_channel(self.update_channel_id)
+        if not channel:
+            omega.logger.warning(f"Channel with ID {self.update_channel_id} not found.")
             return
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
         except Exception as e:
-            await reply_msg.edit(content=f"Failed to fetch the job listing: {e}")
+            await channel.send(f"Failed to fetch job board: {e}\n\nURL: {url}")
             return
         html = response.text
         job_entries = self.extract_jobs_from_html(html)
         if not job_entries:
-            await reply_msg.edit(content="No job entries found.")
+            await channel.send(f"No job entries found.")
             return
         total_jobs = len(job_entries)
         omega.logger.info(f"Found {total_jobs} job entries.")
@@ -161,27 +161,16 @@ class Jobber(commands.Cog):
                 jobs_added += 1
                 new_jobs.append(job)
         if jobs_added > 0:
-            await reply_msg.edit(content=f"Added {jobs_added} new job entries to the database out of {total_jobs}.")
-            await ctx.send(
-                f"New job entries:\n" +
-                "\n".join(
-                    f"**{job['title']}** at {job['company']}\n"
-                    f"Link: {job['link']}\n"
-                    f"Pay: {job['pay']}\n"
-                    f"Snapshot: {job['snapshot']}\n\n"
-                    for job in new_jobs
-                )
+            await channel.send(
+                f"Added {jobs_added} new job entries to the database out of {total_jobs} found."
             )
-        else:
-            await reply_msg.edit(content=f"No new job entries were added to the database out of {total_jobs}.")
-        #    company = job.get("company")
-        #    title = job.get("title")
-        #    link = job.get("link")
-        #    pay = job.get("pay")
-        #    snapshot = job.get("snapshot")
 
-        # Save the job entry to the database
-        # Turn this into a task loop
+            job_summaries = "\n".join(
+                f"**{job['title']}** at {job['company']} - Pay: {job['pay']}\n"
+                for job in new_jobs
+            )
+            if len(job_summaries) < 2000:
+                await channel.send(job_summaries)
 
 async def setup(bot: commands.Bot):
     cog = Jobber(bot)
