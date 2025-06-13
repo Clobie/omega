@@ -87,8 +87,10 @@ class Assistant(commands.Cog):
             # Retrieve RAG context, e.g. 3 results
             rag_results = await omega.rag.retrieve_context(prompt, 3)  # assuming this is async
 
+            texts = [str(entry) for entry in rag_results]
+
             # Compose dynamic system prompt with RAG info appended
-            rag_info = "\n\nRelevant context:\n" + "\n".join(rag_results) if rag_results else ""
+            rag_info = "\n\nRelevant context:\n" + "\n".join(texts) if texts else ""
             dynamic_system_prompt = self.system_prompt + rag_info
 
             # Build full context with dynamic system prompt + conversation history
