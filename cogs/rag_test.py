@@ -131,42 +131,79 @@ class RagTest(commands.Cog):
         else:
             await ctx.send(message)
 
-    @commands.has_permissions(administrator=True)
-    @commands.command(name="testupdate")
-    async def testupdate(self, ctx, doc_id: str):
-        await ctx.send(f"Please provide the new content for the document with ID `{doc_id}`:")
+@commands.has_permissions(administrator=True)
+@commands.command(name="testupdate")
+async def testupdate(self, ctx, doc_id: str):
+	await ctx.send(f"Looking up document with ID `{doc_id}`...")
 
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
+	# Try to retrieve the document and metadata
+	results = omega.rag.collection.get(
+		ids=[doc_id],
+		include=["documents", "metadatas"]
+	)
 
-        try:
-            reply = await self.bot.wait_for("message", timeout=60.0, check=check)
-            new_text = reply.content.strip()
-        except asyncio.TimeoutError:
-            await ctx.send("Timeout: No content received. Update cancelled.")
-            return
+	docs = results.get("documents", [])
+	metas = results.get("metadatas", [])
 
-        await ctx.send("Would you like to add or update metadata as well? Reply with `yes` or `no`:")
+	if not docs:
+		await ctx.send(f"❌ No document found with ID `{doc_id}`.")
+		return
 
-        try:
-            meta_reply = await self.bot.wait_for("message", timeout=30.0, check=check)
-            wants_metadata = meta_reply.content.lower() in ["yes", "y"]
-        except asyncio.TimeoutError:
-            await ctx.send("Timeout. Proceeding without metadata.")
-            wants_metadata = False
+	# Show current data to user
+	current_text = docs[0]
+	current_meta = metas[0] if metas else {}
 
-        new_metadata = None
-        if wants_metadata:
-            await ctx.send("Please provide metadata as JSON (e.g. `{\"source\": \"user update\"}`):")
-            try:
-                json_reply = await self.bot.wait_for("message", timeout=60.0, check=check)
-                import json
-                new_metadata = json.loads(json_reply.content)
-            except (asyncio.TimeoutError, json.JSONDecodeError):
-                await ctx.send("Invalid or no JSON received. Proceeding without metadata.")
+	# Format metadata as JSON string for readability
+	import json
+	meta_display = json.dumps(current_meta, indent=2)
 
-        omega.rag.update_info_in_local_rag(doc_id, new_text, new_metadata)
-        await ctx.send(f"Document with ID `{doc_id}` has been updated.")
+	# Truncate if too long for Discord
+	if len(current_text) > 1000:
+		current_text_display = current_text[:1000] + "\n...[truncated]"
+	else:
+		current_text_display = current_text
+
+	await ctx.send(
+		f"**Current document:**\n```{current_text_display}```\n\n"
+		f"**Current metadata:**\n```json\n{meta_display}```"
+	)
+
+	# Prompt for new content
+	await ctx.send(f"Please provide the *new content* for document ID `{doc_id}`:")
+
+	def check(m):
+		return m.author == ctx.author and m.channel == ctx.channel
+
+	try:
+		reply = await self.bot.wait_for("message", timeout=120.0, check=check)
+		new_text = reply.content.strip()
+	except asyncio.TimeoutError:
+		await ctx.send("⏰ Timeout: No content received. Update cancelled.")
+		return
+
+	# Ask if user wants to change metadata
+	await ctx.send("Would you like to add or update metadata as well? Reply with `yes` or `no`:")
+
+	try:
+		meta_reply = await self.bot.wait_for("message", timeout=30.0, check=check)
+		wants_metadata = meta_reply.content.lower() in ["yes", "y"]
+	except asyncio.TimeoutError:
+		await ctx.send("Timeout. Proceeding without metadata.")
+		wants_metadata = False
+
+	new_metadata = None
+	if wants_metadata:
+		await ctx.send("Please provide metadata as JSON (e.g. `{\"source\": \"user update\"}`):")
+		try:
+			json_reply = await self.bot.wait_for("message", timeout=60.0, check=check)
+			new_metadata = json.loads(json_reply.content)
+		except (asyncio.TimeoutError, json.JSONDecodeError):
+			await ctx.send("⚠️ Invalid or no JSON received. Proceeding without metadata.")
+
+	# Perform the update
+	omega.rag.update_info_in_local_rag(doc_id, new_text, new_metadata)
+	await ctx.send(f"✅ Document with ID `{doc_id}` has been updated.")
+
 
 
 
