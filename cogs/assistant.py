@@ -85,7 +85,7 @@ class Assistant(commands.Cog):
             self.add_context(scope, 'user', prompt)
 
             # Retrieve RAG context, e.g. 3 results
-            rag_results = await omega.rag.retrieve_context(prompt, 3)  # assuming this is async
+            rag_results = omega.rag.retrieve_context(prompt, 3)
 
             texts = [str(entry) for entry in rag_results]
 

@@ -15,7 +15,7 @@ class ChromaRAG:
         self.chroma = chromadb.PersistentClient(path="./rag_db")
         self.collection = self.chroma.get_or_create_collection("discord_knowledge")
 		
-    async def add_info_to_local_rag(self, text: str, metadata: dict = None):
+    def add_info_to_local_rag(self, text: str, metadata: dict = None):
         """Add a piece of text, its embedding, and optional metadata to the local RAG database."""
         embedding = self.embedder.encode([text])[0]
         add_kwargs = {
@@ -27,7 +27,7 @@ class ChromaRAG:
             add_kwargs["metadatas"] = [metadata]
         self.collection.add(**add_kwargs)
 
-    async def update_info_in_local_rag(self, doc_id: str, new_text: str, new_metadata: dict = None):
+    def update_info_in_local_rag(self, doc_id: str, new_text: str, new_metadata: dict = None):
         """
         Update the document, embedding, and optional metadata for an existing entry by its ID.
         If the ID doesn't exist, this will add a new entry with that ID.
@@ -45,18 +45,18 @@ class ChromaRAG:
             add_kwargs["metadatas"] = [new_metadata]
         self.collection.add(**add_kwargs)
 
-    async def retrieve_context(self, query: str, top_k=4) -> list[str]:
+    def retrieve_context(self, query: str, top_k=4) -> list[str]:
         """Retrieve top_k most relevant documents for a query."""
         embedding = self.embedder.encode([query])[0]
         results = self.collection.query(query_embeddings=[embedding.tolist()], n_results=top_k)
         return results['documents'][0] if results['documents'] else []
     
-    async def remove_info_from_local_rag(self, text: str):
+    def remove_info_from_local_rag(self, text: str):
         """Remove a document from the database using its text content."""
         doc_id = str(hash(text))
         self.collection.delete(ids=[doc_id])
 
-    async def remove_duplicates(self):
+    def remove_duplicates(self):
         """Remove duplicate documents from the collection, keeping the first occurrence."""
         all_docs = self.collection.get(include=["documents", "ids"])
         seen_texts = set()
