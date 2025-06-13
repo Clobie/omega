@@ -15,11 +15,11 @@ class Cleanup(commands.Cog):
         except ValueError:
             return None
      
-    @commands.command(name='clean')
-    async def clean(self, ctx, *, val):
+    @commands.command(name='clear')
+    async def clear(self, ctx, *, val):
         """
         Channel cleanup command.
-        Usage: !clean [number|all|bots|images|today|date|user|message]
+        Usage: !clear [number|all|bots|images|today|date|user|message]
         """
 
         await ctx.message.delete()
