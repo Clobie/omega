@@ -37,24 +37,24 @@ class RagUpdater(commands.Cog):
 			text = (
 				f"Weather in {location}:\n"
 				f"{data['current']['condition']['text']}, "
-				f"{data['current']['temp_c']}°C "
-				f"(feels like {data['current']['feelslike_c']}°C)."
+				f"{data['current']['temp_f']}°F"
+				f"(feels like {data['feelslike_f']}°F)."
 			)
 
 			await self._upsert_document(self.weather_doc_id, text, self.weather_metadata)
 
 		except Exception as e:
-			print(f"Weather update error: {e}")
+			omega.logger.info(f"Weather update error: {e}.")
 
 	@tasks.loop(seconds=15)
 	async def update_time(self):
 		try:
 			tz = pytz.timezone("America/New_York")
 			now = datetime.now(tz)
-			text = f"The current time in Eastern Time (ET) is {now.strftime('%Y-%m-%d %H:%M')}."
+			text = f"The current time in Eastern Time (ET) is {now.strftime('%H:%M')}.\nThe current Date in Easter Time (ET) is {now.strftime('%Y-%m-%d')}"
 			await self._upsert_document(self.time_doc_id, text, self.time_metadata)
 		except Exception as e:
-			print(f"Time update error: {e}")
+			omega.logger.info(f"Time update error: {e}.")
 
 	async def _upsert_document(self, doc_id: str, new_text: str, metadata: dict):
 		existing = omega.rag.collection.get(include=["metadatas", "documents"])
