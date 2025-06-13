@@ -14,7 +14,6 @@ class RagUpdater(commands.Cog):
 		self.weather_metadata = {"source": "weather api"}
 		self.time_metadata = {"source": "eastern time clock"}
 
-		# Start the background tasks
 		self.update_weather.start()
 		self.update_time.start()
 
@@ -31,7 +30,7 @@ class RagUpdater(commands.Cog):
 			async with aiohttp.ClientSession() as session:
 				async with session.get(url) as resp:
 					if resp.status != 200:
-						print(f"Weather API error: {resp.status}")
+						omega.logger.info(f"Weather API error: {resp.status}")
 						return
 					data = await resp.json()
 			text = (
