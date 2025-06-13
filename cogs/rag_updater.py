@@ -45,7 +45,7 @@ class RagUpdater(commands.Cog):
 				f"Weather in {location}:\n"
 				f"{data['current']['condition']['text']}, "
 				f"{data['current']['temp_f']}°F"
-				f"(feels like {data['feelslike_f']}°F)."
+				f"(feels like {data['current']['feelslike_f']}°F)."
 			)
 
 			await self._upsert_document(self.weather_doc_id, text, self.weather_metadata)
