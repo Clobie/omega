@@ -83,17 +83,19 @@ class RagTest(commands.Cog):
 
     @commands.command(name="listentries")
     async def listentries(self, ctx):
-        all_data = omega.rag.collection.get(include=["documents", "ids"])
+        all_data = omega.rag.collection.get(include=["documents", "metadatas"])
         documents = all_data.get("documents", [])
-        ids = all_data.get("ids", [])
+        metadatas = all_data.get("metadatas", [])
 
         if not documents:
             await ctx.send("The database is empty.")
             return
 
+        ids = [md.get("id", "N/A") if md else "N/A" for md in metadatas]
+
         lines = ["Entries in the RAG database:"]
         for i, (doc, doc_id) in enumerate(zip(documents, ids), start=1):
-            preview = doc[:100].replace("\n", " ")  # show first 100 chars
+            preview = doc[:100].replace("\n", " ")
             lines.append(f"{i}. ID: `{doc_id}` - {preview}")
 
         message = "\n".join(lines)
@@ -114,6 +116,7 @@ class RagTest(commands.Cog):
                 await ctx.send(chunk)
         else:
             await ctx.send(message)
+
 
 
 async def setup(bot: commands.Bot):
