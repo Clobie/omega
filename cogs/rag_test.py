@@ -23,6 +23,10 @@ class RagTest(commands.Cog):
         if len(msg) > 1900:
             msg = msg[:1900] + "\n...[truncated]"
         await ctx.send(f"Top results for '{query}':\n{msg}")
+    
+    @commands.command(name="nukedb")
+    async def nukedb(self, ctx):
+        pass
 
 async def setup(bot: commands.Bot):
     cog = RagTest(bot)
