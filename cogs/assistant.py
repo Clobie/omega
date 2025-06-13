@@ -20,7 +20,7 @@ class Assistant(commands.Cog):
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()
-        self.rag_retrieval_entries = 5
+        self.rag_retrieval_entries = 3
 
     def get_scope(self, message):
         if isinstance(message.channel, discord.DMChannel):
