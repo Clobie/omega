@@ -9,13 +9,12 @@ class RagTest(commands.Cog):
         self.bot = bot
     
     @commands.command(name="testadd")
-    async def testadd(self, ctx):
-        sample_text = "This is a test entry for the RAG database."
-        omega.rag.add_info_to_local_rag(sample_text, metadata={"source": "testadd command"})
+    async def testadd(self, ctx,  *, data: str):
+        omega.rag.add_info_to_local_rag(data, metadata={"source": "testadd command"})
         await ctx.send("Added test entry to local RAG.")
 
     @commands.command(name="testretrieve")
-    async def testretrieve(self, ctx, *, query: str = "test entry"):
+    async def testretrieve(self, ctx, *, query: str):
         results = omega.rag.retrieve_context(query, top_k=4)
         if not results:
             await ctx.send("No documents found.")
