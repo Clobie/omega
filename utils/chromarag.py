@@ -18,13 +18,16 @@ class ChromaRAG:
     def add_info_to_local_rag(self, text: str, metadata: dict = None):
         """Add a piece of text, its embedding, and optional metadata to the local RAG database."""
         embedding = self.embedder.encode([text])[0]
+        doc_id = str(hash(text))
+        full_metadata = metadata.copy() if metadata else {}
+        full_metadata["id"] = doc_id
         add_kwargs = {
             "documents": [text],
             "embeddings": [embedding.tolist()],
-            "ids": [str(hash(text))]
+            "ids": [doc_id],
+            "metadatas": [full_metadata],
         }
-        if metadata:
-            add_kwargs["metadatas"] = [metadata]
+
         self.collection.add(**add_kwargs)
 
     def update_info_in_local_rag(self, doc_id: str, new_text: str, new_metadata: dict = None):
@@ -33,16 +36,18 @@ class ChromaRAG:
         If the ID doesn't exist, this will add a new entry with that ID.
         """
         embedding = self.embedder.encode([new_text])[0]
-        # Delete the old entry first (if exists)
+
         self.collection.delete(ids=[doc_id])
-        
+
+        full_metadata = new_metadata.copy() if new_metadata else {}
+        full_metadata["id"] = doc_id
+
         add_kwargs = {
             "documents": [new_text],
             "embeddings": [embedding.tolist()],
-            "ids": [doc_id]
+            "ids": [doc_id],
+            "metadatas": [full_metadata],
         }
-        if new_metadata:
-            add_kwargs["metadatas"] = [new_metadata]
         self.collection.add(**add_kwargs)
 
     def retrieve_context(self, query: str, top_k=4) -> list[str]:
