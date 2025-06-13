@@ -9,11 +9,13 @@ class RagTest(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
     
+    @commands.has_permissions(administrator=True)
     @commands.command(name="testadd")
     async def testadd(self, ctx,  *, data: str):
         omega.rag.add_info_to_local_rag(data, metadata={"source": "testadd command"})
         await ctx.send("Added test entry to local RAG.")
 
+    @commands.has_permissions(administrator=True)
     @commands.command(name="testretrieve")
     async def testretrieve(self, ctx, *, query: str):
         results = omega.rag.retrieve_context(query, top_k=4)
@@ -29,6 +31,7 @@ class RagTest(commands.Cog):
             msg = msg[:1900] + "\n...[truncated]"
         await ctx.send(f"Top results for '{query}':\n{msg}")
     
+    @commands.has_permissions(administrator=True)
     @commands.command(name="testdelete")
     async def testdelete(self, ctx, *, query: str):
         # Encode query embedding
@@ -91,7 +94,7 @@ class RagTest(commands.Cog):
             else:
                 await ctx.send("Selected document does not have a valid ID; cannot delete.")
 
-
+    @commands.has_permissions(administrator=True)
     @commands.command(name="listentries")
     async def listentries(self, ctx):
         all_data = omega.rag.collection.get(include=["documents", "metadatas"])
@@ -127,6 +130,44 @@ class RagTest(commands.Cog):
                 await ctx.send(chunk)
         else:
             await ctx.send(message)
+
+    @commands.has_permissions(administrator=True)
+    @commands.command(name="testupdate")
+    async def testupdate(self, ctx, doc_id: str):
+        await ctx.send(f"Please provide the new content for the document with ID `{doc_id}`:")
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        try:
+            reply = await self.bot.wait_for("message", timeout=60.0, check=check)
+            new_text = reply.content.strip()
+        except asyncio.TimeoutError:
+            await ctx.send("Timeout: No content received. Update cancelled.")
+            return
+
+        await ctx.send("Would you like to add or update metadata as well? Reply with `yes` or `no`:")
+
+        try:
+            meta_reply = await self.bot.wait_for("message", timeout=30.0, check=check)
+            wants_metadata = meta_reply.content.lower() in ["yes", "y"]
+        except asyncio.TimeoutError:
+            await ctx.send("Timeout. Proceeding without metadata.")
+            wants_metadata = False
+
+        new_metadata = None
+        if wants_metadata:
+            await ctx.send("Please provide metadata as JSON (e.g. `{\"source\": \"user update\"}`):")
+            try:
+                json_reply = await self.bot.wait_for("message", timeout=60.0, check=check)
+                import json
+                new_metadata = json.loads(json_reply.content)
+            except (asyncio.TimeoutError, json.JSONDecodeError):
+                await ctx.send("Invalid or no JSON received. Proceeding without metadata.")
+
+        omega.rag.update_info_in_local_rag(doc_id, new_text, new_metadata)
+        await ctx.send(f"Document with ID `{doc_id}` has been updated.")
+
 
 
 
