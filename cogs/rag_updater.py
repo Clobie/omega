@@ -21,7 +21,7 @@ class RagUpdater(commands.Cog):
 		self.update_weather.cancel()
 		self.update_time.cancel()
 
-	@tasks.loop(minutes=5)
+	@tasks.loop(seconds=15)
 	async def update_weather(self):
 		api_key = omega.cfg.WEATHERAPICOM_API_KEY
 		location = "Inverness,FL"
