@@ -15,7 +15,7 @@ class ChromaRAG:
         self.chroma = chromadb.PersistentClient(path="./rag_db")
         self.collection = self.chroma.get_or_create_collection("discord_knowledge")
 		
-    def add_info_to_local_rag(self, text: str, metadata: dict = None):
+    def add_info_to_local_rag(self, text: str, doc_id = None, metadata: dict = None):
         """Add a piece of text, its embedding, and optional metadata to the local RAG database."""
         embedding = self.embedder.encode([text])[0]
         doc_id = str(hash(text))
@@ -29,17 +29,6 @@ class ChromaRAG:
         }
 
         self.collection.add(**add_kwargs)
-    
-    def add_with_id(self, doc_id: str, text: str, metadata: dict):
-        embedding = self.embedder.encode([text])[0]  # Embed here
-        metadata = dict(metadata)
-        metadata["id"] = doc_id
-        self.collection.add(
-            documents=[text],
-            metadatas=[metadata],
-            ids=[doc_id],
-            embeddings=[embedding.tolist()]
-        )
 
     def update_info_in_local_rag(self, doc_id: str, new_text: str, new_metadata: dict = None):
         """
@@ -60,18 +49,6 @@ class ChromaRAG:
             "metadatas": [full_metadata],
         }
         self.collection.add(**add_kwargs)
-
-    def update_with_id(self, doc_id: str, new_text: str, metadata: dict = None):
-        embedding = self.embedder.encode([new_text])[0]
-        metadata = dict(metadata) if metadata else {}
-        metadata["id"] = doc_id
-        self.collection.update(
-            documents=[new_text],
-            embeddings=[embedding.tolist()],
-            metadatas=[metadata],
-            ids=[doc_id],
-        )
-
 
     def retrieve_context(self, query: str, top_k=4) -> list[str]:
         """Retrieve top_k most relevant documents for a query."""
