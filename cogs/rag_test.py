@@ -31,25 +31,27 @@ class RagTest(commands.Cog):
     
     @commands.command(name="testdelete")
     async def testdelete(self, ctx, *, query: str):
-        results = omega.rag.retrieve_context(query, top_k=10)
-        if not results:
-            await ctx.send("No documents found for that query.")
-            return
-
+        # Encode query embedding
         embedding = omega.rag.embedder.encode([query])[0]
+
+        # Query collection WITHOUT 'ids' in include
         query_results = omega.rag.collection.query(
             query_embeddings=[embedding.tolist()],
             n_results=10,
-            include=["documents", "ids", "metadatas"]
+            include=["documents", "metadatas"]  # no "ids"
         )
 
         docs = query_results['documents'][0]
-        ids = query_results['ids'][0]
+        metadatas = query_results['metadatas'][0]
 
         if not docs:
             await ctx.send("No documents found for that query.")
             return
 
+        # Extract ids from metadata
+        ids = [md.get("id", None) for md in metadatas]
+
+        # Prepare message for user selection
         msg_lines = ["Select the number of the document to delete:"]
         for i, doc in enumerate(docs, start=1):
             preview = doc[:100].replace("\n", " ")
@@ -74,12 +76,21 @@ class RagTest(commands.Cog):
             return
 
         if choice == len(docs) + 1:
-            omega.rag.collection.delete(ids=ids)
-            await ctx.send(f"Deleted all {len(ids)} matching documents.")
+            # Delete all found documents (filter out None IDs)
+            valid_ids = [id_ for id_ in ids if id_]
+            if valid_ids:
+                omega.rag.collection.delete(ids=valid_ids)
+                await ctx.send(f"Deleted all {len(valid_ids)} matching documents.")
+            else:
+                await ctx.send("No valid document IDs found to delete.")
         else:
             del_id = ids[choice - 1]
-            omega.rag.collection.delete(ids=[del_id])
-            await ctx.send(f"Deleted document #{choice}.")
+            if del_id:
+                omega.rag.collection.delete(ids=[del_id])
+                await ctx.send(f"Deleted document #{choice}.")
+            else:
+                await ctx.send("Selected document does not have a valid ID; cannot delete.")
+
 
     @commands.command(name="listentries")
     async def listentries(self, ctx):
