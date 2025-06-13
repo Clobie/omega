@@ -168,7 +168,7 @@ class Assistant(commands.Cog):
 
         # If we are not in a dm, check for bot tag or channel id in autorespond list
         id = message.channel.id
-        if not self.bot.user.mentioned_in(message) and id not in self.autorespond_channels:
+        if not self.bot.user.mentioned_in(message) and id not in self.autorespond_channels and 'omega' not in message:
             return
 
         # Reply
