@@ -12,3 +12,4 @@ fitz
 bs4
 chromadb
 sentence-transformers
+pysqlite3
