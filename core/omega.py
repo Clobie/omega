@@ -14,6 +14,7 @@ from utils.ai import ai
 from utils.embed import embed
 from utils.giphy import gfy
 from utils.discord_log_handler import DiscordLogHandler
+from utils.chromarag import ChromaRAG
 
 
 # temp
@@ -29,10 +30,11 @@ class Omega:
         self.common = common
         self.credit = credit
         self.role = role
-        self.db = db
-        self.ai = ai
         self.embed = embed
         self.gfy = gfy
+        self.db = db
+        self.ai = ai
+        self.rag = ChromaRAG()
 
         # temp
         discord_handler = DiscordLogHandler(self.bot, 1363678201636847686)

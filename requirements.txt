@@ -10,3 +10,5 @@ tiktoken
 psycopg2-binary
 fitz
 bs4
+chromadb
+sentence-transformers
