@@ -81,15 +81,18 @@ class Assistant(commands.Cog):
         ctx = await self.bot.get_context(message)
         async with ctx.typing():
 
-            #if int(omega.credit.get_user_credits(message.author.id)) == 0:
-            #    await ctx.send(f"You don't have enough credits for that :(")
-            #    return
-
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
 
-            # Calculate token estimate for context
-            full_context = self.get_full_context(scope)
+            # Retrieve RAG context, e.g. 3 results
+            rag_results = await omega.rag.retrieve_context(prompt, 3)  # assuming this is async
+
+            # Compose dynamic system prompt with RAG info appended
+            rag_info = "\n\nRelevant context:\n" + "\n".join(rag_results) if rag_results else ""
+            dynamic_system_prompt = self.system_prompt + rag_info
+
+            # Build full context with dynamic system prompt + conversation history
+            full_context = [{"role": "system", "content": dynamic_system_prompt}] + self.contexts.get(scope, [])
 
             # Get AI response
             result = omega.ai.chat_completion_context(self.model, full_context)
@@ -103,10 +106,7 @@ class Assistant(commands.Cog):
             # Add response to context
             self.add_context(scope, 'assistant', result)
 
-            # Get tokens, cost
-            tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60) # magic numbers bad
-            
-            #omega.credit.user_spend(message.author.id, credits)
+            tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
 
             omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 
@@ -114,15 +114,9 @@ class Assistant(commands.Cog):
                 await ctx.send(content=result)
                 return
 
-            # Get footer
             footer = omega.ai.get_footer(tokens, cost)
-
-            # Build full message
             response_with_footer = result + footer
 
-            #await omega.status.update(self.bot, 'watching', f"Cost: ${omega.ai.get_total_cost()}")
-
-            # Reply with file/embed/text based on response length (because of discord limits)
             if len(response_with_footer) > 4000:
                 with open('file.txt', 'w') as f:
                     f.write(response_with_footer)
@@ -135,6 +129,7 @@ class Assistant(commands.Cog):
                 omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
             else:
                 await ctx.send(content=response_with_footer)
+
 
 
     @commands.Cog.listener()
