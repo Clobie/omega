@@ -60,11 +60,11 @@ class RagUpdater(commands.Cog):
 		existing = omega.rag.collection.get(include=["metadatas", "documents"])
 		ids = [md.get("id") for md in existing.get("metadatas", []) if md]
 		if doc_id in ids:
-			omega.rag.update_info_in_local_rag(doc_id, new_text)
+			omega.rag.update_with_id(doc_id, new_text)
 		else:
 			metadata_with_id = dict(metadata)
 			metadata_with_id["id"] = doc_id
-			omega.rag.add_info_to_local_rag(new_text, metadata_with_id)
+			omega.rag.add_with_id(new_text, metadata_with_id)
 
 async def setup(bot: commands.Bot):
 	cog = RagUpdater(bot)
