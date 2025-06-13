@@ -14,14 +14,22 @@ class RagUpdater(commands.Cog):
 		self.weather_metadata = {"source": "weather api"}
 		self.time_metadata = {"source": "eastern time clock"}
 
-		self.update_weather.start()
-		self.update_time.start()
+		try:
+			self.update_weather.start()
+		except Exception as e:
+			omega.logger.info(f"Failed to start weather update task: {e}")
+
+		try:
+			self.update_time.start()
+		except Exception as e:
+			omega.logger.info(f"Failed to start time update task: {e}")
+
 
 	async def cog_unload(self):
 		self.update_weather.cancel()
 		self.update_time.cancel()
 
-	@tasks.loop(seconds=15)
+	@tasks.loop(minutes=5)
 	async def update_weather(self):
 		api_key = omega.cfg.WEATHERAPICOM_API_KEY
 		location = "Inverness,FL"
