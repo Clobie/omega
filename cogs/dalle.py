@@ -35,6 +35,9 @@ class Dalle(commands.Cog):
         """
         Generate an image using DALL-E 3.
         """
+        await ctx.send("Sorry this command is disabled because I'm poor")
+        return
+    
         if int(omega.credit.get_user_credits(ctx.author.id)) < 5:
             await ctx.send(
                 (
@@ -67,6 +70,10 @@ class Dalle(commands.Cog):
         Edit an image using DALL-E 3.
         Reply to a message with an image attachment with this command, or use the command with an image attachment.
         """
+
+        await ctx.send("Sorry this command is disabled because I'm poor")
+        return
+
         if int(omega.credit.get_user_credits(ctx.author.id)) < 30:
             await ctx.send(
                 (
