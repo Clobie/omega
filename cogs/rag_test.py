@@ -1,6 +1,7 @@
 # cogs/rag_test.py
 
 import discord
+import asyncio
 from discord.ext import commands
 from core.omega import omega
 
@@ -28,10 +29,91 @@ class RagTest(commands.Cog):
             msg = msg[:1900] + "\n...[truncated]"
         await ctx.send(f"Top results for '{query}':\n{msg}")
     
-    @commands.command(name="nukedb")
-    async def nukedb(self, ctx):
-        pass
+    @commands.command(name="testdelete")
+    async def testdelete(self, ctx, *, query: str):
+        results = omega.rag.retrieve_context(query, top_k=10)
+        if not results:
+            await ctx.send("No documents found for that query.")
+            return
 
+        embedding = omega.rag.embedder.encode([query])[0]
+        query_results = omega.rag.collection.query(
+            query_embeddings=[embedding.tolist()],
+            n_results=10,
+            include=["documents", "ids", "metadatas"]
+        )
+
+        docs = query_results['documents'][0]
+        ids = query_results['ids'][0]
+
+        if not docs:
+            await ctx.send("No documents found for that query.")
+            return
+
+        msg_lines = ["Select the number of the document to delete:"]
+        for i, doc in enumerate(docs, start=1):
+            preview = doc[:100].replace("\n", " ")
+            msg_lines.append(f"{i}. {preview}")
+        msg_lines.append(f"{len(docs)+1}. Delete ALL results")
+        msg_lines.append("Reply with the number corresponding to your choice.")
+
+        await ctx.send("\n".join(msg_lines))
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        try:
+            reply = await self.bot.wait_for("message", timeout=30.0, check=check)
+            choice = int(reply.content.strip())
+        except (asyncio.TimeoutError, ValueError):
+            await ctx.send("Invalid input or timeout. Cancelled delete operation.")
+            return
+
+        if choice < 1 or choice > len(docs) + 1:
+            await ctx.send("Choice out of range. Cancelled delete operation.")
+            return
+
+        if choice == len(docs) + 1:
+            omega.rag.collection.delete(ids=ids)
+            await ctx.send(f"Deleted all {len(ids)} matching documents.")
+        else:
+            del_id = ids[choice - 1]
+            omega.rag.collection.delete(ids=[del_id])
+            await ctx.send(f"Deleted document #{choice}.")
+
+    @commands.command(name="listentries")
+    async def listentries(self, ctx):
+        all_data = omega.rag.collection.get(include=["documents", "ids"])
+        documents = all_data.get("documents", [])
+        ids = all_data.get("ids", [])
+
+        if not documents:
+            await ctx.send("The database is empty.")
+            return
+
+        lines = ["Entries in the RAG database:"]
+        for i, (doc, doc_id) in enumerate(zip(documents, ids), start=1):
+            preview = doc[:100].replace("\n", " ")  # show first 100 chars
+            lines.append(f"{i}. ID: `{doc_id}` - {preview}")
+
+        message = "\n".join(lines)
+        if len(message) > 1900:
+            chunks = []
+            current_chunk = []
+            current_len = 0
+            for line in lines:
+                if current_len + len(line) + 1 > 1900:
+                    chunks.append("\n".join(current_chunk))
+                    current_chunk = []
+                    current_len = 0
+                current_chunk.append(line)
+                current_len += len(line) + 1
+            if current_chunk:
+                chunks.append("\n".join(current_chunk))
+            for chunk in chunks:
+                await ctx.send(chunk)
+        else:
+            await ctx.send(message)
 
 
 async def setup(bot: commands.Bot):
