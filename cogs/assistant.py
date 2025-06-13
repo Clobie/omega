@@ -20,6 +20,7 @@ class Assistant(commands.Cog):
         self.context_header = [{"role": "system", "content": self.system_prompt}]
         self.autorespond_channels = self.load_autorespond_channels()
         self.clear_inactive_contexts.start()
+        self.rag_retrieval_entries = 5
 
     def get_scope(self, message):
         if isinstance(message.channel, discord.DMChannel):
@@ -84,19 +85,15 @@ class Assistant(commands.Cog):
             scope = self.get_scope(message)
             self.add_context(scope, 'user', prompt)
 
-            # Retrieve RAG context, e.g. 3 results
-            rag_results = omega.rag.retrieve_context(prompt, 3)
+            rag_results = omega.rag.retrieve_context(prompt, self.rag_retrieval_entries)
 
             texts = [str(entry) for entry in rag_results]
 
-            # Compose dynamic system prompt with RAG info appended
             rag_info = "\n\nRelevant context:\n" + "\n".join(texts) if texts else ""
             dynamic_system_prompt = self.system_prompt + rag_info
 
-            # Build full context with dynamic system prompt + conversation history
             full_context = [{"role": "system", "content": dynamic_system_prompt}] + self.contexts.get(scope, [])
 
-            # Get AI response
             result = omega.ai.chat_completion_context(self.model, full_context)
             
             usedagif = False
@@ -105,7 +102,6 @@ class Assistant(commands.Cog):
                 omega.logger.info("Circumvented annoying AI response by using a GIF. " + result)
                 result = await omega.gfy.get_react_gif_url(result.replace("GIF:", ""))
 
-            # Add response to context
             self.add_context(scope, 'assistant', result)
 
             tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
