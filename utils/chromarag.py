@@ -18,7 +18,8 @@ class ChromaRAG:
     def add_info_to_local_rag(self, text: str, doc_id = None, metadata: dict = None):
         """Add a piece of text, its embedding, and optional metadata to the local RAG database."""
         embedding = self.embedder.encode([text])[0]
-        doc_id = str(hash(text))
+        if not doc_id:
+            doc_id = str(hash(text))
         full_metadata = metadata.copy() if metadata else {}
         full_metadata["id"] = doc_id
         add_kwargs = {
