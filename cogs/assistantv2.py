@@ -143,6 +143,7 @@ class Assistantv2(commands.Cog):
 		self.context_header = [{"role": "system", "content": SYSTEM_PROMPT}]
 		self.clear_old_contexts.start()
 		self.rag_retrieval_entries = 5
+		self.autorespond_channels = self.load_autorespond_channels()
 
 	def cog_unload(self):
 		self.clear_old_contexts.cancel()
@@ -358,7 +359,55 @@ class Assistantv2(commands.Cog):
 		else:
 			await ctx.send(content=response_with_footer)
 
+	def save_autorespond_channels(self):
+		with open("./config/autorespond_channels.json", "w") as file:
+			json.dump(self.autorespond_channels, file)
+			omega.logger.debug("Saved autorespond channels.")
 
+	def load_autorespond_channels(self):
+		try:
+			with open("./config/autorespond_channels.json", "r") as file:
+				omega.logger.debug("Loaded autorespond channels.")
+				return json.load(file)
+		except FileNotFoundError:
+			omega.logger.warning("autorespond_channels.json not found. Returning empty list.")
+			return []
+
+	@commands.has_permissions(manage_guild=True)
+	@commands.command(name="addchannel")
+	async def addchannel(self, context):
+		id = context.channel.id
+		if id in self.autorespond_channels:
+			await context.send("This channel is already added")
+			omega.logger.info(f"Channel {id} is already in the autorespond list.")
+		else:
+			self.autorespond_channels.append(id)
+			self.save_autorespond_channels()
+			await context.send("Channel added")
+			omega.logger.info(f"Added channel {id} to autorespond list.")
+
+	@addchannel.error
+	async def addchannel_error(self, ctx: Context, error: commands.CommandError):
+		if isinstance(error, commands.CheckFailure):
+			await ctx.send("You don't have the necessary permissions to use this command.")
+
+	@commands.has_permissions(manage_guild=True)
+	@commands.command(name="removechannel")
+	async def removechannel(self, context):
+		id = context.channel.id
+		if id in self.autorespond_channels:
+			self.autorespond_channels.remove(id)
+			self.save_autorespond_channels()
+			await context.send("Channel removed")
+			omega.logger.info(f"Removed channel {id} from autorespond list.")
+		else:
+			await context.send("Channel was not in the list")
+			omega.logger.info(f"Channel {id} was not in the autorespond list.")
+
+	@removechannel.error
+	async def removechannel_error(self, ctx: Context, error: commands.CommandError):
+		if isinstance(error, commands.CheckFailure):
+			await ctx.send("You don't have the necessary permissions to use this command.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistantv2(bot))
