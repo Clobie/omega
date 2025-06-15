@@ -274,91 +274,129 @@ class Assistantv2(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
+		omega.logger.debug(f"Received message: {message.content} from {message.author} in {message.channel}")
 
 		# Ignore other bots
 		if message.author.bot:
+			omega.logger.debug("Ignored message from bot.")
 			return
 
-		# Ignore if a command was sent
+		# Check if message was a command
 		ctx = await self.bot.get_context(message)
 		if ctx.command:
+			omega.logger.debug("Ignored message because it was a command.")
 			return
-		
+
+		# Message must be in DM, mention bot, be in allowed channels, or contain 'omega'
 		if not (
-			isinstance(message.channel, discord.DMChannel)	# in DMs
-			or self.bot.user.mentioned_in(message)			# bot is mentioned
-			or id in self.autorespond_channels				# channel is in allowed list
-			or 'omega' in message.content.lower()			# content includes "omega"
+			isinstance(message.channel, discord.DMChannel) or
+			self.bot.user.mentioned_in(message) or
+			message.channel.id in self.autorespond_channels or
+			'omega' in message.content.lower()
 		):
-			omega.logger.info("Ignored b4")
+			omega.logger.info("Message did not meet response criteria.")
 			return
-		
+
+		# Clean prompt
 		prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
+		omega.logger.debug(f"Processed prompt: '{prompt}'")
 
 		user_id = message.author.id
+		omega.logger.debug(f"User ID: {user_id}")
 
+		# Generate and log metadata
 		full_user_context_entry = self.generate_metadata(user_id)
+		omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
 
 		scope = self.get_scope(message)
+		omega.logger.debug(f"Using scope: {scope}")
+
 		self.add_scope_entry(scope, 'user', full_user_context_entry)
 
+		# RAG context retrieval
 		rag_results = omega.rag.retrieve_context(prompt, self.rag_retrieval_entries)
+		omega.logger.debug(f"RAG results: {rag_results}")
+
 		rag_lines = [str(entry) for entry in rag_results]
 		rag_data = "\n".join(rag_lines) if rag_lines else ""
+		omega.logger.debug(f"Compiled RAG data: {rag_data}")
 
-		full_context = self.get_full_context_with_rag(
-			scope,
-			rag_data
-		)
+		# Build full context
+		full_context = self.get_full_context_with_rag(scope, rag_data)
+		omega.logger.debug(f"Full context sent to AI:\n{full_context}")
 
+		# Call AI model
 		result = omega.ai.chat_completion_context(self.model, full_context)
+		omega.logger.debug(f"Raw result from AI:\n{result}")
 
-		# QUICK AND DIRTY TEST IMPLEMENTATION
-		# check if the result contains a FUNC_CALL_* and process it
+		# Check for FUNC_CALL_* patterns
 		func_call_pattern = r"<#FUNC_CALL_([A-Z_]+)(?:,([^>]*))?>"
 		matches = re.findall(func_call_pattern, result)
 		if matches:
+			omega.logger.info(f"Found function call(s): {matches}")
 			result = re.sub(r"<#FUNC_CALL_[A-Z_]+(?:\|[^>]*)?>\s*", "", result)
-		for func_name, params in matches:
-			func_name = func_name.strip()
-			param_list = [p.strip() for p in params.split("|")] if params else []
 
-			if func_name == "CLEARCONTEXT":
-				# TODO: Trigger data extraction
-				self.clear_scope_context(scope)
-			elif func_name == "CLEARCHAT":
-				try:
-					val = param_list[0]
-					if val.isdigit() and val < 20:
-						deleted = await ctx.channel.purge(limit=int(val))
-				except:
-					await ctx.send("Couldn't clear chat :(")
-			elif func_name == "GETCREDITS":
-				credits = omega.credit.get_user_credits(user_id)
-				await ctx.send(f"You have {credits} credits remaining.")
+			for func_name, params in matches:
+				func_name = func_name.strip()
+				param_list = [p.strip() for p in params.split("|")] if params else []
+				omega.logger.debug(f"Processing function: {func_name} with params: {param_list}")
+
+				if func_name == "CLEARCONTEXT":
+					self.clear_scope_context(scope)
+					omega.logger.info("Cleared scope context.")
+				elif func_name == "CLEARCHAT":
+					try:
+						val = param_list[0]
+						if val.isdigit() and int(val) < 20:
+							deleted = await ctx.channel.purge(limit=int(val))
+							omega.logger.info(f"Cleared {len(deleted)} messages from chat.")
+					except Exception as e:
+						omega.logger.error(f"Failed to clear chat: {e}")
+						await ctx.send("Couldn't clear chat :(")
+				elif func_name == "GETCREDITS":
+					try:
+						credits = omega.credit.get_user_credits(user_id)
+						await ctx.send(f"You have {credits} credits remaining.")
+						omega.logger.info(f"Sent credits info to user: {credits}")
+					except Exception as e:
+						omega.logger.error(f"Failed to get/send credits: {e}")
 
 		self.add_scope_entry(scope, 'assistant', result)
+		omega.logger.debug("Added assistant response to scope context.")
 
+		# Track token usage and cost
 		tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
+		omega.logger.info(f"Tokens used: {tokens}, Cost: ${cost:.4f}, Remaining credits: {credits}")
 
 		omega.ai.log_usage(message.author.id, tokens, cost, 'completion')
 
 		footer = omega.ai.get_footer(tokens, cost)
-
 		response_with_footer = result + footer
 
+		# Handle long responses
 		if len(response_with_footer) > 4000:
-			with open('file.txt', 'w') as f:
-				f.write(response_with_footer)
-			file = discord.File('file.txt')
-			await ctx.send(attachments=[file])
-			omega.logger.debug("Response message exceeded 4000 characters, sent as a file.")
+			try:
+				with open('file.txt', 'w') as f:
+					f.write(response_with_footer)
+				file = discord.File('file.txt')
+				await ctx.send(attachments=[file])
+				omega.logger.debug("Response exceeded 4000 characters, sent as file.")
+			except Exception as e:
+				omega.logger.error(f"Failed to send long message as file: {e}")
 		elif len(response_with_footer) > 2000:
-			embed = omega.embed.create_embed("", response_with_footer)
-			await ctx.send(embed=embed)
-			omega.logger.debug("Response message exceeded 2000 characters, sent as an embed.")
+			try:
+				embed = omega.embed.create_embed("", response_with_footer)
+				await ctx.send(embed=embed)
+				omega.logger.debug("Response exceeded 2000 characters, sent as embed.")
+			except Exception as e:
+				omega.logger.error(f"Failed to send embed: {e}")
 		else:
-			await ctx.send(content=response_with_footer)
+			try:
+				await ctx.send(content=response_with_footer)
+				omega.logger.debug("Sent response as plain message.")
+			except Exception as e:
+				omega.logger.error(f"Failed to send message: {e}")
+
 
 	def save_autorespond_channels(self):
 		with open("./config/autorespond_channels.json", "w") as file:
