@@ -273,6 +273,13 @@ class Assistantv2(commands.Cog):
 
 		return None
 
+	async def revamp_same_response(self, response, new_info):
+		result = omega.ai.chat_completion(
+			self.model,
+			f"Revamp this message in the same style, but with the new information included:\nOld response:{response}\nInfo to add:{new_info}"
+		)
+		return result
+
 	@commands.Cog.listener()
 	async def on_message(self, message):
 		omega.logger.debug(f"Received message: {message.content} from {message.author} in {message.channel}")
@@ -359,7 +366,7 @@ class Assistantv2(commands.Cog):
 					elif func_name == "GETCREDITS":
 						try:
 							credits = omega.credit.get_user_credits(user_id)
-							await ctx.send(f"You have {credits} credits remaining.")
+							result = self.revamp_same_response(result, f"the user has {credits} credits")
 							omega.logger.info(f"Sent credits info to user: {credits}")
 						except Exception as e:
 							omega.logger.error(f"Failed to get/send credits: {e}")
