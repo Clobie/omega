@@ -305,7 +305,7 @@ class Assistantv2(commands.Cog):
 		omega.logger.debug(f"User ID: {user_id}")
 
 		# Generate and log metadata
-		full_user_context_entry = self.generate_metadata(user_id)
+		full_user_context_entry = self.generate_metadata(user_id) + f"\n{prompt}"
 		omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
 
 		scope = self.get_scope(message)
