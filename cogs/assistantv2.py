@@ -345,7 +345,7 @@ class Assistantv2(commands.Cog):
 			matches = re.findall(func_call_pattern, result)
 			if matches:
 				omega.logger.info(f"Found function call(s): {matches}")
-				result = re.sub(r"<#FUNC_CALL_[A-Z_]+(?:\|[^>]*)?>\s*", "", result)
+				#result = re.sub(r"<#FUNC_CALL_[A-Z_]+(?:\|[^>]*)?>\s*", "", result)
 
 				for func_name, params in matches:
 					func_name = func_name.strip()
