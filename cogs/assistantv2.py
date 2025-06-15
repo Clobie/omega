@@ -341,7 +341,7 @@ class Assistantv2(commands.Cog):
 			omega.logger.debug(f"Raw result from AI:\n{result}")
 
 			# Check for FUNC_CALL_* patterns
-			func_call_pattern = r"<#FUNC_CALL_([A-Z_]+)(?:,([^>]*))?>"
+			func_call_pattern = r"<#FUNC_CALL_([A-Z_]+)(?:[|,]([^>]*))?>"
 			matches = re.findall(func_call_pattern, result)
 			if matches:
 				omega.logger.info(f"Found function call(s): {matches}")
