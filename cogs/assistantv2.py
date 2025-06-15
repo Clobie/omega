@@ -298,75 +298,77 @@ class Assistantv2(commands.Cog):
 			omega.logger.info("Message did not meet response criteria.")
 			return
 
-		# Clean prompt
-		prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-		omega.logger.debug(f"Processed prompt: '{prompt}'")
+		async with ctx.typing():
 
-		user_id = message.author.id
-		omega.logger.debug(f"User ID: {user_id}")
+			# Clean prompt
+			prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
+			omega.logger.debug(f"Processed prompt: '{prompt}'")
 
-		# Generate and log metadata
-		full_user_context_entry = self.generate_metadata(user_id) + f"\n{prompt}"
-		omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
+			user_id = message.author.id
+			omega.logger.debug(f"User ID: {user_id}")
 
-		scope = self.get_scope(message)
-		omega.logger.debug(f"Using scope: {scope}")
+			# Generate and log metadata
+			full_user_context_entry = self.generate_metadata(user_id) + f"\n{prompt}"
+			omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
 
-		self.add_scope_entry(scope, 'user', full_user_context_entry)
+			scope = self.get_scope(message)
+			omega.logger.debug(f"Using scope: {scope}")
 
-		# RAG context retrieval
-		rag_results = omega.rag.retrieve_context(prompt, self.rag_retrieval_entries)
-		omega.logger.debug(f"RAG results: {rag_results}")
+			self.add_scope_entry(scope, 'user', full_user_context_entry)
 
-		rag_lines = [str(entry) for entry in rag_results]
-		rag_data = "\n".join(rag_lines) if rag_lines else ""
-		omega.logger.debug(f"Compiled RAG data: {rag_data}")
+			# RAG context retrieval
+			rag_results = omega.rag.retrieve_context(prompt, self.rag_retrieval_entries)
+			omega.logger.debug(f"RAG results: {rag_results}")
 
-		# Build full context
-		full_context = self.get_full_context_with_rag(scope, rag_data)
-		omega.logger.debug(f"\n\nFull context sent to AI:\n\n{full_context}\n\n")
+			rag_lines = [str(entry) for entry in rag_results]
+			rag_data = "\n".join(rag_lines) if rag_lines else ""
+			omega.logger.debug(f"Compiled RAG data: {rag_data}")
 
-		# Call AI model
-		result = omega.ai.chat_completion_context(self.model, full_context)
-		omega.logger.debug(f"Raw result from AI:\n{result}")
+			# Build full context
+			full_context = self.get_full_context_with_rag(scope, rag_data)
+			omega.logger.debug(f"\n\nFull context sent to AI:\n\n{full_context}\n\n")
 
-		# Check for FUNC_CALL_* patterns
-		func_call_pattern = r"<#FUNC_CALL_([A-Z_]+)(?:,([^>]*))?>"
-		matches = re.findall(func_call_pattern, result)
-		if matches:
-			omega.logger.info(f"Found function call(s): {matches}")
-			result = re.sub(r"<#FUNC_CALL_[A-Z_]+(?:\|[^>]*)?>\s*", "", result)
+			# Call AI model
+			result = omega.ai.chat_completion_context(self.model, full_context)
+			omega.logger.debug(f"Raw result from AI:\n{result}")
 
-			for func_name, params in matches:
-				func_name = func_name.strip()
-				param_list = [p.strip() for p in params.split("|")] if params else []
-				omega.logger.debug(f"Processing function: {func_name} with params: {param_list}")
+			# Check for FUNC_CALL_* patterns
+			func_call_pattern = r"<#FUNC_CALL_([A-Z_]+)(?:,([^>]*))?>"
+			matches = re.findall(func_call_pattern, result)
+			if matches:
+				omega.logger.info(f"Found function call(s): {matches}")
+				result = re.sub(r"<#FUNC_CALL_[A-Z_]+(?:\|[^>]*)?>\s*", "", result)
 
-				if func_name == "CLEARCONTEXT":
-					self.clear_scope_context(scope)
-					omega.logger.info("Cleared scope context.")
-				elif func_name == "CLEARCHAT":
-					try:
-						val = param_list[0]
-						if val.isdigit() and int(val) < 20:
-							deleted = await ctx.channel.purge(limit=int(val))
-							omega.logger.info(f"Cleared {len(deleted)} messages from chat.")
-					except Exception as e:
-						omega.logger.error(f"Failed to clear chat: {e}")
-						await ctx.send("Couldn't clear chat :(")
-				elif func_name == "GETCREDITS":
-					try:
-						credits = omega.credit.get_user_credits(user_id)
-						await ctx.send(f"You have {credits} credits remaining.")
-						omega.logger.info(f"Sent credits info to user: {credits}")
-					except Exception as e:
-						omega.logger.error(f"Failed to get/send credits: {e}")
+				for func_name, params in matches:
+					func_name = func_name.strip()
+					param_list = [p.strip() for p in params.split("|")] if params else []
+					omega.logger.debug(f"Processing function: {func_name} with params: {param_list}")
 
-		self.add_scope_entry(scope, 'assistant', result)
-		omega.logger.debug("Added assistant response to scope context.")
+					if func_name == "CLEARCONTEXT":
+						self.clear_scope_context(scope)
+						omega.logger.info("Cleared scope context.")
+					elif func_name == "CLEARCHAT":
+						try:
+							val = param_list[0]
+							if val.isdigit() and int(val) < 20:
+								deleted = await ctx.channel.purge(limit=int(val))
+								omega.logger.info(f"Cleared {len(deleted)} messages from chat.")
+						except Exception as e:
+							omega.logger.error(f"Failed to clear chat: {e}")
+							await ctx.send("Couldn't clear chat :(")
+					elif func_name == "GETCREDITS":
+						try:
+							credits = omega.credit.get_user_credits(user_id)
+							await ctx.send(f"You have {credits} credits remaining.")
+							omega.logger.info(f"Sent credits info to user: {credits}")
+						except Exception as e:
+							omega.logger.error(f"Failed to get/send credits: {e}")
 
-		await ctx.send(result)
-		return # skip for now
+			self.add_scope_entry(scope, 'assistant', result)
+			omega.logger.debug("Added assistant response to scope context.")
+
+			await ctx.send(result)
+			return # skip for now
 
 		# Track token usage and cost
 		tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
