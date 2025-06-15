@@ -275,7 +275,7 @@ class Assistantv2(commands.Cog):
 
 	async def revamp_same_response(self, response, new_info):
 		result = omega.ai.chat_completion(
-			self.model,
+			'gpt-4.1-mini',
 			f"Your are an AI assistant with the goal to revamp responses in the same style, but with new information included.",
 			f"Response to revamp:{response}\nNew information to include:{new_info}"
 		)
@@ -358,8 +358,11 @@ class Assistantv2(commands.Cog):
 					elif func_name == "CLEARCHAT":
 						try:
 							val = param_list[0]
-							if val.isdigit() and int(val) < 20:
+							if val.isdigit() and int(val) <= 50:
 								deleted = await ctx.channel.purge(limit=int(val))
+								omega.logger.info(f"Cleared {len(deleted)} messages from chat.")
+							if val == "all":
+								deleted = await ctx.channel.purge(limit=None)
 								omega.logger.info(f"Cleared {len(deleted)} messages from chat.")
 						except Exception as e:
 							omega.logger.error(f"Failed to clear chat: {e}")
