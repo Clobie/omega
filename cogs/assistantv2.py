@@ -144,6 +144,7 @@ class Assistantv2(commands.Cog):
 		self.clear_old_contexts.start()
 		self.rag_retrieval_entries = 5
 		self.autorespond_channels = self.load_autorespond_channels()
+		self.model = "gpt-4.1"
 
 	def cog_unload(self):
 		self.clear_old_contexts.cancel()
@@ -323,7 +324,7 @@ class Assistantv2(commands.Cog):
 
 		# Build full context
 		full_context = self.get_full_context_with_rag(scope, rag_data)
-		omega.logger.debug(f"Full context sent to AI:\n{full_context}")
+		omega.logger.debug(f"\n\nFull context sent to AI:\n\n{full_context}\n\n")
 
 		# Call AI model
 		result = omega.ai.chat_completion_context(self.model, full_context)
