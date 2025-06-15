@@ -309,31 +309,31 @@ class Assistantv2(commands.Cog):
 
 			# Clean prompt
 			prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
-			omega.logger.debug(f"Processed prompt: '{prompt}'")
+			#omega.logger.debug(f"Processed prompt: '{prompt}'")
 
 			user_id = message.author.id
-			omega.logger.debug(f"User ID: {user_id}")
+			#omega.logger.debug(f"User ID: {user_id}")
 
 			# Generate and log metadata
 			full_user_context_entry = self.generate_metadata(user_id) + f"\n{prompt}"
-			omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
+			#omega.logger.debug(f"Generated metadata: {full_user_context_entry}")
 
 			scope = self.get_scope(message)
-			omega.logger.debug(f"Using scope: {scope}")
+			#omega.logger.debug(f"Using scope: {scope}")
 
 			self.add_scope_entry(scope, 'user', full_user_context_entry)
 
 			# RAG context retrieval
 			rag_results = omega.rag.retrieve_context(prompt, self.rag_retrieval_entries)
-			omega.logger.debug(f"RAG results: {rag_results}")
+			#omega.logger.debug(f"RAG results: {rag_results}")
 
 			rag_lines = [str(entry) for entry in rag_results]
 			rag_data = "\n".join(rag_lines) if rag_lines else ""
-			omega.logger.debug(f"Compiled RAG data: {rag_data}")
+			#omega.logger.debug(f"Compiled RAG data: {rag_data}")
 
 			# Build full context
 			full_context = self.get_full_context_with_rag(scope, rag_data)
-			omega.logger.debug(f"\n\nFull context sent to AI:\n\n{full_context}\n\n")
+			#omega.logger.debug(f"\n\nFull context sent to AI:\n\n{full_context}\n\n")
 
 			# Call AI model
 			result = omega.ai.chat_completion_context(self.model, full_context)
@@ -366,7 +366,7 @@ class Assistantv2(commands.Cog):
 					elif func_name == "GETCREDITS":
 						try:
 							credits = omega.credit.get_user_credits(user_id)
-							result = self.revamp_same_response(result, f"the user has {credits} credits")
+							result = await self.revamp_same_response(result, f"the user has {credits} credits")
 							omega.logger.info(f"Sent credits info to user: {credits}")
 						except Exception as e:
 							omega.logger.error(f"Failed to get/send credits: {e}")
