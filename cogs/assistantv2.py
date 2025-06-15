@@ -135,7 +135,7 @@ DOC_UPDATE_PROMPT = (
 )
 
 
-class Assistant(commands.Cog):
+class Assistantv2(commands.Cog):
 
 	def __init__(self, bot: commands.Bot):
 		self.bot = bot
@@ -360,3 +360,5 @@ class Assistant(commands.Cog):
 
 
 
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Assistantv2(bot))
