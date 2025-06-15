@@ -179,6 +179,7 @@ class Assistant(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.command(name="addchannel")
     async def addchannel(self, context):
+        return
         id = context.channel.id
         if id in self.autorespond_channels:
             await context.send("This channel is already added")
@@ -197,6 +198,7 @@ class Assistant(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.command(name="removechannel")
     async def removechannel(self, context):
+        return
         id = context.channel.id
         if id in self.autorespond_channels:
             self.autorespond_channels.remove(id)
