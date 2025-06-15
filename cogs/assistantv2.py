@@ -365,6 +365,9 @@ class Assistantv2(commands.Cog):
 		self.add_scope_entry(scope, 'assistant', result)
 		omega.logger.debug("Added assistant response to scope context.")
 
+		await ctx.send(result)
+		return # skip for now
+
 		# Track token usage and cost
 		tokens, cost, credits = omega.ai.update_cost(self.model, result, full_context, 0.15, 0.60)
 		omega.logger.info(f"Tokens used: {tokens}, Cost: ${cost:.4f}, Remaining credits: {credits}")
