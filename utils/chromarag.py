@@ -74,3 +74,13 @@ class ChromaRAG:
                 seen_texts.add(doc)
         if ids_to_delete:
             self.collection.delete(ids=ids_to_delete)
+    
+    def get_document_by_id(self, doc_id: str) -> str | None:
+        """
+        Retrieve the text of a document by its ID.
+        Returns the document string if found, else None.
+        """
+        result = self.collection.get(ids=[doc_id], include=["documents"])
+        if result["documents"]:
+            return result["documents"][0]
+        return None
