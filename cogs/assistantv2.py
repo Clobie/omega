@@ -276,7 +276,8 @@ class Assistantv2(commands.Cog):
 	async def revamp_same_response(self, response, new_info):
 		result = omega.ai.chat_completion(
 			self.model,
-			f"Revamp this message in the same style, but with the new information included:\nOld response:{response}\nInfo to add:{new_info}"
+			f"Your are an AI assistant with the goal to revamp responses in the same style, but with new information included.",
+			f"Response to revamp:{response}\nNew information to include:{new_info}"
 		)
 		return result
 
