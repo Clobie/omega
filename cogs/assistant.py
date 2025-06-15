@@ -132,7 +132,7 @@ class Assistant(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-
+        return
         # Ignore other bots
         if message.author.bot:
             return
@@ -169,7 +169,8 @@ class Assistant(commands.Cog):
         # If we are not in a dm, check for bot tag or channel id in autorespond list
         id = message.channel.id
         if (
-            self.bot.user.mentioned_in(message)
+            isinstance(message.channel, discord.DMChannel)
+            or self.bot.user.mentioned_in(message)
             or id in self.autorespond_channels
             or 'omega' in message.content.lower()
         ):
@@ -239,8 +240,6 @@ class Assistant(commands.Cog):
             await context.send(embed=embed)
         else:
             await context.send(f"👥 No usage data found for <@{user_id}>.")
-
-
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Assistant(bot))
