@@ -290,6 +290,7 @@ class Assistantv2(commands.Cog):
 			or id in self.autorespond_channels				# channel is in allowed list
 			or 'omega' in message.content.lower()			# content includes "omega"
 		):
+			omega.logger.info("Ignored b4")
 			return
 		
 		prompt = message.content.replace(str(f"<@{self.bot.user.id}>"), "").strip()
